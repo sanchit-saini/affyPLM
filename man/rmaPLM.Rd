@@ -7,11 +7,13 @@
   concentrate on the RMA model.}
 }
 \usage{
-rmaPLM(object,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",background.param = list(),normalize.param=list(),output.param=list(),model.param=list())
+rmaPLM(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",background.param = list(),normalize.param=list(),output.param=list(),model.param=list())
 }
 
 \arguments{
   \item{object}{an \code{\link[affy]{AffyBatch}}}
+  \item{subset}{a vector with the names of probesets to be used. If NULL
+  then all probesets are used.}
   \item{normalize}{logical value. If \code{TRUE} normalize data using
     quantile normalization}
   \item{background}{logical value. If \code{TRUE} background correct
@@ -36,8 +38,10 @@ rmaPLM(object,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize
 \author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
 
 \references{Under Preparation}
-\seealso{\code{\link[affy]{express}},\code{\link[affy]{expresso}},
-  \code{\link[affy]{rma}}, \code{\link{threestep}}},\code{\link{fitPLM}}}
+\seealso{\code{\link[affy]{expresso}},
+  \code{\link[affy]{rma}}, \code{\link{threestep}},\code{\link{fitPLM}}, \code{\link{threestepPLM}}
+}
+
 
 \examples{
 # A larger example testing weight image function

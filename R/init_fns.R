@@ -15,6 +15,7 @@
 ## Aug 23, 2003 - make sure to make scaling available via normalize
 ## Sep 11, 2003 - Added a boxplot function for exprSets
 ## Oct 29, 2003 - Port to R-1.8.0
+## Mar 14, 2004 - added Mbox and MAplot functions for exprSets
 ##
 ############################################################
 
@@ -50,6 +51,55 @@
               boxplot(data.frame(exprs(x)),...)
             })
 
+  if (!isGeneric("Mbox"))
+    setGeneric("Mbox",function(object,...)
+               standardGeneric("Mbox"))
+  
+  
+  setMethod("Mbox",signature("exprSet"),
+            function(object,log=FALSE,...){
+              if(log){
+                x <- log2(exprs(object))
+              } else {
+                x <- exprs(object)
+              }
+              medianchip <- apply(x, 1, median)
+              M <- sweep(x,1,medianchip,FUN='-')
+              boxplot(data.frame(M),...)
+            })
+ 
+  if (!isGeneric("MAplot"))
+    setGeneric("MAplot",function(object,...)
+               standardGeneric("MAplot"))
+  
+  
+  setMethod("MAplot",signature("exprSet"),
+            function(object,log=FALSE,ref=NULL,...){
+              if(log){
+                x <- log2(exprs(object))
+              } else {
+                x <- exprs(object)
+              }
+              if (is.null(ref)){
+                medianchip <- apply(x, 1, median)
+              } else {
+                medianchip <- x[,ref]
+              }
+              M <- sweep(x,1,medianchip,FUN='-')
+              A <- 1/2*sweep(x,1,medianchip,FUN='+')
+              if (is.null(ref)){
+                for (i in 1:dim(x)[2]){
+                  title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
+                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                }
+              } else {
+                for (i in (1:dim(x)[2])[-ref]){
+                  title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
+                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                }
+              }  
+            })
+  
 }
 
 
@@ -77,4 +127,8 @@
   assign("normalize.AffyBatch.methods",
          c(current.normmethods,"quantiles.probeset","scaling"),
          envir=as.environment(match("package:affy", search())))
+
+  # load the Lapack library needed for some parts of fitPLM
+  .C("Lapack_Init",PACKAGE="affyPLM")
+  
 }

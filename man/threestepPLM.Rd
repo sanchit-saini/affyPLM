@@ -6,11 +6,13 @@
   \code{\link{PLMset}} using a three step expression measure.
 }
 \usage{
-threestepPLM(object, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),output.param=list(), model.param=list())
+threestepPLM(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),output.param=list(), model.param=list())
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{object}{an \code{\link[affy:AffyBatch-class]{AffyBatch}}}
+  \item{subset}{a vector with the names of probesets to be used. If NULL
+  then all probesets are used.}
   \item{normalize}{logical value. If \code{TRUE} normalize data using
     quantile normalization}
   \item{background}{logical value. If \code{TRUE} background correct
@@ -36,8 +38,10 @@ An \code{\link{PLMset}}
 \author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
 
 \references{Under preparation}
-\seealso{\code{\link[affy]{express}},\code{\link[affy]{expresso}},
-  \code{\link[affy]{rma}}, \code{\link{threestep}}}
+\seealso{\code{\link[affy]{expresso}},
+  \code{\link[affy]{rma}}, \code{\link{threestep}},
+  \code{\link{rmaPLM}}, \code{\link{fitPLM}}
+}
 
 \examples{
 data(affybatch.example)

@@ -1,6 +1,6 @@
 #test the preprocessing functionality
 
-library(affyPLM)
+library(AffyExtensions)
 data(affybatch.example)
 
 

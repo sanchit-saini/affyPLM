@@ -10,6 +10,7 @@
 fitPLM(object,model=PM ~ -1 + probes +samples,
 variable.type=c(default="factor"),
 constraint.type=c(default="contr.treatment"),
+subset=NULL,
 background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=list(),model.param=list())
 }
 
@@ -22,6 +23,8 @@ background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = 
     are factors or standard variables}
   \item{constraint.type}{should factor variables sum to zero or have
     first variable set to zero (endpoint constraint)}
+  \item{subset}{a vector with the names of probesets to be used. If NULL
+  then all probesets are used.}
   \item{normalize}{logical value. If \code{TRUE} normalize data using
     quantile normalization}
   \item{background}{logical value. If \code{TRUE} background correct
@@ -36,8 +39,10 @@ background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = 
   \item{model.param}{A list of parameters controlling model procedure}
 }
 \details{
-  This function fits robust Probe Level Linear models to all the probesets in
-  an \code{\link[affy]{AffyBatch}}.
+  This function fits robust Probe Level linear Models to all the probesets in
+  an \code{\link[affy]{AffyBatch}}. This is carried out on a probeset by
+  probeset basis. The user has quite a lot of control over which model
+  is used and what outputs are stored. For more details please read the vignette.
 }
 \value{
   An \code{\link{PLMset}}
@@ -46,7 +51,7 @@ background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = 
 \author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
 
 \references{Under Preparation}
-\seealso{\code{\link[affy]{express}},\code{\link[affy]{expresso}},
+\seealso{\code{\link[affy]{expresso}},
   \code{\link[affy]{rma}}, \code{\link{threestep}}}
 
 \examples{
@@ -59,7 +64,7 @@ se(Pset)[1:5,]
 data(Dilution)
 Pset <- fitPLM(Dilution,model=PM ~ -1 + probes + samples)
 image(Pset)
-boxplot(Pset)
+boxplot(Pset) # NUSE
 
 #now lets try a wider class of models
 Pset <- fitPLM(Dilution,model=PM ~ -1 + probes +liver,normalize=FALSE,background=FALSE)
@@ -77,8 +82,7 @@ coefs(Pset)[1:10,]
 #try a different se.type
 Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,model.param=list(se.type=2))
 se(Pset)[1:10,]
-Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,model.param=list(se.type=3))
-se(Pset)[1:10,]
+
 }
 
 \keyword{manip}

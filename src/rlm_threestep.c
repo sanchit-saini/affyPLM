@@ -27,6 +27,7 @@
  ** Oct 5, 2003 - added summary_param, allow the user set parameters to control
  **               tuning constant, and M estimation function
  ** Oct 10, 2003 - a PLM threestep version added.
+ ** May 26, 2004 - changed the rlm fitting algorithm
  **
  ********************************************************************/
 
@@ -99,7 +100,7 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
      Calloc puts everything to zero, so need change only non zero elements.
      
   */
-  
+
   for (row =0; row < nprobes*cols; row++){
     curcol = row%nprobes;
     
@@ -112,16 +113,21 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
     }
   }
 
-  /* now do chip effects */
+ /* now do chip effects */
 
   for (row =0; row < nprobes*cols; row++){
-    curcol = row/nprobes;         /*integer division */
+    curcol = row/nprobes;         //integer divison
     
     X[(curcol+(nprobes-1))*n + row] = 1.0;
     
   }
 
-  rlm_fit(X,Y, n, p, out_beta, out_resids, out_weights,PsiFunc(summary_param->psi_method),summary_param->psi_k,20,0);
+
+  /*  THE OLD WAY USING IRLS 
+  rlm_fit(X,Y, n, p, out_beta, out_resids, out_weights,PsiFunc(summary_param->psi_method),summary_param->psi_k,20,0);  */
+
+   rlm_fit_anova(Y, nprobes, cols, out_beta, out_resids, out_weights,PsiFunc(summary_param->psi_method),summary_param->psi_k,20,0);
+
   rlm_compute_se(X,Y, n, p, out_beta, out_resids, out_weights, out_se_estimates,NULL, residSE, 1, PsiFunc(summary_param->psi_method),summary_param->psi_k);
   
 
@@ -193,7 +199,10 @@ void rlm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *
     
   }
 
-  rlm_fit(X,Y, n, p, out_beta, residuals, out_weights,PsiFunc(summary_param->psi_method),summary_param->psi_k,20,0);
+  /* THE OLD WAY USING IRLS 
+  rlm_fit(X,Y, n, p, out_beta, residuals, out_weights,PsiFunc(summary_param->psi_method),summary_param->psi_k,20,0); */
+
+  rlm_fit_anova(Y, nprobes, cols, out_beta, residuals, out_weights,PsiFunc(summary_param->psi_method),summary_param->psi_k,20,0);
   rlm_compute_se(X,Y, n, p, out_beta, residuals, out_weights, out_se_estimates,NULL, residSE, 1, PsiFunc(summary_param->psi_method),summary_param->psi_k);
   
 

@@ -12,8 +12,8 @@ threestep(object,subset=NULL, verbose=TRUE, normalize=TRUE,background=TRUE,backg
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{object}{an \code{\link[affy:AffyBatch-class]{AffyBatch}}}
-  \item{subset}{an indexing vector with the the probe sets to be
-    converted to expression. (not currently implemented)}
+  \item{subset}{a vector with the names of probesets to be used. If NULL
+  then all probesets are used.}
   \item{verbose}{logical value. If \code{TRUE} it writes out some messages. (Curently ignored)}
   \item{normalize}{logical value. If \code{TRUE} normalize data using
     quantile normalization}

@@ -38,6 +38,6 @@
 
 \author{Ben Bolstad, \email{bolstad@stat.berkeley.edu}}
 
-\seealso{\code{\link[affy]{normalize}},\code{\link[affy:normalize.quantiles]{normalize.quantiles}}}
+\seealso{\code{\link[affy]{normalize}}, \code{\link[affy:normalize.quantiles]{normalize.quantiles}}}
 
 \keyword{manip}

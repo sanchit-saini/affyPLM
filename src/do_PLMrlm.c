@@ -73,6 +73,8 @@
  ** Oct 12, 2003 - fixed declaration order error             
  ** Apr 5, 2004  - Changed a malloc to a Calloc        
  ** May 11, 2004 - fixed a minor memory leak.
+ ** May 27, 2004 - if the -1 + samples + probes model (with probes constraint sum to zero) use
+ **                a different and faster algorithm
  **
  *********************************************************************/
 
@@ -384,10 +386,21 @@ void rlm_PLM_block(const Datagroup *data, const PLMmodelparam *model, modelfit *
     rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(0),1.345,20,0);
 
   }
-  /* Least Squares */
-  rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);
-  rlm_compute_se(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, current->cur_se_estimates,current->cur_varcov, current->cur_residSE, model->se_method, PsiFunc(model->psi_code),model->psi_k);
+  if (!model->default_model){
+    
+    /* Least Squares for general models */
+    rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);  
+    rlm_compute_se(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, current->cur_se_estimates,current->cur_varcov, current->cur_residSE, model->se_method, PsiFunc(model->psi_code),model->psi_k);
+    
+  } else {
+    
+    /* Optimized case for the RMA style model PM ~ -1 + samples + probes  with sum to zero constraint on probes */
+    rlm_fit_anova(Y, current->nprobes, data->cols, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);
+    rlm_compute_se_anova(Y, current->nprobes, data->cols, current->cur_params, current->cur_resids, current->cur_weights, current->cur_se_estimates,current->cur_varcov, current->cur_residSE, model->se_method, PsiFunc(model->psi_code),model->psi_k);
+    
+  }
   
+    
   Free(Y);
 }
 

@@ -1,6 +1,6 @@
 Package: affyPLM
-Version: 1.1.6
-Date: 2004-05-11
+Version: 1.2.0
+Date: 2004-06-30
 Title: affyPLM - Probe Level Models
 Author: Ben Bolstad <bolstad@stat.berkeley.edu>
 Maintainer: Ben Bolstad <bolstad@stat.berkeley.edu>
@@ -8,5 +8,5 @@ Depends: R (>= 1.9.0), affy (>= 1.4.24), affydata
 Description: A package for fitting Probe Level Models.
 License: GPL version 2 or newer
 URL: http://www.stat.berkeley.edu/users/bolstad/AffyExtensions
-Collate:  LESN.R PLMset.R fitPLM.R normalize.exprSet.R normalize.scaling.R quantile_extensions.R threestep.R PLMSet2exprSet.R rmaPLM.R init_fns.R threestepPLM.R
+Collate:  LESN.R PLMset.R   PLM.tstat.R internalfunctions.R fitPLM.R normalize.exprSet.R normalize.scaling.R quantile_extensions.R threestep.R PLMSet2exprSet.R rmaPLM.R  threestepPLM.R init_fns.R
 

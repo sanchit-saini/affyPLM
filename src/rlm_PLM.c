@@ -55,6 +55,7 @@
  **                 Huber regression
  ** Apr 5, 2004   - All malloc/free are now Calloc/Free
  ** May 3, 2004   - Fixed a subtle and small memory leak.
+ ** May 27, 2004  - add a way to detect that default model is being fitted
  **
  *********************************************************************/
 
@@ -282,7 +283,11 @@ SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rl
   } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"Huber") == 0){
     model->init_method = 2;
   }
+  param = GetParameter(modelparam,"isdefaultmodel");
+  model->default_model = asInteger(param);
 
+  param = GetParameter(modelparam,"MMorPM.covariate");
+  model->mmorpm_covariate = asInteger(param);
 
 
   /* figure out what optional features we want to output */

@@ -25,7 +25,8 @@
  ** Jan 11, 2003 - check up on some stack imbalance problems.(turns out to be in threestep.c)
  ** Feb 24, 2003 - add in missing #include <string.h>, remove or comment out unused variables
  ** Aug  7, 2003 - add a specific biweight only correction
- ** Apr  5, 2003 - all calloc/free are now Calloc/Free. (Note that dynamic array sizing still needs implementation)
+ ** Apr  5, 2004 - all calloc/free are now Calloc/Free. (Note that dynamic array sizing still needs implementation)
+ ** June 28, 2004 - dynamic array sizing implemented
  **
  ***************************************************************************/
 
@@ -55,9 +56,10 @@
  **
  *************************************************************************************/
 
-void IdealMM_correct_single(double *PM, double *MM, int rows, char** ProbeNames){
+static void IdealMM_correct_single(double *PM, double *MM, int rows, char** ProbeNames){
   int i,j;
   double IM,SB;
+  int current_buf_size=200;
   double contrast_tau = 0.03;
   double scale_tau = 10.0;
   char *curname =Calloc(200,char);
@@ -81,6 +83,12 @@ void IdealMM_correct_single(double *PM, double *MM, int rows, char** ProbeNames)
   nprobes = 1;
   for (j = 1; j < rows; j++){
     if ((strcmp(first,ProbeNames[j]) != 0) | (j == (rows -1))){
+      if (nprobes > current_buf_size){
+	current_buf_size = nprobes;
+	cur_rows = Realloc(cur_rows,current_buf_size,int);
+	buffer = Realloc(buffer,current_buf_size,double);
+	  
+      }
       if (j == (rows -1)){
         nprobes++;
         for (k = 0; k < nprobes; k++){
@@ -160,11 +168,12 @@ void IdealMM_correct(double *PM, double *MM, int *nprobes, int *nchips, char** P
 
 
 
-void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, char** ProbeNames){
+static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, char** ProbeNames){
   int i,j;
   double IM,SB;
   /*  double contrast_tau = 0.03; */
   /*double scale_tau = 10.0; */
+  int current_buf_size=200;
   char *curname =Calloc(200,char);
   int *cur_rows =Calloc(200,int); 
   double *buffer = Calloc(200,double);
@@ -185,7 +194,12 @@ void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, char** Pro
   i =0;
   nprobes = 1;
   for (j = 1; j < rows; j++){
-    if ((strcmp(first,ProbeNames[j]) != 0) | (j == (rows -1))){
+    if ((strcmp(first,ProbeNames[j]) != 0) | (j == (rows -1))){   
+      if (nprobes > current_buf_size){
+	current_buf_size = nprobes;
+	cur_rows = Realloc(cur_rows,current_buf_size,int);
+	buffer = Realloc(buffer,current_buf_size,double);  
+      }
       if (j == (rows -1)){
         nprobes++;
         for (k = 0; k < nprobes; k++){

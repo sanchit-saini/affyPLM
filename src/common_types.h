@@ -19,6 +19,8 @@
  **                 iterations of iteratively reweighted least
  **                 squares and how we intialize the IRLS: least 
  **                 squares or median polish.
+ ** May 27, 2004  - added default.model to  PLMmodelparam if non zero then
+ **                 we are fitting -1 + samples + probes with (sum probes = 0 constraint)
  **
  *********************************************************************/
 
@@ -137,6 +139,8 @@ typedef struct{
   double *input_chipcovariates;
   int n_rlm_iterations;
   int init_method;
+  int default_model;
+  int mmorpm_covariate; 
   pt2PLMSummary PLM3stepSummary;
 } PLMmodelparam;
 

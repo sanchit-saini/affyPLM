@@ -8,13 +8,13 @@
 ##
 ## History
 ## Aug 23, 2003 - Initial version
-##              - Added type argument to
+##              - Added type argument to 
 ##
 #############################################################
 
 
 normalize.scaling <- function(X,trim=0.02,baseline=-1){
-  .Call("R_normalize_scaling",X,trim,baseline, PACKAGE="affyPLM")
+  .Call("R_normalize_scaling",X,trim,baseline,PACKAGE="affyPLM")
 }
 
 
@@ -32,8 +32,8 @@ normalize.AffyBatch.scaling <- function(abatch,type=c("together","pmonly","mmonl
     abatch <- normalize.AffyBatch.scaling(abatch,type="pmonly",trim=trim,baseline=baseline)
     Index <- unlist(indexProbes(abatch,"mm"))
   }
-
-
+  
+  
   col.names <- colnames(exprs(abatch))
   exprs(abatch)[Index,] <- normalize.scaling(exprs(abatch)[Index,],trim,baseline)
   colnames(exprs(abatch)) <- col.names
