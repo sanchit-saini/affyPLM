@@ -290,6 +290,7 @@ void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use
     } else {
        qsort(datvec,*cols,sizeof(double),(int(*)(const void*, const void*))sort_double);
        half = (*cols + 1)/2;
+       length = *cols;
        if (length % 2 == 1){
 	 row_mean[i] = datvec[half - 1];
        } else {
