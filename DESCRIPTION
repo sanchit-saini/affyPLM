@@ -1,6 +1,6 @@
 Package: affyPLM
-Version: 1.2.5
-Date: 2004-10-28
+Version: 1.2.6
+Date: 2005-1-27
 Title: affyPLM - Probe Level Models
 Author: Ben Bolstad <bolstad@stat.berkeley.edu>
 Maintainer: Ben Bolstad <bolstad@stat.berkeley.edu>

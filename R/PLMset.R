@@ -300,7 +300,7 @@ setMethod("indexProbesProcessed", signature("PLMset"),
 
     
 setMethod("image",signature(x="PLMset"),
-          function(x,which=0,type=c("weights","resids","pos.resids","neg.resids"),use.log=TRUE,add.legend=FALSE,standardize=FALSE,...){
+          function(x,which=0,type=c("weights","resids","pos.resids","neg.resids","sign.resids"),use.log=TRUE,add.legend=FALSE,standardize=FALSE,...){
             
             type <- match.arg(type)
             
@@ -476,8 +476,31 @@ setMethod("image",signature(x="PLMset"),
                     par(mar = c(5, 4, 4, 2) + 0.1)
                   } 
                 }
-                
               }
+              if (type == "sign.resids"){
+
+                residsmatrix <- matrix(nrow=rows,ncol=cols)
+                residsmatrix[xycoor]<- sign(x@residuals[,i])
+                residsmatrix[xycoor2]<- sign(x@residuals[,i])
+
+                                        #this line flips the matrix around so it is correct
+                residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
+
+                if (add.legend){
+                  layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                  par(mar = c(4, 4, 5, 3))
+                }
+                image(residsmatrix,col=pseudoPalette(low="blue",high="red",mid="white"),xaxt='n',
+                      yaxt='n',main=sampleNames(x)[i],zlim=c(-1,1))
+                if (add.legend){
+                  par(mar = c(4, 0, 5, 3))
+                  pseudoColorBar(seq(-1,1,2), horizontal = FALSE, col = pseudoPalette(low="blue",high="red",mid="white"), main = "")
+                  layout(1)
+                  par(mar = c(5, 4, 4, 2) + 0.1)
+                } 
+                
+              } 
+              
             }
           })
 
