@@ -1,4 +1,4 @@
-library(AffyExtensions)
+library(affyPLM)
 
 # test threestep and threestepPLM to see if they agree
 
