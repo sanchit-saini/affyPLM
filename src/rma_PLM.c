@@ -14,6 +14,7 @@
  **
  ** Modification history
  ** Sept 14, 2003 - Intial version
+ ** May 3, 2004   - Fixed a subtle and small memory leak.
  **
  *********************************************************************/
 
@@ -250,7 +251,9 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   SET_VECTOR_ELT(output_list,8,Routput->residSE);
   SET_VECTOR_ELT(output_list,9,Routput->varcov);
   UNPROTECT(Routput->nprotected + 4);
-  
+
+  for ( i =0; i < data->nprobesets; i++)
+    Free(output->outnames[i]); 
   Free(output->outnames);
   Free(data->ProbeNames);
   Free(data);

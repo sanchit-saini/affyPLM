@@ -15,6 +15,7 @@
  ** Modification history
  ** Oct 9, 2003 - Initial version
  ** Apr 5, 2004 - all malloc/free are now Calloc/Free
+ ** May 3, 2004   - Fixed a subtle and small memory leak.
  **
  *********************************************************************/
 
@@ -260,7 +261,10 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
   SET_VECTOR_ELT(output_list,8,Routput->residSE);
   SET_VECTOR_ELT(output_list,9,Routput->varcov);
   UNPROTECT(Routput->nprotected + 4);
-  
+
+
+  for ( i =0; i < data->nprobesets; i++)
+    Free(output->outnames[i]);
   Free(output->outnames);
   Free(data->ProbeNames);
   Free(data);
