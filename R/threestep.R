@@ -146,7 +146,7 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
 
 
 
-  results <- .Call("R_threestep_c",pm(object), mm(object), probeNames(object), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method), get.summary.code(summary.method),b.param,n.param,s.param, PACKAGE="AffyPLM")
+  results <- .Call("R_threestep_c",pm(object), mm(object), probeNames(object), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method), get.summary.code(summary.method),b.param,n.param,s.param, PACKAGE="affyPLM")
 
   colnames(results[[1]]) <- sampleNames(object)
   colnames(results[[2]]) <- sampleNames(object)

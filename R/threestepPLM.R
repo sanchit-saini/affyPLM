@@ -138,7 +138,7 @@ threestepPLM <- function(object,normalize=TRUE,background=TRUE,background.method
   }
   md.param$psi.type <- get.psi.code(md.param$psi.type)
 
-  fit.results <- .Call("R_threestepPLMset_c",pm(object), mm(object), probeNames(object), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method),b.param,n.param,op.param,md.param, PACKAGE="AffyPLM")
+  fit.results <- .Call("R_threestepPLMset_c",pm(object), mm(object), probeNames(object), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method),b.param,n.param,op.param,md.param, PACKAGE="affyPLM")
   probenames <- rownames(pm(object))
   colnames(fit.results[[1]]) <- sampleNames(object)
   colnames(fit.results[[4]]) <- sampleNames(object)
