@@ -1,4 +1,5 @@
 %\VignetteIndexEntry{affyPLM: Fitting Probe Level Models}
+%\VignettePackage{affyPLM}
 \documentclass[12pt]{article}
 \usepackage{amsmath,pstricks}
 \usepackage{hyperref}

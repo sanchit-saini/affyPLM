@@ -1,4 +1,5 @@
 %\VignetteIndexEntry{affyPLM: the "threestep" function}
+%\VignettePackage{affyPLM}
 \documentclass[12pt]{article}
 \usepackage{amsmath,pstricks}
 \usepackage{hyperref}
