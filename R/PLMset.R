@@ -42,7 +42,7 @@
 ## Apr 29, 2003 - Add a replacement function for se
 ## Sep 25, 2003 - Port to R-1.8
 ## Oct 7, 2003 - update getCDFInfo to reflect changes in affy package.
-##
+## Oct 14, 2003 - cdfName accessor.
 ###########################################################
 
 #creating the PLMset object
@@ -77,6 +77,12 @@ setClass("PLMset",
 
 
   #now some accessors.
+  if (is.null(getGeneric("cdfName")))
+     setGeneric("cdfName", function(object)
+             standardGeneric("cdfName"))
+
+  setMethod("cdfName", "PLMset", function(object)
+          object@cdfName)
 
   #access weights
   setMethod("weights",signature(object="PLMset"),
