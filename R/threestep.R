@@ -13,7 +13,7 @@
 #
 #
 # note this function does not leave the supplied
-# AffyBatch unchanged if you select DESTRUCTIVE=TRUE. this is 
+# AffyBatch unchanged if you select DESTRUCTIVE=TRUE. this is
 # for memory purposes but can be quite
 # dangerous if you are not careful. Use destructive=FALSE if this is
 # deemed likely to be a problem. NOTE DESTRUCTIVE item removed for now
@@ -41,7 +41,7 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
     code <- c(1, 2, 3, 4, 5, 6, 7, 8,9)[name == background.names]
     code
   }
-    
+
   get.normalization.code <- function(name){
     normalization.names <- c("quantile","quantile.probeset","scaling")
 
@@ -84,12 +84,12 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
     code <- c(0:6)[name == psi.names]
     code
   }
-  
+
   get.default.psi.k <- function(name){
     psi.code <- get.psi.code(name)
     ## ** Huber - k = 1.345
     ## ** Fair - k = 1.3998
-    ## ** Cauchy - k=2.3849 
+    ## ** Cauchy - k=2.3849
     ## ** Welsch - k = 2.9846
     ## ** Tukey Biweight - k = 4.6851
     ## ** Andrews Sine - K = 1.339
@@ -113,9 +113,9 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
 
   rows <- length(probeNames(object))
   cols <- length(object)
- 
+
   ngenes <- length(geneNames(object))
-  
+
   # background correction for RMA type backgrounds
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
@@ -125,39 +125,39 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
     cat("Background Correcting\n")
     object <- bg.correct.mas(object)
   }
-    
+
   LESN.param <-list(baseline=0.25,theta=4)
   LESN.param <- convert.LESN.param(LESN.param)
 
   b.param <- list(densfun =  body(bg.dens), rho = new.env(),lesnparam=LESN.param)
   b.param[names(background.param)] <- background.param
-  
+
   n.param <- list(scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
   n.param[names(normalize.param)] <- normalize.param
 
   s.param <- list(psi.type="Huber",psi.k=NULL)
   s.param[names(summary.param)] <- summary.param
-  
+
   if (is.null(s.param$psi.k)){
     s.param$psi.k <- get.default.psi.k(s.param$psi.type)
   }
-  
+
   s.param$psi.type <- get.psi.code(s.param$psi.type)
 
 
-  
-  results <- .Call("R_threestep_c",pm(object), mm(object), probeNames(object), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method), get.summary.code(summary.method),b.param,n.param,s.param) #, PACKAGE="AffyExtensions") 
-  
+
+  results <- .Call("R_threestep_c",pm(object), mm(object), probeNames(object), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method), get.summary.code(summary.method),b.param,n.param,s.param, PACKAGE="AffyPLM")
+
   colnames(results[[1]]) <- sampleNames(object)
   colnames(results[[2]]) <- sampleNames(object)
   #se.exprs <- array(NA, dim(exprs)) # to be fixed later, besides which don't believe much in nominal se's with medianpolish
-  
+
   phenodata <- phenoData(object)
   annotation <- annotation(object)
-  description <- description(object) 
+  description <- description(object)
   notes <- notes(object)
-  
-  new("exprSet", exprs = results[[1]], se.exprs = results[[2]], phenoData = phenodata, 
+
+  new("exprSet", exprs = results[[1]], se.exprs = results[[2]], phenoData = phenodata,
        annotation = annotation, description = description, notes = notes)
 }
 

@@ -59,7 +59,7 @@
 ##          we set it to the default parameter. These defaults are the following:
 ## ** Huber - k = 1.345
 ## ** Fair - k = 1.3998
-## ** Cauchy - k=2.3849 
+## ** Cauchy - k=2.3849
 ## ** Welsch - k = 2.9846
 ## ** Tukey Biweight - k = 4.6851
 ## ** Andrews Sine - K = 1.339
@@ -82,8 +82,8 @@
 ###########################################################
 
 fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=list(),model.param=list()){
-  
- 
+
+
   get.background.code <- function(name) {
     background.names <- c("RMA.1", "RMA.2", "IdealMM","MAS","MASIM","LESN2","LESN1","LESN0")
     if (!is.element(name, background.names)) {
@@ -93,7 +93,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     code <- c(1, 2, 3, 4, 5, 6, 7, 8)[name == background.names]
     code
   }
-  
+
   get.normalization.code <- function(name) {
     normalization.names <- c("quantile","quantile.probeset","scaling")
     if (!is.element(name, normalization.names)) {
@@ -113,7 +113,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     code <- c(0:6)[name == psi.names]
     code
   }
-  
+
   convert.LESN.param <- function(param.list){
     defaults <- c(0.25,4)
     if (!is.null(param.list$baseline)){
@@ -129,7 +129,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     psi.code <- get.psi.code(name)
     ## ** Huber - k = 1.345
     ## ** Fair - k = 1.3998
-    ## ** Cauchy - k=2.3849 
+    ## ** Cauchy - k=2.3849
     ## ** Welsch - k = 2.9846
     ## ** Tukey Biweight - k = 4.6851
     ## ** Andrews Sine - K = 1.339
@@ -154,8 +154,8 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
 
 
-  
-  
+
+
   if (class(object) != "AffyBatch"){
     stop(paste("argument is",class(object),"fitPLM requires AffyBatch"))
   }
@@ -164,23 +164,23 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 #  if (constraint.type != "contr.treatment"){
 #    stop("only endpoint constraint currently implemented")
 #  }
-  
+
 #  options(contrasts=c(constraint.type,"contr.poly"))
 
-  
+
   model.terms <- terms(model)
   mt.variables <- attr(model.terms,"variables")
-  
+
   if ((mt.variables[[2]] != "PM") & (mt.variables[[2]] != "pm")){
     stop(paste("Response term in model should be 'PM' or 'pm'"))
   }
-  
+
   mt.intercept <- attr(model.terms,"intercept")
   mt.termlabels <- attr(model.terms,"term.labels")
 
-  
+
   length.parameters <- length(mt.termlabels)
-  
+
   if (length.parameters < 1){
     stop("Insufficent parameters supplied in model")
   }
@@ -188,13 +188,13 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   # check to see if there is other chip level parameters and that they are valid
   mt.termlabels.abbrev <- mt.termlabels[mt.termlabels != "samples"]
   mt.termlabels.abbrev <- mt.termlabels.abbrev[mt.termlabels.abbrev != "probes"]
-  
+
   has.probeeffects <- is.element("probes",mt.termlabels)
   has.chipeffects <- is.element("samples",mt.termlabels)
-  
 
 
-  
+
+
   #if (!has.probeeffects){
   #  stop("Fitting a model without probe-effects currently not supported")
   #}
@@ -211,11 +211,11 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   #now go through the non default parameters seeing which type they should be treated as.
 
   #cat(mt.termlabels.abbrev,"\n")
-  
+
   vt <- NULL
 
   #check to see that everything is either "factor" or "covariate"
-  #figure out what the default type is 
+  #figure out what the default type is
   if (is.na(variable.type["default"])){
     cat("No default type given. Assuming default variable type is factor\n")
     vt.default <- "factor"
@@ -225,25 +225,25 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     } else {
       stop("Incorrect default variable.type given")
     }
-  } 
-    
+  }
+
   if (sum(!is.element(variable.type,c("factor","covariate")))){
     stop("An incorrect variable type provided")
   }
 
-  
+
   if (length(mt.termlabels.abbrev) >=1){
-    
+
     vt <- rep(vt.default,length(mt.termlabels.abbrev))
     names(vt) <- mt.termlabels.abbrev
-    
-    vt[names(variable.type)] <- variable.type    
-    #has.vt <- is.element(mt.termlabels.abbrev,names(variable.type))    
+
+    vt[names(variable.type)] <- variable.type
+    #has.vt <- is.element(mt.termlabels.abbrev,names(variable.type))
   }
   #cat(has.vt,"\n");
   #print(vt)
 
-  #figure out what the default constraint type is 
+  #figure out what the default constraint type is
 
   if (is.na(constraint.type["default"])){
     cat("No default type given. Assuming default constraint type is contr.treatment\n")
@@ -254,41 +254,41 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     } else {
       stop("Incorrect default constraint.type given")
     }
-  } 
+  }
 
   # check to see if there are any constraints on for the "probes" and "samples" parameters. Constraints on the first chip
   # level parameter will be ignored unless, the default constraint on probes will always "contr.sum", however
   # will allow the user to shoot themselves in the foot by setting it to something else (ie "contr.treatment") and there may be times when
   # this is useful.
-  
+
 
   if (is.na(constraint.type["probes"])){
     ct.probe <- "contr.sum"
   } else {
     ct.probe <- constraint.type["probes"]
- }	
+ }
 
   if (is.na(constraint.type["samples"])){
     ct.samples <- ct.default
   } else {
     ct.samples <- constraint.type["samples"]
   }
- 
+
 
   # Constraint.types given for each variable.
   # note that if user puts a constraint on a covariate variable it will be ignored.
 
   if (length(mt.termlabels.abbrev) >=1){
-    
+
     ct <- rep(ct.default,length(mt.termlabels.abbrev))
     names(ct) <- mt.termlabels.abbrev
-    
-    ct[names(constraint.type)] <- constraint.type 
+
+    ct[names(constraint.type)] <- constraint.type
   #  print(ct)
-  }	
+  }
   #print(ct.probe)
   #print(ct.samples)
-  
+
   if (mt.intercept == 0){
     if (has.probeeffects){
       if (ct.probe == "contr.sum"){
@@ -311,8 +311,8 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
       model.type <- 21
     }
   }
-	
-  
+
+
   if (!has.chipeffects & (length(mt.termlabels.abbrev) < 1)){
     stop("Model does not have enough chip level parameters")
   }
@@ -325,7 +325,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   #print(nsamples)
   chip.param.names <- NULL
 
-  
+
   if (has.chipeffects){
     our.samples <- 1:nsamples
     if (!mt.intercept){
@@ -340,11 +340,11 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
       }
     }
   } else {
-    chip.effects <- NULL    
+    chip.effects <- NULL
   }
 
 
-  
+
   if (length(mt.termlabels.abbrev) >=1){
 
     in.pheno <- is.element(mt.termlabels.abbrev, names(pData(object)))
@@ -353,13 +353,13 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     #cat(mt.termlabels.abbrev)
     #cat(in.pheno,in.parent.frame,"\n")
 
-    
+
     if (sum(in.pheno | in.parent.frame) != length(mt.termlabels.abbrev)){
       stop("Specified parameter does not exist in phenoData or parent frame")
     }
 
     chipeffect.names <-  NULL
-    
+
     if (has.chipeffects){
       # chip.effects will handle intercept, use constraints on treatments
       # if chip.effects then the matrix will be singular, but we will go
@@ -367,7 +367,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
       #options(contrasts=c("contr.treatment","contr.poly"))
 
       stop("Can not fit a model with an effect for every chip and additional parameters")
-      
+
       #for (trt in mt.termlabels.abbrev){
       #   if (is.element(trt,  names(pData(object)))){
       #     trt.values <- pData(object)[,names(pData(object))==trt]
@@ -375,7 +375,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
       #       trt.effect <- model.matrix(~ -1 + trt.values)
       #     } else {
       #       trt.effect <- model.matrix(~ as.factor(trt.values))[,-1]
-      #     }           
+      #     }
       #   } else {
       #     trt.values <- eval(as.name(trt))
       #     if (length(trt.values) != nsamples){
@@ -396,7 +396,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
       # no chipeffect, first factor treatment will be unconstrained if no intercept
       #
       #
-      
+
       #options(contrasts=c("contr.treatment","contr.poly"))
       #print(ct)
       first.factor <- FALSE
@@ -416,10 +416,10 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
                 trt.effect <- model.matrix(~ C(as.factor(trt.values),ct[trt]))[,-1]
               }
              } else {
-              
+
                trt.effect <- model.matrix(~  C(as.factor(trt.values),ct[trt]))[,-1]
              }
-          }           
+          }
         } else {
           trt.values <- eval(as.name(trt))
           if (length(trt.values) != nsamples){
@@ -438,10 +438,10 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
             } else {
               trt.effect <- model.matrix(~ C(as.factor(trt.values),ct[trt]))[,-1]
             }
-          }  
+          }
         }
         chip.effects <- cbind(chip.effects,trt.effect)
-        
+
         if (vt[names(vt)==trt] == "covariate"){
           chipeffect.names <- c(chipeffect.names,trt)
         } else {
@@ -467,7 +467,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
                 for (levs in levels(as.factor(trt.values))[-1]){
                   chipeffect.names <- c(chipeffect.names,paste(trt,"_",levs,sep=""))
                 }
-              } else {                
+              } else {
                 for (levs in levels(as.factor(trt.values))[-length(levels(as.factor(trt.values)))]){
                   chipeffect.names <- c(chipeffect.names,paste(trt,"_",levs,sep=""))
                 }
@@ -488,20 +488,20 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   #print(chip.effects)
   #print(colnames(chip.covariates))
 
-  
+
   #check that chip covariates are not singular
-  
+
   if (qr(chip.covariates)$rank < ncol(chip.covariates)){
     stop("chiplevel effects is singular: singular fits are not implemented in fitPLM")
   }
-  
+
   #cat("Method is ",model.type,"\n")
   # now add other variables onto chip.covariates matrix
 
   rows <- length(probeNames(object))
   cols <- length(object)
   ngenes <- length(geneNames(object))
-  
+
   # background correction for RMA type backgrounds
   bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
@@ -511,13 +511,13 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     cat("Background Correcting\n")
     object <- bg.correct.mas(object)
   }
-    
+
   LESN.param <-list(baseline=0.25,theta=4)
   LESN.param <- convert.LESN.param(LESN.param)
 
   b.param <- list(densfun =  body(bg.dens), rho = new.env(),lesnparam=LESN.param)
   b.param[names(background.param)] <- background.param
-  
+
   n.param <- list(scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
   n.param[names(normalize.param)] <- normalize.param
 
@@ -527,34 +527,37 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
   op.param$varcov <- match.arg(op.param$varcov,c("none","chiplevel","all"))
 
-  
+
   md.param <- list(se.type=4,psi.type="Huber",psi.k=NULL,max.its=20,init.method="ls")
   md.param[names(model.param)] <- model.param
 
- 
-  
-  
+
+
+
   if (is.null(md.param$psi.k)){
     md.param$psi.k <- get.default.psi.k(md.param$psi.type)
   }
-  
+
   md.param$psi.type <- get.psi.code(md.param$psi.type)
 
-  
-  
-  # lets do the actual model fitting
-  fit.results <- .Call("R_rlmPLMset_c",pm(object),mm(object),probeNames(object),
-        ngenes, normalize, background,
-        get.background.code(background.method), get.normalization.code(normalize.method),model.type,chip.covariates,b.param,n.param,op.param,md.param)
-  
 
-  
+
+  # lets do the actual model fitting
+  fit.results <- .Call("R_rlmPLMset_c", pm(object), mm(object),
+                       probeNames(object), ngenes, normalize, background,
+                       get.background.code(background.method),
+                       get.normalization.code(normalize.method),
+                       model.type,chip.covariates, b.param, n.param,
+                       op.param, md.param, PACKAGE="affyPLM")
+
+
+
  #put names on matrices and return finished object
 
   #chip.param.names <- NULL
 
   if (has.chipeffects){
-    #chip.param.names <- c(chip.param.names,sampleNames(object))    
+    #chip.param.names <- c(chip.param.names,sampleNames(object))
   } else {
     chip.param.names <- c(chip.param.names,chipeffect.names)
   }
@@ -574,7 +577,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
   if (op.param$residuals){
    colnames(fit.results[[8]]) <- sampleNames(object)
-   rownames(fit.results[[8]]) <- probenames 
+   rownames(fit.results[[8]]) <- probenames
   }
 
   if (op.param$resid.SE){
@@ -594,12 +597,12 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
         rownames(x) <- names
         x
       }
-      fit.results[[10]] <- lapply(fit.results[[10]],name.matrix,tmp.colnames) 
+      fit.results[[10]] <- lapply(fit.results[[10]],name.matrix,tmp.colnames)
     }
   }
-  
 
-  
+
+
   colnames(fit.results[[2]]) <- "ProbeEffects"
   rownames(fit.results[[2]]) <- probenames
   colnames(fit.results[[5]]) <- "SEProbeEffects"
@@ -628,7 +631,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   description <- description(object)
   notes <- notes(object)
 
-  
+
   x <- new("PLMset")
   x@chip.coefs=fit.results[[1]]
   x@probe.coefs= fit.results[[2]]
