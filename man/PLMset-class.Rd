@@ -48,7 +48,7 @@
 \alias{model.description,PLMset-method}
 \alias{summary,PLMset-method}
 \alias{sampleNames<-,PLMset-method}
-
+\alias{MAplot,PLMset-method}
 
 \title{Class PLMset}
 \description{This is a class representation for Probe level Linear
@@ -135,6 +135,7 @@ Class \code{"exprSet"}, directly.
     \item{residSE}{\code{signature(x = "PLMset")}: will return the residual SE (if it has been stored)}
     \item{boxplot}{\code{signature(x = "PLMset")}: Boxplot of Normalized
       Unscaled Standard Errors (NUSE)}
+    \item{MAplot}{\code{signature(x = "PLMset")}: MA plots of a PLMset}
  }
 }
 \note{This class is better described in the vignette.}
