@@ -23,6 +23,7 @@
  **                R_normalize_scaling
  **                Remove a pesky debug printf
  ** Apr 5, 2004 - all malloc/free should be Calloc/Free
+ ** May 11, 2004 - fix a small memory leak.
  **
  *********************************************************************/
 
@@ -61,6 +62,7 @@ static double mean_trim(double *x, int length, double trim){
     for (i=0; i < length; i++){
       sum+=x[i];  
     }    
+    Free(buffer);
     return (sum/(double)length);
   } else {
     

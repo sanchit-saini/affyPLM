@@ -72,6 +72,7 @@
  **                and initialization method
  ** Oct 12, 2003 - fixed declaration order error             
  ** Apr 5, 2004  - Changed a malloc to a Calloc        
+ ** May 11, 2004 - fixed a minor memory leak.
  **
  *********************************************************************/
 
@@ -753,5 +754,6 @@ void do_PLMrlm(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
   Free(current->cur_params);
   Free(current->cur_weights);
   Free(current->cur_rows);
+  Free(current->cur_residSE);
   Free(current);
 }
