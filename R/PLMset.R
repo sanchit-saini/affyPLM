@@ -41,6 +41,7 @@
 ## Feb 15, 2003 - Add in a "show" method. Add in an coefs.probe accessor function
 ## Apr 29, 2003 - Add a replacement function for se
 ## Sep 25, 2003 - Port to R-1.8
+## Oct 7, 2003 - update getCDFInfo to reflect changes in affy package.
 ##
 ###########################################################
 
@@ -161,155 +162,107 @@ setClass("PLMset",
   
   setMethod("getCdfInfo", signature("PLMset"), 
             function (object, how=getOption("BioC")$affy$probesloc) {
-              ## "how" is a list. each element of the list must have an element
-              ## tagged "what" and an element tagged "where"
-              ## "what" can be "data", "package", "file" or "environment"
-              ## "where" is where it can be found
 
-              cdfname <- cleancdfname(object@cdfName)
-              second.try <- FALSE
+                ## "how" is a list. each element of the list must have an element
+            ## tagged "what" and an element tagged "where"
+            ## "what" can be "package", "file" or "environment"
+            ## "where" is where it can be found
+
+            cdfname <- cleancdfname(object@cdfName)
+            second.try <- FALSE
+
+            if (debug.affy123)
+              cat("Trying to get cdfenv for", cdfname, "\n")
+
+            i <- 0
+            while(i < length(how)) {
+              i <- i+1
 
               if (debug.affy123)
-                cat("Trying to get cdfenv for", cdfname, "\n")
-              
-              
-              i <- 0
-              while(i < length(how)) {
-                i <- i+1
-                
-                if (debug.affy123)
-                  cat(i, ":")
-                
-                what <- how[[i]]$what
-                where <- how[[i]]$where
+                cat(i, ":")
 
-                if (debug.affy123) {
-                  cat("what=", what, "where=")
-                  print(where)
-                }
-                
-                if (what == "data") {
-                  ##if we can get it from data dir. otherwise load package
-                  
-                  if(cdfname %in% do.call("data", list(package=where))$results[, 3]) {
-                    ##RI: package="affy" doesnt work it has to be package=affy
-                    ##    fix if you can
-                    ##LG: weird stuff with data... but I had a workaround...
-                    
-                    where.env <- pos.to.env(match(paste("package:", where, sep = ""), search()))
-                    
-                    ## check if the cdfenv is already loaded. If not load it *in* the environment
-                    ## of the package (where.env)
-                    if( ! exists(cdfname, where = where.env, inherits = FALSE)) {
-                      path <- .path.package(where)
-                      filename <- paste(cdfname, ".rda", sep="")
-                      load(file.path(path, "data", filename) ,
-                           envir = where.env)
-                    }
-                    cdfenv <- get(cdfname, envir=where.env)
-                    return(cdfenv)
+              what <- how[[i]]$what
+              where <- how[[i]]$where
+
+              if (debug.affy123) {
+                cat("what=", what, "where=")
+                print(where)
+              }
+              
+              if (what == "data") {
+                ##need this until cdfenv.example is better handled
+                ##if we can get it from data dir. otherwise load package
+
+                if(cdfname %in% do.call("data", list(package=where))$results[, 3]) {
+                  where.env <- pos.to.env(match(paste("package:", where, sep = ""), search()))
+
+                  ## check if the cdfenv is already loaded. If not load it *in* the environment
+                  ## of the package (where.env)
+                  if(!exists(cdfname, where = where.env, inherits = FALSE)) {
+                    path <- .path.package(where)
+                    filename <- paste(cdfname, ".rda", sep="")
+                    load(file.path(path, "data", filename) ,
+                         envir = where.env)
                   }
-                  next
+                  cdfenv <- get(cdfname, envir=where.env)
+                  return(cdfenv)
                 }
-                
-                if (what == "package") {
-                  loc <- .find.package(cdfname, lib.loc=where, quiet=TRUE)
-                  
-                  if (!second.try && identical(loc, character(0))) {
+                next
+              }
+
+
+              
+              if (what == "package") {
+                loc <- .find.package(cdfname, lib.loc=where, quiet=TRUE)
+
+                if (!second.try && identical(loc, character(0))) {
                     ## before jumping to the next option, check the possibility to
                     ## download the missing cdfenv pack
-                    
-                    if (how[[i]]$autoload) {
-                      cat(paste("Environment",cdfname,"is not available.\n"))
-                      cat("This environment contains needed probe location information.\n\n")
-                      
-                      cat(paste("We will try to download and install the",
-                                cdfname,"package.\n\n"))
-                      if (! "package:reposTools" %in% search()) {
-                        on.exit(detach("package:reposTools"))
-                      }
-                      
-                      if (! require(reposTools))
-                        stop(paste("The package reposTools is required to download environments.",
-                                   "Please download and install it.\n", sep="\n"))
-                      
-                      reposEntry <- getReposEntry(how[[i]]$repository)
-                      
-                      if (is.null(how[[i]]$installdir))
-                        status.install <- install.packages2(cdfname, reposEntry)
-                      else
-                        status.install <- install.packages2(cdfname, reposEntry, how[[i]]$installdir)
 
-                      if (length(statusList(status.install)) == 0) {
-                        warning(paste("Data package", cdfname, "does not seem to exist", 
-                                      "in the repository\n",
-                                      how[[i]]$repository, "\n"))
-                      } else {
-                        ## rewind the iterator i and try again
-                        i <- i-1
-                        second.try <- TRUE
-                      }
+                    if (how[[i]]$autoload) {
+                        cat(paste("Environment",cdfname,"is not available.\n"))
+                        cat("This environment contains needed probe location information.\n")
+
+                        cat(paste("We will try to download and install the",
+                                  cdfname,"package.\n\n"))
+
+                        if (is.null(how[[i]]$installdir))
+                            status <- getCDFenv(cdfname,verbose=TRUE)
+                        else
+                            status <- getCDFenv(cdfname,
+                                                how[[i]]$installdir,
+                                                verbose=TRUE)
+
+                        if (!status) {
+                            ## rewind the iterator i and try again
+                            i <- i-1
+                            second.try <- TRUE
+                        }
                     }
                     ## jump to next way to get the cdfenv
                     next
-                  }
-                  if (length(loc) > 1)
-                    warning(paste("several packages with a matching name. Using the one at", loc[1]))
-                  
-                  existsnow<- .find.package(cdfname, lib.loc=where, quiet=TRUE)
+                }
 
-                  if(!identical(loc, character(0))){
+                if (length(loc) > 1)
+                    warning(paste("several packages with a matching name. Using the one at", loc[1]))
+
+                existsnow<- .find.package(cdfname, lib.loc=where, quiet=TRUE)
+
+                if(!identical(loc, character(0))){
                     do.call("library", list(cdfname, lib.loc=dirname(loc[1])))
-                    
+
                     return(get(cdfname, envir=as.environment(paste("package:", cdfname, sep=""))))
-                  }
-                  next
-                }                
-                
-                if (what == "file") {
-                  ##now this is an actual Affymetrix filename
-                  cdfname <- paste(object@cdfName,".CDF",sep="")
-                  cdf <- read.cdffile(file.path(path.expand(where), cdfname))
-                  ## ---> extra paranoia <---
-                  if (cdf@cdfName != object@cdfName)
-                    warning(paste("The CDF file identifies as", cdf@cdfName,
-                                  "while you probably want", object@cdfName))
-                  ## ---> end of paranoia <---
-                  return(getLocations.Cdf(cdf))
                 }
-                
-                if (what == "environment") {
-                  if(exists(object@cdfName,inherits=FALSE,where=where))
-                    return(as.environment(get(object@cdfName,inherits=FALSE,envir=where)))
-                  next
-                }
-              }
+                next
+            }
               
-              warning(paste("\nWe could not find and/or install the necessary probe location information.\n",
-                            "Here is a list of common problems and possible solutions:\n\n",
-                            "Problem 1: You are not connected to the Internet.\n",
-                            "Solution:  Try again once you connect to the Internet.\n\n",
-                            "Problem 2: You do not have the necessary permissions to install packages.\n",
-                            "Solution:  Ask your system administrator to install ",cleancdfname(object@cdfName), " package from:\n",
-                            "           http://www.bioconductor.org/data/cdfenvs/cdfenvs.html\n\n",
-                            "Problem 3: Necessary package not available from Bioconductor.\n",
-                            "Solution:  Use makecdfenv package to create environment from CDF file.\n",
-                            "           See the dealing_with_cdfenvs vignette for more details\n\n",
-                            "NOTE: Once you install ",cleancdfname(object@cdfName)," you should not have this problem again.\n",
-                            sep=""))
-              warning(paste("To let you proceed for now, a dummy cdfenv", cleancdfname(object@cdfName),
-                            "will be created..."))
-              if (exists(object@cdfName, envir=.GlobalEnv)) {
-                stop("Could not create dummy environment. Giving up.")
-              }
-              assign(object@cdfName,
-                     new.env(parent=.GlobalEnv),
-                     envir=.GlobalEnv)
-              warning(paste("IMPORTANT: Depending on your settings, you might have to delete the object",
-                            object@cdfName, " after you install right the package !\n(command 'rm(",
-                            object@cdfName,")' )\n"))
-              return(get(object@cdfName, envir=.GlobalEnv))
-            })
+              if (what == "environment") {
+                  if(exists(object@cdfName,inherits=FALSE,where=where))
+                      return(as.environment(get(object@cdfName,inherits=FALSE,envir=where)))
+                  next
+                }
+            }
+          })
 
   ## indexProbes, similar to that used in the AffyBatch class
   ## use the cdfenv to get what we need.
@@ -332,7 +285,7 @@ if( !isGeneric("indexProbes") )
               envir <- getCdfInfo(object)
               
               if(is.null(genenames)) 
-                genenames <- ls(envir )
+                genenames <- ls(envir)
               
               ## shorter code, using the features of multiget
               ## (eventually more readable too)
