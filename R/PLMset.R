@@ -29,7 +29,7 @@
 ##  then mu(k) would be stored in the exprs slot, its standard error in the se slot
 ##  probe_i(k) is stored in the probe.coef slot, with its standard error in its respective slot
 ##  chip_j(k) and chipcovariates_j(k) would be stored in chip.coefs (and ses in se.chip.coefs)
-## 
+##
 ##
 ## Modification History
 ##
@@ -113,7 +113,7 @@ setClass("PLMset",
 
 
   #now some accessors.
-  
+
 if (is.null(getGeneric("cdfName")))
   setGeneric("cdfName", function(object)
              standardGeneric("cdfName"))
@@ -124,14 +124,14 @@ setMethod("cdfName", "PLMset", function(object)
 
                                         #access weights
 setMethod("weights",signature(object="PLMset"),
-          function(object,genenames=NULL){ 
+          function(object,genenames=NULL){
 		if (is.null(genenames)){
 			object@weights
 		} else{
 		 which <-indexProbesProcessed(object)[genenames]
 		 which <- do.call("c",which)
 		 object@weights[which,]
-		}	
+		}
 	})
 
 
@@ -155,7 +155,7 @@ setReplaceMethod("weights",signature(object="PLMset"),
 if (!isGeneric("coefs"))
   setGeneric("coefs",function(object)
              standardGeneric("coefs"))
-  
+
 setMethod("coefs",signature(object="PLMset"),
             function(object) object@chip.coefs)
 
@@ -183,14 +183,14 @@ setMethod("coefs.probe",signature(object="PLMset"),
 if (!isGeneric("se"))
   setGeneric("se",function(object)
              standardGeneric("se"))
-  
+
 setMethod("se",signature(object="PLMset"),
           function(object) object@se.chip.coefs)
 
 if (!isGeneric("se.probe"))
   setGeneric("se.probe",function(object)
              standardGeneric("se.probe"))
-  
+
 setMethod("se.probe",signature(object="PLMset"),
           function(object) object@se.probe.coefs)
 
@@ -204,11 +204,11 @@ setReplaceMethod("se",signature(object="PLMset"),
                  function(object,value){
                    object@se.chip.coefs <- value
                    object
-                 })  
+                 })
 
 ## indexProbes, similar to that used in the AffyBatch class
   ## use the cdfenv to get what we need.
-  
+
 if( !isGeneric("indexProbes") )
   setGeneric("indexProbes", function(object, which, ...)
              standardGeneric("indexProbes"))
@@ -216,40 +216,39 @@ if( !isGeneric("indexProbes") )
 setMethod("indexProbes", signature("PLMset", which="character"),
           function(object, which=c("pm", "mm","both"),
                    genenames=NULL, xy=FALSE) {
-            
+
             which <- match.arg(which)
-            
+
             i.probes <- match(which, c("pm", "mm", "both"))
             ## i.probes will know if "[,1]" or "[,2]"
             ## if both then [,c(1,2)]
             if(i.probes==3) i.probes=c(1,2)
-            
+
             envir <- getCdfInfo(object)
-            
-            if(is.null(genenames)) 
+
+            if(is.null(genenames))
               genenames <- ls(envir )
-            
+
             ## shorter code, using the features of multiget
             ## (eventually more readable too)
             ## note: genenames could be confusing (the same gene can be
               ## found in several affyid (ex: the 3' and 5' controls)
-            
-            ans <-  multiget(genenames, pos, envir, iffail=NA)
-            
+            ans <- mget(genenames, envir, ifnotfound=NA)
+
             ## this kind of thing could be included in 'multiget' as
             ## and extra feature. A function could be specified to
             ## process what is 'multiget' on the fly
             for (i in seq(along=ans)) {
-              
-              
+
+
                                         #this line needs to be changed for R 1.7.0
               if ( is.na(ans[[i]][1]) )
                 next
-              
+
               ##as.vector cause it might be a matrix if both
               tmp <- as.vector(ans[[i]][, i.probes])
-              
-              
+
+
               if (xy) {
                 warning("flag 'xy' is deprecated")
                 x <- tmp %% nrow(object)
@@ -257,10 +256,10 @@ setMethod("indexProbes", signature("PLMset", which="character"),
                 y <- tmp %/% nrow(object) + 1
                 tmp <- cbind(x, y)
               }
-              
+
               ans[[i]] <- tmp
             }
-            
+
             return(ans)
           })
 
@@ -271,10 +270,10 @@ if( !isGeneric("indexProbesProcessed") )
 
 setMethod("indexProbesProcessed", signature("PLMset"),
 	function(object){
-		pmindex <-indexProbes(object,which="pm")	
+		pmindex <-indexProbes(object,which="pm")
 		pmindex.length <- lapply(pmindex,length)
 
-		cs <- cumsum(do.call("c",pmindex.length)) 
+		cs <- cumsum(do.call("c",pmindex.length))
 		cl  <- do.call("c",pmindex.length)
 		for (i in 1:length(pmindex)){
 			pmindex[[i]] <- cs[i] - (cl[i]:1)+1
@@ -287,19 +286,19 @@ setMethod("indexProbesProcessed", signature("PLMset"),
 
 
 
-  
 
-    
+
+
 #  if( !isGeneric("image.weights") )
 #    setGeneric("image.weights", function(x)
 #               standardGeneric("image.weights"), where=where)
 
-    
+
 setMethod("image",signature(x="PLMset"),
           function(x,which=0,type=c("weights","resids","pos.resids","neg.resids"),use.log=TRUE,add.legend=FALSE,standardize=FALSE,...){
-            
+
             type <- match.arg(type)
-            
+
             pm.index <- unique(unlist(indexProbes(x, "pm")))
             rows <- x@nrow
             cols <- x@ncol
@@ -308,19 +307,19 @@ setMethod("image",signature(x="PLMset"),
             pm.y.locs <- pm.index%/%rows + 1
             xycoor <- matrix(cbind(pm.x.locs,pm.y.locs),ncol=2)
             xycoor2 <- matrix(cbind(pm.x.locs,pm.y.locs+1),ncol=2)
-            
-            
+
+
             if (is.element(type,c("weights"))){
               if (any(dim(x@weights) ==0)){
                 stop("Sorry this PLMset does not appear to have weights\n");
-              } 
+              }
               if (which == 0){
-                
+
                 which <- 1:dim(x@weights)[2]
-                
+
               }
             }
-            
+
             if (is.element(type,c("resids","pos.resids","neg.resids"))){
               if (any(dim(x@residuals) ==0)){
                 stop("Sorry this PLMset does not appear to have residuals\n");
@@ -329,9 +328,9 @@ setMethod("image",signature(x="PLMset"),
                 which <- 1:dim(x@residuals)[2]
               }
             }
-            
-            
-            
+
+
+
             for (i in which){
               if (type == "weights"){
                 weightmatrix <-matrix(nrow=rows,ncol=cols)
@@ -352,7 +351,7 @@ setMethod("image",signature(x="PLMset"),
                   layout(1)
                   par(mar = c(5, 4, 4, 2) + 0.1)
                 }
-                
+
               }
               if (type == "resids"){
                 residsmatrix <- matrix(nrow=rows,ncol=cols)
@@ -366,7 +365,7 @@ setMethod("image",signature(x="PLMset"),
                                         #this line
                                         #flips the matrix around so it is correct
                 residsmatrix<- as.matrix(rev(as.data.frame(residsmatrix)))
-                
+
                 if (use.log){
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
@@ -380,13 +379,13 @@ setMethod("image",signature(x="PLMset"),
                     pseudoColorBar(seq(-max(log2(abs(x@residuals)+1)),max(log2(abs(x@residuals)+1)),0.1), horizontal = FALSE, col = pseudoPalette(low="blue",high="red",mid="white"), main = "",log.ticks=TRUE)
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
-                  } 
-                  
-                  
-                  
-                  
+                  }
+
+
+
+
                 } else {
-                  
+
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
@@ -398,7 +397,7 @@ setMethod("image",signature(x="PLMset"),
                     pseudoColorBar(seq(-max(abs(x@residuals)),max(abs(x@residuals)),0.1), horizontal = FALSE, col = pseudoPalette(low="blue",high="red",mid="white"), main = "")
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
-                  } 
+                  }
                 }
               }
               if (type == "pos.resids"){
@@ -420,7 +419,7 @@ setMethod("image",signature(x="PLMset"),
                     pseudoColorBar(seq(0,max(log2(pmax(x@residuals,0)+1)),0.1), horizontal = FALSE, col = pseudoPalette(low="white",high="red"), main = "",log.ticks=TRUE)
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
-                  } 
+                  }
                 } else {
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
@@ -433,7 +432,7 @@ setMethod("image",signature(x="PLMset"),
                     pseudoColorBar(seq(0,max(x@residuals),0.1), horizontal = FALSE, col = pseudoPalette(low="white",high="red"), main = "")
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
-                  } 
+                  }
                 }
               }
               if (type == "neg.resids"){
@@ -456,8 +455,8 @@ setMethod("image",signature(x="PLMset"),
                     pseudoColorBar(seq(-max(log2(abs(pmin(x@residuals,0))+1)),0,0.1), horizontal = FALSE, col = pseudoPalette(low="blue",high="white"), main = "",log.ticks=TRUE)
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
-                  } 
-                  
+                  }
+
                 } else {
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
@@ -470,9 +469,9 @@ setMethod("image",signature(x="PLMset"),
                     pseudoColorBar(seq(min(x@residuals),0,0.1), horizontal = FALSE, col = pseudoPalette(low="blue",high="white"), main = "")
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
-                  } 
+                  }
                 }
-                
+
               }
             }
           })
@@ -489,10 +488,10 @@ setMethod("boxplot",signature(x="PLMset"),
 
 setMethod("show", "PLMset",
           function(object) {
-            
+
             cat("Probe level linear model (PLMset) object\n")
             cat("size of arrays=", object@nrow, "x", object@ncol,"\n",sep="")
-            
+
             ## Location from cdf env
             try( cdf.env <- getCdfInfo(object) )
             if (! inherits(cdf.env, "try-error")) {
@@ -501,7 +500,7 @@ setMethod("show", "PLMset",
               warning("missing cdf environment !")
               num.ids <- "???"
             }
-            
+
             cat("cdf=", object@cdfName,
                 " (", num.ids, " probeset ids)\n",
                 sep="")
@@ -518,7 +517,7 @@ setMethod("show", "PLMset",
               cat(" Method=",object@model.description$preprocessing$bg.method)
             }
             cat("\n")
-            
+
             cat("Normalization=",object@model.description$preprocessing$normalize,sep="")
             if (object@model.description$preprocessing$normalize){
               cat(" Method=",object@model.description$preprocessing$norm.method)
@@ -530,14 +529,14 @@ setMethod("show", "PLMset",
             cat("\n")
             cat("Output Settings\n")
             print(object@model.description$outputsettings)
-            
-            
+
+
           })
 
 if (!isGeneric("coefs.const"))
   setGeneric("coefs.const",function(object)
              standardGeneric("coefs.const"))
-  
+
   setMethod("coefs.const","PLMset",
             function(object){
               exprs(object)
@@ -554,7 +553,7 @@ setMethod("se.const","PLMset",
           })
 
 #A summary method, to be cleaned up better at a later date.
- 
+
 setMethod("summary","PLMset",
           function(object,genenames=NULL){#
 
@@ -577,7 +576,7 @@ setMethod("summary","PLMset",
                 cur.chip.coef <- object@chip.coefs[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs)),]
                 cur.chip.se <- object@se.chip.coefs[grep(paste("^",probeset.names,sep=""),rownames(object@se.chip.coefs)),]#
 
-                
+
                 cat("Probeset:", probeset.names,"\n")
 
                 cat("Intercept Estimates\n")
@@ -593,7 +592,7 @@ setMethod("summary","PLMset",
 
                 cat("\nResiduals\n")
                 print(object@residuals[inds,])
-                
+
                  cat("\nWeights\n")
                 print(object@weights[inds,])
                 cat("\n\n")
@@ -604,9 +603,9 @@ setMethod("summary","PLMset",
 if (!isGeneric("Mbox"))
   setGeneric("Mbox",function(object,...)
              standardGeneric("Mbox"))
-  
 
-  
+
+
 setMethod("Mbox",signature("PLMset"),
           function(object,...){
             medianchip <- apply(coefs(object), 1, median)
@@ -633,7 +632,7 @@ setReplaceMethod("resid",signature(object="PLMset"),
 setMethod("resid",signature("PLMset"),
           function(object,genenames=NULL,standardize=FALSE){
 	    if (!standardize){
-              if (is.null(genenames)){	 	
+              if (is.null(genenames)){
                 object@residuals
               } else {
                 which <-indexProbesProcessed(object)[genenames]
@@ -673,8 +672,8 @@ setMethod("residuals",signature("PLMset"),
 if (!isGeneric("normvec"))
   setGeneric("normvec",function(object,...)
              standardGeneric("normvec"))
-    
-    
+
+
 setMethod("normvec",signature("PLMset"),
           function(object){
             object@normVec
@@ -684,20 +683,20 @@ if (!isGeneric("varcov"))
   setGeneric("varcov",function(object,...)
              standardGeneric("varcov"))
 
-  
+
   setMethod("varcov",signature("PLMset"),
             function(object,...){
               object@varcov
             })
-  
-  
+
+
 
 if (!isGeneric("residSE"))
   setGeneric("residSE",function(object,...)
              standardGeneric("residSE"))
 
 
-  
+
 setMethod("residSE",signature("PLMset"),
           function(object){
             return(object@residualSE)
@@ -716,12 +715,12 @@ setReplaceMethod("sampleNames",signature(object="PLMset"),
                  function(object,value){
                    rownames(pData(object)) <- value
 		   if (!any(dim(object@weights) == 0)){
-			colnames(object@weights) <- value			
+			colnames(object@weights) <- value
 		   }
 		    if (!any(dim(object@residuals) == 0)){
-			colnames(object@residuals) <- value			
+			colnames(object@residuals) <- value
 		   }
-		   object         
+		   object
                  })
 
 
