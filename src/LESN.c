@@ -188,7 +188,7 @@ static double bw_gaussian(double x, double pmin, double pmax, double theta){
 
 static double log2(double x){
 
-  return log(x)/log(2);
+  return log(x)/log(2.0);
 
 }
 

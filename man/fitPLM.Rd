@@ -10,7 +10,7 @@
 fitPLM(object,model=PM ~ -1 + probes +samples,
 variable.type=c(default="factor"),
 constraint.type=c(default="contr.treatment"),
-background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",se.type=4,psi.type="Huber",psi.k=NULL,background.param=list(),normalize.param=list())
+background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=list(),model.param=list())
 }
 
 \arguments{
@@ -28,13 +28,12 @@ background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = 
     using RMA background correction}
   \item{background.method}{name of background method to use.}
   \item{normalize.method}{name of normalization method to use.}
-  \item{se.type}{integer value indicating which of the four standard
-    error methods to use}
-  \item{psi.type}{A name of a weight function to use in M estimation}
-  \item{psi.k}{A tuning parameter for \code{psi.type}}
   \item{background.param}{A list of parameters for background routines}
-  \item{normalize.param}{A list of parameters for normalization routines}
-  
+  \item{normalize.param}{A list of parameters for normalization
+    routines}
+  \item{output.param}{A list of parameters controlling optional output
+    from the routine.}
+  \item{model.param}{A list of parameters controlling model procedure}
 }
 \details{
   This function fits robust Probe Level Linear models to all the probesets in
@@ -76,9 +75,9 @@ coefs(Pset)[1:10,]
 
 
 #try a different se.type
-Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,se.type=2)
+Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,model.param=list(se.type=2))
 se(Pset)[1:10,]
-Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,se.type=3)
+Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,model.param=list(se.type=3))
 se(Pset)[1:10,]
 }
 

@@ -1,5 +1,6 @@
 %\VignetteIndexEntry{affyPLM: Fitting Probe Level Models}
 %\VignettePackage{affyPLM}
+
 \documentclass[12pt]{article}
 \usepackage{amsmath,pstricks}
 \usepackage{hyperref}
@@ -27,188 +28,150 @@ After starting R, the package should be loaded using
 <<echo=F,results=hide>>=
 library(affyPLM)
 @
-this will load affyPLM as well as the affy package and its dependencies.
+this will load {\it affyPLM} as well as the affy package and its dependencies.
 
 \section{Fitting Probe level models}
 
 \subsection{What is a probelevel model and what is a PLMset?}
 
-A probelevel model is a linear model fit to probe data. In particular
-it is where we fit a model with probe level and chip level parameters
-for each probeset. It is easy to arrange the data for a probeset so
-that the rows are probes and the columns are chips. In this case our
-probe level parameters are usually a factor variable for each
-probe. The chip level parameters could be, a factor with a level for
-each array, factor variables grouping the chips into treatment groups
-or perhaps some sort of covariate (pH, temperature).
+A probelevel model is a linear model fit to probe data. In particular it is where we fit a model with probe level and chip level parameters for each probeset. It is easy to arrange the data for a probeset so that the rows are probes and the columns are chips. In this case our probe level parameters are usually a factor variable for each probe. The chip level parameters could be, a factor with a level for each array, factor variables grouping the chips into treatment groups or perhaps some sort of covariate (pH, temperature). 
 
-A \verb+PLMset+ is an R object that holds the results of a fitted
-probelevel model. Some of the items that are kept are parameter
-estimates, their standard errors and robust fit weights.
+A \verb+PLMset+ is an R object that holds the results of a fitted probelevel model. Some of the items that are kept are parameter estimates, their standard errors and robust fit weights.
 
 \subsection{Using the software to fit probelevel models}
 
 \subsubsection{Some examples}
 
-The main function for fitting Probe level models is the function
-\verb+fitPLM+. The most basic way to call the function is to call
-passing an \verb+AffyBatch+ objects, this will fit a linear model with
-an effect estimated for each chip.
-
+The main function for fitting Probe level models is the function \verb+fitPLM+. The most basic way to call the function is to call passing an \verb+AffyBatch+ objects, this will fit a linear model with an effect estimated for each chip.
 <<>>=
 data(Dilution)   # an example dataset provided by the affy package
 Pset <- fitPLM(Dilution)
 @
-
-once you have a fitted model (this object is referred to as a
-\verb+PLMset+ object) you may view the chip level parameter estimates
-and the corresponding standard errors using accessor functions
-\verb+coefs+ and \verb+se+ respectively.
-
+once you have a fitted model (this object is referred to as a \verb+PLMset+ object) you may view the chip level parameter estimates and the corresponding standard errors using accessor functions \verb+coefs+ and \verb+se+ respectively.
 <<>>=
 coefs(Pset)[1:10,]
 se(Pset)[1:10,]
 @
 
-The \verb+fitPLM+ function also allows you to specify more complicated
-models. For instance we may wish to fit a robust linear model with an
-effect for liver dilution level and scanner (these are already defined
-in the \verb+phenoData+ slot of the \verb+AffyBatch+, you can also
-give names of objects in the current environment)
+The \verb+fitPLM+ function also allows you to specify more complicated models. For instance we may wish to fit a robust linear model with an effect for liver dilution level and scanner (these are already defined in the \verb+phenoData+ slot of the \verb+AffyBatch+, you can also give names of objects in the current environment)
 
 <<>>=
 Pset <- fitPLM(Dilution, model = PM ~ -1 + probes + liver + scanner,
-                normalize=FALSE,
-                background=FALSE)
+		normalize=FALSE,
+		background=FALSE)
 coefs(Pset)[1:2,]
 @
 
-By default all variables are treated as factors. The "-1 + probes" is
-handled specially by the c code (currently the probe effects are
-constrained by a sum to zero constraint).  The first factor specified
-is unconstrained (in the above case that would be liver), all of the
-following factors are constrained with the endpoint constraint (ie in
-our case scanner).
+By default all variables are treated as factors. The "-1 + probes" is handled specially by the c code (currently the probe effects are constrained by a sum to zero constraint).  The first factor specified is unconstrained (in the above case that would be liver), all of the following factors are constrained with the endpoint constraint (ie in our case scanner).
 
-It is also possible to fit models where some of the variables are
-treated as covariates rather than as factors.
-
+It is also possible to fit models where some of the variables are treated as covariates rather than as factors.
 <<>>=
 logliver <- log2(c(20,20,10,10))
 Pset <- fitPLM(Dilution,model=PM~-1+probes+logliver+scanner, 
-                normalize=FALSE, 
-                background=FALSE, 
-                variable.type=c(logliver="covariate"))
+		normalize=FALSE, 
+		background=FALSE, 
+		variable.type=c(logliver="covariate"))
 coefs(Pset)[1:2,]
 @
 
 We can also fit models with intercept parameters
-
 <<>>=
 data(affybatch.example)
 Pset <- fitPLM(affybatch.example, model = PM ~ probes + samples, 
-                normalize=FALSE, 
-                background=FALSE) 
+		normalize=FALSE, 
+		background=FALSE) 
 coefs.const(Pset)[1:2]
 coefs(Pset)[1:2,]
 @
-
 and with different constraints on the parameters.
-
 <<>>=
 data(affybatch.example)
 Pset <- fitPLM(affybatch.example, model = PM ~ probes + samples,
-                normalize=FALSE,
-                background=FALSE,
-                constraint.type=c(samples="contr.sum"))
+		normalize=FALSE,
+		background=FALSE,
+		constraint.type=c(samples="contr.sum"))
 coefs.const(Pset)[1:2]
 coefs(Pset)[1:2,]
 @
 
+
+
 \subsubsection{Some specific notes about specifying models in {\tt fitPLM}}
 
-If you do not specify a model when using fitPLM then the default model
-is used. The default model is {\tt PM ~ -1 + probes + samples}. The
-words \verb+probes+ and \verb+samples+, for probe and array effects,
-are reserved words in the specification of a model. The default model
-will compute a parameter for each chip.
+If you do not specify a model when using fitPLM then the default model is used. The default model is {\tt PM ~ -1 + probes + samples}. The words \verb+probes+ and \verb+samples+, for probe and array effects, are reserved words in the specification of a model. The default model will compute a parameter for each chip.
 
-There are some specific rules that you must follow when specifying a
-model the first is that the response should always be \verb+PM+, next
-specify the intercept and probe effect terms ie {\tt -1 + probes},
-then you may specify your chip level parameters. To put chip level
-parameter all you need to do is put the name in your model as we have
-done in the earlier examples with \verb+liver+, \verb+scanner+ and
-\verb+logliver+. These variables should either be defined in the
-\verb+phenoData+ slot of the \verb+AffyBatch+ holding your data or as
-appropriate vectors in your current R session, like the example with
-\verb+logliver+ above.
+There are some specific rules that you must follow when specifying a model the first is that the response should always be \verb+PM+, next specify the intercept and probe effect terms ie {\tt -1 + probes}, then you may specify your chip level parameters. To put chip level parameter all you need to do is put the name in your model as we have done in the earlier examples with \verb+liver+, \verb+scanner+ and \verb+logliver+. These variables should either be defined in the \verb+phenoData+ slot of the \verb+AffyBatch+ holding your data or as appropriate vectors in your current R session, like the example with \verb+logliver+ above.
 
-By default all parameters are treated as factor variables unless
-specified otherwise. The first chip level factor is always left
-unconstrained (unless an intercept term has been fitted), all the
-following chip level factors are by default constrained with the
-endpoint constraint, unless you specify otherwise. Note that the probe
-parameters are by default constrained using the sum to zero
-constraint, it is recommended you use this constraint, but it is
-possible to use an endpoint constraint by using \verb+constraint.type+
+By default all parameters are treated as factor variables unless specified otherwise. The first chip level factor is always left unconstrained (unless an intercept term has been fitted), all the following chip level factors are by default constrained with the endpoint constraint, unless you specify otherwise. Note that the probe parameters are by default constrained using the sum to zero constraint, it is recommended you use this constraint, but it is possible to use an endpoint constraint by using \verb+constraint.type+
 
-To specify that a chip level parameter should be treated as a
-covariate rather than a factor, you use the \verb+variable.type+
-parameter of \verb+fitPLM+. The example using \verb+logliver+
-demonstrates this.
+To specify that a chip level parameter should be treated as a covariate rather than a factor, you use the \verb+variable.type+ parameter of \verb+fitPLM+. The example using \verb+logliver+ demonstrates this.
 
 \subsubsection{Pre-processing}
 
-By default the \verb+fitPLM+ function will preprocess the data using
-the RMA \cite{iriz:etal:2003},\cite{iriz:etal:2003b} preprocessing
-steps. In particular it uses the same background and normalization
-\cite{bols:etal:2003} as the \verb+rma+ function of \verb+affy+. It is
-possible to turn off either of these steps by specifying that
-\verb+background+ and/or \verb+normalize+ are \verb+FALSE+.
+By default the \verb+fitPLM+ function will preprocess the data using the RMA \cite{iriz:etal:2003},\cite{iriz:etal:2003b} preprocessing steps. In particular it uses the same background and normalization \cite{bols:etal:2003} as the \verb+rma+ function of \verb+affy+. It is possible to turn off either of these steps by specifying that \verb+background+ and/or \verb+normalize+ are \verb+FALSE+.
 
 \section{Quality diagnostics}
 
-A pseudo chip image plot of the weights from the robust linear model
-fit is a useful quality diagnostic.
+A pseudo chip image plot of the weights from the robust linear model fit is a useful quality diagnostic.
 
-<<fig=TRUE>>=
+<<fig=FALSE>>=
 Pset <- fitPLM(Dilution)
 image(Pset,which=2)
 @
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=4in,height=4in,angle = -90]{weights}
+\end{center}
+\caption{Pseudo chip image of weights}
+\end{figure}
+Areas of low weight are greener, high weights (ie weight of 1) are light grey). The image plot will allow you to detect artifacts on your chip.
 
-Areas of low weight are greener, high weights (ie weight of 1) are
-light grey). The image plot will allow you to detect artifacts on your
-chip.
+
+Another alternative is to examine plots of residuals. There are several options for doing this. Firstly we can plot the residuals themselves
+<<fig=FALSE>>=
+image(Pset,which=2, type="resids")
+@
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=4in,height=4in,angle = -90]{resid}
+\caption{Pseudo chip image of residuals}
+\end{center}
+where the positive residuals are red and the negative residuals are blue.
+
+One can also look at only the positive (or negative residuals) in isolation.
+<<fig=FALSE>>=
+image(Pset,which=2, type="pos.resids")
+image(Pset,which=2, type="neg.resids")
+@
+note that the legend can be turned on and off by using the {\tt add.legend} parameter.
+
+\end{figure}
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=4in,height=4in,angle = -90]{posresid}
+\includegraphics[width=4in,height=4in,angle = -90]{negresid}
+\caption{Pseudo chip images of postive and negative residuals}
+\end{center}
+\end{figure}
 
 
-Another diagnostic, particularly useful when you fit a model with an
-effect for each array (the default model) is to boxplot the model
-standard errors (standardized across probesets so each has median 1).
-This is done by using the boxplot function on a \verb+PLMset+ object.
-%Pset <- fitPLM(Dilution)
 
+Another diagnostic, particularly useful when you fit a model with an effect for each array (the default model) is to boxplot the model standard errors (standardized across probesets so each has median 1). This is done by using the boxplot function on a \verb+PLMset+ object.
 <<fig=TRUE,pdf=TRUE,width=6,height=6>>=
 boxplot(Pset)
 @
 
-Another possible diagnostic is to compute M's for each chip relative
-to a median (pseudo)chip. This is handled by the command
-
-<<eval=FALSE>>
+Another possible diagnostic is to compute M's for each chip relative to a median (pseudo)chip. This is handled by the command
+<<fig=FALSE>>=
 Mbox(Pset)
 @
-
-which will produce boxplots of the M values by array. A discordant
-chip may show on such a plot.
+which will produce boxplots of the M values by array. A discordant chip may show on such a plot.
 
 
 
 \section{How long will it take to run the model fitting procedures?}
 
-It may take considerable time to run the fitPLM function. The length
-of time it is going to take to run the model fitting procedure will
-depend on a number of factors including:
+It may take considerable time to run the fitPLM function. The length of time it is going to take to run the model fitting procedure will depend on a number of factors including:
 \begin{enumerate}
 \item CPU speed
 \item Memory size of the machine (RAM and VM)
@@ -217,15 +180,9 @@ depend on a number of factors including:
 \item Number of parameters in model
 \end{enumerate}
 
-It is recommended that you run the \verb+fitPLM+ function only on
-machines with large amounts of RAM. If you have a large number of
-arrays the number of parameters in your model will have the greatest
-effect on runtime.
+It is recommended that you run the \verb+fitPLM+ function only on machines with large amounts of RAM. If you have a large number of arrays the number of parameters in your model will have the greatest effect on runtime.
 
-The \verb+fitPLM+ function has been tested using the
-\verb+system.time+ function. The specifications of the test machine
-are given in figure \ref{MachineSpec}. The results are given in
-\ref{runtimes}.
+The \verb+fitPLM+ function has been tested using the \verb+system.time+ function. The specifications of the test machine are given in figure \ref{MachineSpec}. The results are given in \ref{runtimes}.
 \begin{figure}
 \begin{tabular}{ll} \hline
 Component       & Specs \\ \hline
@@ -236,7 +193,7 @@ RAM     & 1 GB \\
 Swap & 6 GB \\
 R       & R-1.7.0 (Development) \\
 affy    & 1.1.8 \\ 
-affyPLM & 0.4-14 \\ \hline
+AffyExtensions & 0.4-14 \\ \hline
 \end{tabular}
 \caption{Benchmarking Machine Specifications} \label{MachineSpec}
 \end{figure}
@@ -271,14 +228,7 @@ Number of Arrays & Number of Chip level parameters  & Run time (seconds) \\ \hli
 
 \subsection{Why is it so much slower than the {\tt rma} function?}
 
-The robust linear model fitting procedure uses IRLS (iteratively
-re-weighted least squares) which is going to be inherently slower than
-the median polish algorithm. In addition the \verb+fitPLM+ procedure
-produces standard error and weight estimates where as the \verb+rma+
-function focuses only on producing expression estimates. If your goal
-is to compute expression estimates one for each probeset, each array
-it is probably better to use \verb+rma+ function. When you wish to fit
-a more general model \verb+fitPLM+ is the more appropriate choice.
+The robust linear model fitting procedure uses IRLS (iteratively re-weighted least squares) which is going to be inherently slower than the median polish algorithm. In addition the \verb+fitPLM+ procedure produces standard error and weight estimates where as the \verb+rma+ function focuses only on producing expression estimates. If your goal is to compute expression estimates one for each probeset, each array it is probably better to use \verb+rma+ function. When you wish to fit a more general model \verb+fitPLM+ is the more appropriate choice.
 
 
 \bibliographystyle{plainnat}

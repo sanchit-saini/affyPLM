@@ -12,7 +12,14 @@
 \alias{se.probe}
 \alias{se.const}
 \alias{Mbox}
-\alias{indexProbes}
+\alias{normvec}
+\alias{varcov}
+\alias{residSE}
+\alias{resid<-}
+\alias{residuals<-}
+\alias{indexProbesProcessed}
+\alias{model.description}
+\alias{sampleNames<-}
 \alias{coefs,PLMset-method}
 \alias{weights<-,PLMset-method}
 \alias{weights,PLMset-method}
@@ -30,6 +37,18 @@
 \alias{getCdfInfo,PLMset-method}
 \alias{indexProbes,PLMset,character-method}
 \alias{cdfName,PLMset-method}
+\alias{normvec,PLMset-method}
+\alias{resid,PLMset-method}
+\alias{residuals,PLMset-method}
+\alias{resid<-,PLMset-method}
+\alias{residuals<-,PLMset-method}
+\alias{residSE,PLMset-method}
+\alias{varcov,PLMset-method}
+\alias{indexProbesProcessed,PLMset-method}
+\alias{model.description,PLMset-method}
+\alias{summary,PLMset-method}
+\alias{sampleNames<-,PLMset-method}
+
 
 \title{Class PLMset}
 \description{This is a class representation for Probe level Linear
@@ -68,6 +87,12 @@
     \item{\code{ncol}:}{Object of class "numeric". Number of cols in chip}
     \item{\code{notes}:}{Object of class "character" Vector of
       explanatory text }
+    \item{\code{varcov}:}{Object of class "list". A list of
+      variance/covariance matrices}
+    \item{\code{residualSE}:}{Object of class "matrix". Contains residual
+      standard error and df}
+    \item{\code{residuals}:}{Object of class "matrix". Contains
+      residuals from model fit (if stored)}
   }
 }
 \section{Extends}{
@@ -103,12 +128,14 @@ Class \code{"exprSet"}, directly.
       names. \code{which} can be "pm", "mm", or "both". If "both" then
       perfect match locations are given followed by mismatch locations.}
     \item{Mbox}{\code{signature(object = "PLMset")}: gives a boxplot of
-      M's for each chip. The M's are computed relative to a "median" chip.}
+      M's for each chip. The M's are computed relative to a "median"
+      chip.}
+    \item{normvec}{will return the normalization vector (if it has been
+      stored)}
+    \item{residSE}{will return the residual SE (if it has been stored)}
  }
 }
 \note{This class is better described in the vignette.}
-%\seealso{  \code{\link{Cel}}, \code{\link{Cdf}}, 
-%  \code{\link{exprSet-class}}} 
 
 \author{B. M. Bolstad \email{bolstad@stat.berkeley.edu}}
 

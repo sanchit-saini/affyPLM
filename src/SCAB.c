@@ -124,7 +124,7 @@ double fit_Probeset_model(double *PM, double *MM, int length, int robust, int ps
     } */
 
   if (robust){
-    rlm_fit(x, y, 2*length,nparams, out_beta, out_resids, weights,PsiFunc(psicode),psi_k);
+    rlm_fit(x, y, 2*length,nparams, out_beta, out_resids, weights,PsiFunc(psicode),psi_k,20,0);
   } else {    
     lm_wfit(x, y, weights, 2*length,nparams,tol,out_beta,out_resids);
   }
@@ -187,7 +187,7 @@ double fit_Difference_model(double *PM, double *MM, int length, int robust, int 
     } */
 
   if (robust){
-    rlm_fit(x, y, length,nparams, out_beta, out_resids, weights,PsiFunc(psicode),psi_k);
+    rlm_fit(x, y, length,nparams, out_beta, out_resids, weights,PsiFunc(psicode),psi_k,20,0);
   } else {    
     lm_wfit(x, y, weights, length,nparams,tol,out_beta,out_resids);
   }

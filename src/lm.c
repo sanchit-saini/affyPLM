@@ -23,6 +23,7 @@
  **                gives weights of 0.
  ** Jul 27, 2003 - better handling of cases where a parameter
  **                is not estimable (set it to NA)
+ ** Sep 14, 2003 - fix a bug where k was where a j should be in a for loop
  **
  ********************************************************************/
 
@@ -113,7 +114,7 @@ void lm_wfit(double *x, double *y, double *w, int rows, int cols, double tol, do
       for (j = 0; j < k; j++){
 	out_beta[j] = beta[jpvt[j]];
       }
-      for(j =k; k < cols; j++){
+      for(j =k; j < cols; j++){
 	out_beta[jpvt[j]] =  R_NaN;
       }
 

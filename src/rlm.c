@@ -34,6 +34,7 @@
  ** Jun 04, 2003 - Make rlm_fit accept a function pointer to allow 
  **                more general psi functions
  ** Jun 05, 2003 - move lm_wfit  to lm.c
+ ** Sep 13, 2003 - rlm now has a parameter that controls the maximum number of iterations
  **
  ********************************************************************/
 
@@ -191,14 +192,14 @@ double med_abs(double *x, int length){
  ** double *out_resids - already allocated space to store residuals: length rows
  ** double *out_weights - already allocated space to store regression weights: length rows
  ** 
- ** This function fits a robust linear model using huber regression, convergence is
+ ** This function fits a robust linear model using M estimation, convergence is
  ** determined by the change in residuals.
  **
  **
  **********************************************************************************/
 
 
-void rlm_fit(double *x, double *y, int rows, int cols, double *out_beta, double *out_resids, double *out_weights,double (* PsiFn)(double, double, int), double psi_k){
+void rlm_fit(double *x, double *y, int rows, int cols, double *out_beta, double *out_resids, double *out_weights,double (* PsiFn)(double, double, int), double psi_k,int max_iter, int initialized){
 
   int i; /* ,j; */
   /* double k = 1.345; */
@@ -207,7 +208,7 @@ void rlm_fit(double *x, double *y, int rows, int cols, double *out_beta, double 
   double acc = 1e-4;
   double scale =0.0;
   double conv;
-  int max_iter=20;
+  //int max_iter=20;
   int iter;
   
 
@@ -220,16 +221,18 @@ void rlm_fit(double *x, double *y, int rows, int cols, double *out_beta, double 
 
 
 
-  /* intially use equal weights */
-  for (i=0; i < rows; i++){
-    wts[i] = 1.0;
+  if (!initialized){
+
+    /* intially use equal weights */
+    for (i=0; i < rows; i++){
+      wts[i] = 1.0;
+    }
+    
+    /* get our intial beta estimates by standard linear regression */
+    
+    
+    lm_wfit(x, y, wts, rows, cols, tol, beta, resids);
   }
-
-  /* get our intial beta estimates by standard linear regression */
-
-  
-  lm_wfit(x, y, wts, rows, cols, tol, beta, resids);
-
   /* printf("%f %f %f\n",beta[0],beta[1],beta[2]); */
 
   /*
@@ -311,7 +314,7 @@ void rlm_fit(double *x, double *y, int rows, int cols, double *out_beta, double 
 
 void rlm_fit_R(double *x, double *y, int *rows, int *cols, double *out_beta, double *out_resids, double *out_weights){
 
-  rlm_fit(x, y, *rows, *cols, out_beta, out_resids,out_weights,psi_huber,1.345);
+  rlm_fit(x, y, *rows, *cols, out_beta, out_resids,out_weights,psi_huber,1.345, 20,0);
 }
 
 

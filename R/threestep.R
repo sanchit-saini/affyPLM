@@ -26,11 +26,11 @@
 # Jul 26, 2003 - introduced normalization options parameter
 #                converted background parameters in same manner
 # Jul 27, 2003 - cleaned up parameter list
-# Oct 7, 2003 - comment out 
+# Oct  5, 2003 - summary.param which controls options for summarization  added.
 #
 #####################################################################
 
-threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list()){
+threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),summary.param=list()){
 
   get.background.code <- function(name) {
     background.names <- c("RMA.1", "RMA.2", "IdealMM","MAS","MASIM","LESN2","LESN1","LESN0","SB")
@@ -75,8 +75,44 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
   }
 
 
-  #rows <- length(probeNames(object))
-  #cols <- length(object)
+  get.psi.code <- function(name){
+    psi.names <- c("Huber","fair","Cauchy","Geman-Mclure","Welsch","Tukey","Andrews")
+     if (!is.element(name, psi.names)) {
+      stop(paste(name, "is not a valid Psi type. Please use one of:",
+                 "Huber","fair","Cauchy","Geman-Mclure","Welsch","Tukey","Andrews"))
+    }
+    code <- c(0:6)[name == psi.names]
+    code
+  }
+  
+  get.default.psi.k <- function(name){
+    psi.code <- get.psi.code(name)
+    ## ** Huber - k = 1.345
+    ## ** Fair - k = 1.3998
+    ## ** Cauchy - k=2.3849 
+    ## ** Welsch - k = 2.9846
+    ## ** Tukey Biweight - k = 4.6851
+    ## ** Andrews Sine - K = 1.339
+    if (psi.code == 0){
+      psi.k <- 1.345
+    } else if (psi.code == 1){
+      psi.k <- 1.3998
+    } else if (psi.code == 2){
+      psi.k <- 2.3849
+    } else if (psi.code == 4){
+      psi.k <- 2.9846
+    } else if (psi.code == 5){
+       psi.k <- 4.6851
+    } else if (psi.code == 6){
+      psi.k <- 1.339
+    } else {
+      psi.k <- 1
+    }
+    psi.k
+  }
+
+  rows <- length(probeNames(object))
+  cols <- length(object)
  
   ngenes <- length(geneNames(object))
   
@@ -99,7 +135,18 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
   n.param <- list(scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
   n.param[names(normalize.param)] <- normalize.param
 
-  results <- .Call("R_threestep_c",pm(object), mm(object), probeNames(object), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method), get.summary.code(summary.method),b.param,n.param) #, PACKAGE="AffyExtensions") 
+  s.param <- list(psi.type="Huber",psi.k=NULL)
+  s.param[names(summary.param)] <- summary.param
+  
+  if (is.null(s.param$psi.k)){
+    s.param$psi.k <- get.default.psi.k(s.param$psi.type)
+  }
+  
+  s.param$psi.type <- get.psi.code(s.param$psi.type)
+
+
+  
+  results <- .Call("R_threestep_c",pm(object), mm(object), probeNames(object), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method), get.summary.code(summary.method),b.param,n.param,s.param) #, PACKAGE="AffyExtensions") 
   
   colnames(results[[1]]) <- sampleNames(object)
   colnames(results[[2]]) <- sampleNames(object)

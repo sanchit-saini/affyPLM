@@ -11,7 +11,7 @@
 #include <math.h>
 
 
-
+SEXP GetParameter(SEXP alist, char *param_name);
 SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP bg_type,SEXP background_parameters);
 SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_type, SEXP norm_parameters);
 

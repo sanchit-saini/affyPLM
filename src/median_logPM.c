@@ -18,6 +18,7 @@
  ** Feb 6, 2003 - Initial version of this summarization method
  ** Feb 24, 2003 - Remove unused variable in i from MedianLog
  ** Jul 23, 2003 - add SE parameter (but not yet implemented)
+ ** Oct 10, 2003 - added PLM version
  **
  ************************************************************************/
 
@@ -72,7 +73,7 @@ double MedianLog(double *x, int length){
  **
  ***************************************************************************/
 
-void MedianLogPM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE){
+void MedianLogPM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE,  summary_plist *summary_param){
   int i,j;
   double *z = Calloc(nprobes*cols,double);
 
@@ -122,5 +123,35 @@ void MedianLogPM_noSE(double *data, int rows, int cols, int *cur_rows, double *r
     results[j] = MedianLog(&z[j*nprobes],nprobes);
 
   }
+  Free(z);
+}
+
+
+
+
+
+void MedianLogPM_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals,  summary_plist *summary_param){
+  int i,j;
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
+    }
+  } 
+  
+  for (j=0; j < cols; j++){
+    results[j] = MedianLog(&z[j*nprobes],nprobes); 
+    resultsSE[j] = R_NaReal;
+  }
+
+  
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      residuals[j*nprobes + i] = z[j*nprobes + i] - results[j];  
+    }
+  } 
+
+  
   Free(z);
 }

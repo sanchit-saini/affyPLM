@@ -24,7 +24,7 @@
  **
  ** Note that the function calls here suffer a little bit from "fortran-itis", ie
  ** lots of parameters passed in and out, should probably to rewritten in a 
- ** cleaner form at somepoint.
+ ** cleaner form at somepoint. (THIS HAS BEEN DONE)
  **
  ** Modification history
  **
@@ -60,6 +60,17 @@
  ** Jun 04, 2003  - add mechanism for more general psi functions.
  ** Jun 11, 2003  - make sure that the standard error call allows other psi functions.
  ** Jul 23, 2003 - remove one last compiler warning.
+ ** Sep 02, 2003 - residuals are now stored
+ ** Sep 05, 2003 - clean up in how parameters are passed to  do_PLMrlm
+ ** Sep 06, 2003 - introduced the struct modelfit. It is used to group together
+ **                items related to the current model (for each probeset) being
+ **                fitted. More clean up in how parameters are passed between
+ **                functions. residSE now outputted.
+ ** Sep 07, 2003 - chip level part of variance covariance matrix returned.
+ ** Sep 08, 2003 - more work on returning variance covariance
+ ** Sep 13, 2003 - Modify rlm_PLM_block so it handles number of iterations
+ **                and initialization method
+ ** Oct 12, 2003 - fixed declaration order error                     
  **
  *********************************************************************/
 
@@ -68,6 +79,9 @@
 #include "rlm_se.h"
 #include "rlm.h"
 #include "psi_fns.h"
+#include "common_types.h"
+#include "medianpolish.h"
+
 #include <R.h>
 #include <Rdefines.h>
 #include <Rmath.h>
@@ -76,6 +90,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+/**********************************************************************
+ **
+ ** the modelfit struct is used for storing information about the 
+ ** current model (the one being fitted individually to each probeset.
+ **
+ **********************************************************************/
+
+typedef struct{
+  double *cur_params;            /* storage */
+  double *cur_se_estimates;
+  double *cur_weights;
+  double *cur_resids;
+  double *cur_varcov;
+  double *cur_residSE;
+  int *cur_rows;  /* indices in the data matrix to use for current model */
+  double *X;      /* design matrix */
+  int n;          /* number of observations */
+  int p;          /* number of parameters */
+  int nprobes;    /* number of probes in current probeset */
+  
+} modelfit;
+
+
+
+
+
 
 
 
@@ -261,6 +302,13 @@ void rlm_design_matrix_realloc(double *X, int nprobes, int cols, int p, double *
 
 
 /**********************************************************************
+ ** 
+ **  rlm_PLM_block(const Datagroup *data, const PLMmodelparam *model, modelfit *current)
+ **
+ **
+ **********************************************************************
+ **
+ ** HERE AND BELOW IS OUTDATED. LEFT HERE FOR HISTORICAL INTEREST
  **
  ** void rlm_PLM_block(double *data, int rows, int cols, int *cur_rows, int nchipparams, double *chipcovariates, 
  **                      double *weights, double *params, double *se_estimates, int nprobes, int method,int se_method)
@@ -292,157 +340,266 @@ void rlm_design_matrix_realloc(double *X, int nprobes, int cols, int p, double *
  **
  *********************************************************************/
 
-void rlm_PLM_block(double *data, int rows, int cols, int *cur_rows, int p, double *X, double *weights, double *params, double *se_estimates, int nprobes, int method,int se_method, int psitype,double psi_k){
-
-  int i, j; /* row,curcol,currow; */
-
-  int n = (nprobes*cols);
-
-  double *Y = Calloc(n,double);
-  double *out_resids=Calloc(n,double);
+void rlm_PLM_block(const Datagroup *data, const PLMmodelparam *model, modelfit *current){
   
+  int i, j;
+  //  int n = (current->nprobes*data->cols);
+
+  double *Y = Calloc(current->n,double);
   double lg2 = log(2.0); /* Cache hopefully for speed :) */
+
+  double *probeparam;
+  double *chipparam;
+  double constparam;
+
 
   /* log2 transform and create Y vector */
 
-  for (j = 0; j < cols; j++){
-    for (i =0; i < nprobes; i++){
-      Y[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/lg2;
+  for (j = 0; j < data->cols; j++){
+    for (i =0; i < current->nprobes; i++){
+      Y[j*current->nprobes + i] = log(data->PM[j*data->rows + current->cur_rows[i]])/lg2;
     }
   }
 
+  if (model->init_method == 1){
+    /* median polish */
+    probeparam = Calloc(current->nprobes,double);
+    chipparam = Calloc(data->cols,double);
+    median_polishPLM(data->PM,data->rows, data->cols, current->cur_rows, probeparam, chipparam, &constparam, current->nprobes, current->cur_resids); 
+    //   if (model->method == 0){
+    //  for (i =0; i < (current->nprobes-1); i++){
+    //	current->cur_params[i] = probeparam[i];
+    //  }
+    //  for (i = 0; i < data->cols; i++){
+    //	current->cur_params[i+(current->nprobes-1)] = constparam + chipparam[i];
+    //  }
+    // }
+    Free(probeparam);
+    Free(chipparam);
+  } else if (model->init_method ==2){
+    /* fully iterated huber regression */
+    
+    rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(0),1.345,20,0);
 
-  rlm_fit(X,Y, n, p, params, out_resids, weights, PsiFunc(psitype),psi_k);
-  rlm_compute_se(X,Y, n, p, params, out_resids, weights, se_estimates,se_method, PsiFunc(psitype),psi_k);
-
-
-  Free(out_resids);
+  }
+  /* Least Squares */
+  rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);
+  rlm_compute_se(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, current->cur_se_estimates,current->cur_varcov, current->cur_residSE, model->se_method, PsiFunc(model->psi_code),model->psi_k);
+  
   Free(Y);
 }
 
+/*********************************************************************
+ **
+ ** void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,const PLMmodelparam *model, int j, int i)
+ **
+ ** This function should copy the results of the current fit into 
+ ** the appropiate output areas.
+ **
+ ********************************************************************/
 
-void copy_PLM_results(double *cur_params, double *cur_se_estimates, double *out_probeparams, double *out_chipparams, double *out_constparams,double *out_probeSE, double *out_chipSE, double *out_constSE, int rows, int cols, int nchipparams, int nprobes,int nps, int j, int i, int method){
+void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,const PLMmodelparam *model, const outputsettings *store, int j, int i){
 
   int k,l;
+  int offset;
 
-  if (method == 0){
-    if (j == (rows -1)){
-      out_probeparams[j] = 0.0;
-      for (l=0; l < nprobes -1; l++){
-	out_probeparams[j +1 - (nprobes) + l] = cur_params[l];
-	out_probeparams[j]-=cur_params[l];
-	out_probeSE[j +1 - (nprobes) + l] = cur_se_estimates[l];
+  /* depending on what model was fit copy the parameter estimates and standard errors to the appropriate places */
+ 
+  
+  if (model->method == 0){
+    if (j == (data->rows -1)){
+      output->out_probeparams[j] = 0.0;
+      for (l=0; l < current->nprobes -1; l++){
+	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l];
+	output->out_probeparams[j]-=current->cur_params[l];
+	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l];
       }
-      out_probeSE[j] = 0.0/0.0;
+      output->out_probe_SE[j] = 0.0/0.0;
     } else {
-      out_probeparams[j -1] = 0.0;
-      for (l=0; l < nprobes -1; l++){
-	out_probeparams[j - (nprobes) + l] = cur_params[l];
-	out_probeparams[j-1]-=cur_params[l];
-	out_probeSE[j - (nprobes) + l] = cur_se_estimates[l]; 
+      output->out_probeparams[j -1] = 0.0;
+      for (l=0; l < current->nprobes -1; l++){
+	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l];
+	output->out_probeparams[j-1]-=current->cur_params[l];
+	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l]; 
       }
-      out_probeSE[j-1] = 0.0/0.0;
+      output->out_probe_SE[j-1] = 0.0/0.0;
     }
   
-    for (k= 0; k < nchipparams ; k++){
-      out_chipparams[k*nps +i] = cur_params[k+(nprobes-1)];
-      out_chipSE[k*nps +i] = cur_se_estimates[k+(nprobes-1)];
+    for (k= 0; k < model->nchipparams ; k++){
+      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+(current->nprobes-1)];
+      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+(current->nprobes-1)];
     }
-  } else if (method ==1){
+  } else if (model->method ==1){
     /* first element is  constcoef */
     
-    if (j == (rows -1)){
-      out_probeparams[j] = 0.0;
-      for (l=0; l < nprobes -1; l++){
-	out_probeparams[j +1 - (nprobes) + l] = cur_params[l+1];
-	out_probeparams[j]-=cur_params[l+1];
-	out_probeSE[j +1 - (nprobes) + l] = cur_se_estimates[l+1];
+    if (j == (data->rows -1)){
+      output->out_probeparams[j] = 0.0;
+      for (l=0; l < current->nprobes -1; l++){
+	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l+1];
+	output->out_probeparams[j]-=current->cur_params[l+1];
+	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l+1];
       }
-      out_probeSE[j] = 0.0/0.0;
+      output->out_probe_SE[j] = 0.0/0.0;
     } else {
-      out_probeparams[j -1] = 0.0;
-      for (l=0; l < nprobes -1; l++){
-	out_probeparams[j - (nprobes) + l] = cur_params[l+1];
-	out_probeparams[j-1]-=cur_params[l+1];
-	out_probeSE[j - (nprobes) + l] = cur_se_estimates[l+1]; 
+      output->out_probeparams[j -1] = 0.0;
+      for (l=0; l < current->nprobes -1; l++){
+	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l+1];
+	output->out_probeparams[j-1]-=current->cur_params[l+1];
+	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l+1]; 
       }
-      out_probeSE[j-1] = 0.0/0.0;
+      output->out_probe_SE[j-1] = 0.0/0.0;
     }
-    for (k= 0; k < nchipparams ; k++){
-      out_chipparams[k*nps +i] = cur_params[k+(nprobes)];
-      out_chipSE[k*nps +i] = cur_se_estimates[k+(nprobes)];
+    for (k= 0; k < model->nchipparams ; k++){
+      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+(current->nprobes)];
+      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+(current->nprobes)];
     }
-    out_constparams[i] = cur_params[0];
-    out_constSE[i] = cur_se_estimates[0];
-  } else if (method == 20){
-    for (k= 0; k < nchipparams ; k++){
-      out_chipparams[k*nps +i] = cur_params[k];
-      out_chipSE[k*nps +i] = cur_se_estimates[k];
+    output->out_constparams[i] = current->cur_params[0];
+    output->out_const_SE[i] = current->cur_se_estimates[0];
+  } else if (model->method == 20){
+    for (k= 0; k < model->nchipparams ; k++){
+      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k];
+      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k];
     }
-  } else if (method == 21){
-    out_constparams[i] = cur_params[0];
-    out_constSE[i] = cur_se_estimates[0];
-    for (k= 0; k < nchipparams ; k++){
-      out_chipparams[k*nps +i] = cur_params[k+1];
-      out_chipSE[k*nps +i] = cur_se_estimates[k+1];
+  } else if (model->method == 21){
+    output->out_constparams[i] = current->cur_params[0];
+    output->out_const_SE[i] = current->cur_se_estimates[0];
+    for (k= 0; k < model->nchipparams ; k++){
+      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+1];
+      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+1];
     }
-  } else if (method == 10){
+  } else if (model->method == 10){
     
-    if (j == (rows -1)){
-      out_probeparams[j+1-nprobes] = 0.0;
-      for (l=1; l < nprobes; l++){
-	out_probeparams[j +1 - (nprobes) + l] = cur_params[l-1];
-	//out_probeparams[j]-=cur_params[l];
-	out_probeSE[j +1 - (nprobes) + l] = cur_se_estimates[l-1];
+    if (j == (data->rows -1)){
+      output->out_probeparams[j+1-current->nprobes] = 0.0;
+      for (l=1; l < current->nprobes; l++){
+	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l-1];
+	//out_probeparams[j]-=current->cur_params[l];
+	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l-1];
       }
-      out_probeSE[j+1-nprobes] = 0.0;
+      output->out_probe_SE[j+1-current->nprobes] = 0.0;
     } else {
-      out_probeparams[j-nprobes] = 0.0;
-      for (l=1; l < nprobes; l++){
-	out_probeparams[j - (nprobes) + l] = cur_params[l-1];
-	//out_probeparams[j-1]-=cur_params[l];
-	out_probeSE[j - (nprobes) + l] = cur_se_estimates[l-1]; 
+      output->out_probeparams[j-current->nprobes] = 0.0;
+      for (l=1; l < current->nprobes; l++){
+	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l-1];
+	//out_probeparams[j-1]-=current->cur_params[l];
+	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l-1]; 
       }
-      out_probeSE[j-nprobes] = 0.0;
+      output->out_probe_SE[j-current->nprobes] = 0.0;
     }
     
-    for (k= 0; k < nchipparams ; k++){
-      out_chipparams[k*nps +i] = cur_params[k+(nprobes-1)];
-      out_chipSE[k*nps +i] = cur_se_estimates[k+(nprobes-1)];
+    for (k= 0; k < model->nchipparams ; k++){
+      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+(current->nprobes-1)];
+      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+(current->nprobes-1)];
     }
     
     
-  } else if (method == 11){
+  } else if (model->method == 11){
     /* first element is  constcoef */
     
-    if (j == (rows -1)){
-      out_probeparams[j+1-nprobes] = 0.0;
-      for (l=1; l < nprobes; l++){
-	out_probeparams[j +1 - (nprobes) + l] = cur_params[l];
-	//out_probeparams[j]-=cur_params[l+1];
-	out_probeSE[j +1 - (nprobes) + l] = cur_se_estimates[l];
+    if (j == (data->rows -1)){
+      output->out_probeparams[j+1-current->nprobes] = 0.0;
+      for (l=1; l < current->nprobes; l++){
+	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l];
+	//out_probeparams[j]-=current->cur_params[l+1];
+	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l];
       }
-      out_probeSE[j+1-nprobes] = 0.0;
+      output->out_probe_SE[j+1-current->nprobes] = 0.0;
     } else {
-      out_probeparams[j -nprobes] = 0.0;
-      for (l=1; l < nprobes; l++){
-	out_probeparams[j - (nprobes) + l] = cur_params[l];
-	//out_probeparams[j-1]-=cur_params[l+1];
-	out_probeSE[j - (nprobes) + l] = cur_se_estimates[l]; 
+      output->out_probeparams[j -current->nprobes] = 0.0;
+      for (l=1; l < current->nprobes; l++){
+	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l];
+	//out_probeparams[j-1]-=current->cur_params[l+1];
+	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l]; 
       }
-      out_probeSE[j-nprobes] = 0.0;
+      output->out_probe_SE[j-current->nprobes] = 0.0;
     }
-    for (k= 0; k < nchipparams ; k++){
-      out_chipparams[k*nps +i] = cur_params[k+(nprobes)];
-      out_chipSE[k*nps +i] = cur_se_estimates[k+(nprobes)];
+    for (k= 0; k < model->nchipparams ; k++){
+      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+(current->nprobes)];
+      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+(current->nprobes)];
     }
-    out_constparams[i] = cur_params[0];
-    out_constSE[i] = cur_se_estimates[0];
+    output->out_constparams[i] = current->cur_params[0];
+    output->out_const_SE[i] = current->cur_se_estimates[0];
 
   }
-  
-}
 
+
+
+  /* copy out the variance/covariance matrix (or parts thereof) if required */
+
+
+  if (store->varcov){
+    offset = current->p-model->nchipparams;
+    if (store->varcov == 1){
+      /**              0 is no intercept with sum to zero constraint on probe effects.
+       **              1 is intercept with sum to zero contraint on probe effects.
+       **              10 is no intercept with the endpoint constraint on probe effects.
+       **              11 is intercept with the endpoint constraint on probe effects.
+       **              21 will fit model with no probe effects but an intercept
+       **              20 or anything else will yield no probe effect, no intercept  
+       **/
+      for (k = 0; k < model->nchipparams; k++){
+	for (l = 0; l <= k ; l++){
+	  output->out_varcov[i][k*model->nchipparams + l] = current->cur_varcov[(k+offset)*current->p + (l+offset)];
+	  output->out_varcov[i][l*model->nchipparams + k] = output->out_varcov[i][k*model->nchipparams + l];
+	}
+      }
+    } else {
+      error("varcov option all not currently supported");
+      
+    }
+  }
+  
+  /* copy the weights and residuals into output */
+  /* note that we use the values in "store"
+     to determine whether to save what has been returned
+     for everything that follows                       */
+
+
+  
+  
+  if (store->weights){
+    if (j == (data->rows -1)){
+      for(k=0; k < data->cols; k++){
+	for (l=0; l < current->nprobes; l++){
+	  output->out_weights[k*(data->rows) + (j+1 - (current->nprobes) + l)] = current->cur_weights[k*(current->nprobes) + l];
+	}
+	//printf("\n");
+      }
+    } else {
+      for(k=0; k < data->cols; k++){
+	for (l=0; l < current->nprobes; l++){
+	  output->out_weights[k*(data->rows) + (j - (current->nprobes) + l)] = current->cur_weights[k*(current->nprobes) + l];
+	  //printf("%d ",(j - (current->nprobes) + l));
+	  //  printf("% f",current->cur_weights[k*(current->nprobes) + l]);
+	}
+	//printf("\n");
+      }
+    }
+    
+  }
+
+  if (store->residuals){
+    if (j == (data->rows -1)){
+      for(k=0; k < data->cols; k++){
+	for (l=0; l < current->nprobes; l++){
+	  output->out_resids[k*(data->rows) + (j+1 - (current->nprobes) + l)] = current->cur_resids[k*(current->nprobes) + l];
+	}
+      }
+    } else {
+      for(k=0; k < data->cols; k++){
+	for (l=0; l < current->nprobes; l++){
+	  output->out_resids[k*(data->rows) + (j - (current->nprobes) + l)] = current->cur_resids[k*(current->nprobes) + l];
+	}
+      }
+    }
+    
+  }
+
+  if (store->residSE){
+    output->out_residSE[i] = current->cur_residSE[0];
+    output->out_residSE[data->nprobesets+i] = current->n - current->p;
+  }
+}
 
 
 
@@ -454,6 +611,20 @@ void copy_PLM_results(double *cur_params, double *cur_se_estimates, double *out_
 
 
 /********************************************************************************************
+ ** 
+ ** void do_PLMrlm(Datagroup *data,  PLMmodelparam * model, PLMoutput *output, 
+ **                outputsettings *store) 
+ **
+ ** Datagroup *data - the data to which we will be fitting models
+ ** PLMmodelparam *model - information about the model to be fitted
+ ** PLMoutput *output - places to store various model outputs
+ ** outputsettings *store - certain items are optional and won't
+ **                         be stored unless user desired.
+ **
+ **
+ ********************************************************************************************
+ **  ANYTHING BELOW THIS LINE IS OUTDATED AND SHOULD BE IGNORED. IT IS LEFT HERE FOR
+ **  HISTORICAL INTEREST ONLY.
  **
  ** void do_PLMrlm(double *PM, char **ProbeNames, int *rows, int *cols, int nps, int method, 
  **                double *chipcovariates, char **outNames, double *out_weights, double *out_probeparams, 
@@ -482,139 +653,104 @@ void copy_PLM_results(double *cur_params, double *cur_se_estimates, double *out_
  **
  *******************************************************************************************/
 
-
-void do_PLMrlm(double *PM, char **ProbeNames, int *rows, int *cols, int nps, int nchipparams, int method,int se_method, double *chipcovariates, char **outNames, double *out_weights, double *out_probeparams, double *out_chipparams, double *out_constparams,double *out_probeSE, double *out_chipSE, double *out_constSE, int psitype, double psi_k){
- int j = 0;
-  int i = 0;
-  int k = 0,l=0;
-  int n, p=0;
+void do_PLMrlm(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, outputsettings *store){
+  int i = 0,j=0,k=0;
   int size;
   char *first;
   int first_ind;
   int max_nrows = 1000;
-
+  int old_nprobes =0;
+ 
   /* buffers of size 200 should be enough. */
 
-  int *cur_rows=Calloc(max_nrows,int);
-  int nprobes=0;
-  int old_nprobes =0;
+  modelfit *current = malloc(sizeof(modelfit));
 
-  double *cur_weights = Calloc(*cols,double);
-  double *cur_params = Calloc(*cols+100,double);
-  double *cur_se_estimates = Calloc(*cols+100,double);
-  /* double *OLDPM = NULL; */
+  current->cur_rows=Calloc(max_nrows,int);
+  current->cur_weights = Calloc(data->cols,double);
+  current->cur_params = Calloc(data->cols+100,double);
+  current->cur_se_estimates = Calloc(data->cols+100,double);
+  current->cur_resids = Calloc(data->cols,double);
+  current->X = Calloc(10,double);
+  current->p = 0;
+  current->nprobes = 0;
+  current->n = 0;
+  current->cur_residSE = Calloc(2,double);
+  current->cur_varcov = Calloc(4,double);
 
-  double *X = Calloc(10,double);
-
-  first = ProbeNames[0];
+  first = data->ProbeNames[0];
   first_ind = 0;
   i =0;
-  nprobes = 1;
-  for (j = 1; j < *rows; j++){
-    if ((strcmp(first,ProbeNames[j]) != 0) | (j == (*rows -1))){
-      if (j == (*rows -1)){
-        nprobes++;
-        for (k = 0; k < nprobes; k++){
+  current->nprobes = 1;
+  for (j = 1; j < data->rows; j++){
+    if ((strcmp(first,data->ProbeNames[j]) != 0) | (j == (data->rows -1))){
+      if (j == (data->rows -1)){
+        current->nprobes++;
+        for (k = 0; k < current->nprobes; k++){
 	  if (k >= max_nrows){
 	    max_nrows = 2*max_nrows;
-	    cur_rows = Realloc(cur_rows, max_nrows, int);
+	    current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
 	  }
-          cur_rows[k] = (j+1 - nprobes)+k;
+          current->cur_rows[k] = (j+1 - current->nprobes)+k;
         }
       } else {
-        for (k = 0; k < nprobes; k++){
+        for (k = 0; k < current->nprobes; k++){
 	  if (k >= max_nrows){
 	    max_nrows = 2*max_nrows;
-	    cur_rows = Realloc(cur_rows, max_nrows, int);
+	    current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
 	  }
-          cur_rows[k] = (j - nprobes)+k;
+          current->cur_rows[k] = (j - current->nprobes)+k;
 	}
       }
 
       /* Check last number of probes and only Realloc when needed */
-      if (old_nprobes != nprobes){
-	n = nprobes*(*cols);
-	if (method % 10 == 1){
-	  if (method == 21){
-	    p = nchipparams+1;
+      if (old_nprobes != current->nprobes){
+	current->n = current->nprobes*(data->cols);
+	if (model->method % 10 == 1){
+	  if (model->method == 21){
+	    current->p = model->nchipparams+1;
 	  } else {
-	    p = nprobes + nchipparams;
+	    current->p = current->nprobes + model->nchipparams;
 	  }
 	} else {
-	  if (method == 20){
-	    p = nchipparams;
+	  if (model->method == 20){
+	    current->p = model->nchipparams;
 	  } else {
-	    p = nprobes + nchipparams-1;
+	    current->p = current->nprobes + model->nchipparams-1;
 	  }
 	} 
-	cur_weights = Realloc(cur_weights,n,double);
-	cur_params  = Realloc(cur_params,p,double);
-	cur_se_estimates  = Realloc(cur_se_estimates,p,double);
-	X = Realloc(X,n*p,double);
-	rlm_design_matrix_realloc(X, nprobes, *cols, p, chipcovariates, method);
-	old_nprobes = nprobes;
+	current->cur_weights = Realloc(current->cur_weights,current->n,double);
+	current->cur_resids = Realloc(current->cur_resids,current->n,double);
+	current->cur_params  = Realloc(current->cur_params,current->p,double);
+	current->cur_se_estimates  = Realloc(current->cur_se_estimates,current->p,double);
+	current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
+	current->X = Realloc(current->X,current->n*current->p,double);
+	rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+	old_nprobes = current->nprobes;
       }
 
 
-      rlm_PLM_block(PM, *rows, *cols, cur_rows, p, X , cur_weights, cur_params, cur_se_estimates, nprobes, method,se_method,psitype,psi_k);
+      rlm_PLM_block(data, model, current);      
+      copy_PLM_results(current, output, data, model, store, j,i);
       
-      copy_PLM_results(cur_params, cur_se_estimates, out_probeparams, out_chipparams, out_constparams, out_probeSE, out_chipSE, out_constSE, *rows, *cols, nchipparams, nprobes, nps,j,i,method);
-      
-      /*      if (j == (*rows -1)){
-	out_probeparams[j] = 0.0;
-	for (l=0; l < nprobes -1; l++){
-	  out_probeparams[j +1 - (nprobes) + l] = cur_params[l];
-	  out_probeparams[j]-=cur_params[l];
-	  out_probeSE[j +1 - (nprobes) + l] = cur_se_estimates[l];
-	}
-	out_probeSE[j] = 0.0/0.0;
-      } else {
-	out_probeparams[j -1] = 0.0;
-	for (l=0; l < nprobes -1; l++){
-	  out_probeparams[j - (nprobes) + l] = cur_params[l];
-	  out_probeparams[j-1]-=cur_params[l];
-	  out_probeSE[j - (nprobes) + l] = cur_se_estimates[l]; 
-	}
-	out_probeSE[j-1] = 0.0/0.0;
-      }
-	
-      for (k= 0; k < nchipparams ; k++){
-	  out_chipparams[k*nps +i] = cur_params[k+(nprobes-1)];
-	  out_chipSE[k*nps +i] = cur_se_estimates[k+(nprobes-1)];
-	  } */
-      
-      if (j == (*rows -1)){
-	for(k=0; k < *cols; k++){
-	  for (l=0; l < nprobes; l++){
-	    out_weights[k*(*rows) + (j+1 - (nprobes) + l)] = cur_weights[k*(nprobes) + l];
-	  }
-	  //printf("\n");
-	}
-      } else {
-	for(k=0; k < *cols; k++){
-	  for (l=0; l < nprobes; l++){
-	    out_weights[k*(*rows) + (j - (nprobes) + l)] = cur_weights[k*(nprobes) + l];
-	    //printf("%d ",(j - (nprobes) + l));
-	    //  printf("% f",cur_weights[k*(nprobes) + l]);
-	  }
-	  //printf("\n");
-	}
-      }
-      
+    
       size = strlen(first);
-      outNames[i] = Calloc(size+1,char);
-      strcpy(outNames[i],first);
+      output->outnames[i] = Calloc(size+1,char);
+      strcpy(output->outnames[i],first);  
       i++;
-      first = ProbeNames[j];
+      first = data->ProbeNames[j];
       first_ind = j;
-      nprobes = 0;
+      current->nprobes = 0;
     }
-    nprobes++;
+    current->nprobes++;
   }
 
-  Free(X);
-  Free(cur_se_estimates);
-  Free(cur_params);
-  Free(cur_weights);
-  Free(cur_rows);
+
+  Free(current->X);
+  Free(current->cur_varcov);
+  Free(current->cur_resids);
+  Free(current->cur_se_estimates);
+  Free(current->cur_params);
+  Free(current->cur_weights);
+  Free(current->cur_rows);
+  free(current);
 }

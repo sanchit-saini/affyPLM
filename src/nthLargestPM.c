@@ -19,7 +19,8 @@
  ** some point this will be generalized. If there is anly one PM
  ** in a probeset then that will be returned
  **
- ** Feb 6, 2002 - Initial version of this summarization method
+ ** Feb 6, 2003 - Initial version of this summarization method
+ ** Oct 5, 2003 - added summary_param
  **
  ************************************************************************/
 
@@ -87,7 +88,7 @@ double LogNthLargest(double *x, int length,int n){
  **
  ***************************************************************************/
 
-void LogNthLargestPM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE){
+void LogNthLargestPM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
   int i,j;
   double *z = Calloc(nprobes*cols,double);
 
@@ -101,5 +102,32 @@ void LogNthLargestPM(double *data, int rows, int cols, int *cur_rows, double *re
     results[j] = LogNthLargest(&z[j*nprobes],nprobes,2);
     resultsSE[j] = R_NaReal;
   }
+  Free(z);
+}
+
+
+
+
+void LogNthLargestPM_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
+  int i,j;
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = data[j*rows + cur_rows[i]];  
+    }
+  } 
+  
+  for (j=0; j < cols; j++){
+    results[j] = LogNthLargest(&z[j*nprobes],nprobes,2);
+    resultsSE[j] = R_NaReal;
+  }
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      residuals[j*nprobes + i] = log(z[j*nprobes + i])/log(2.0)  - results[j];  
+    }
+  } 
+  
   Free(z);
 }

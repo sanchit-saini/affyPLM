@@ -23,7 +23,7 @@
  ** Jan 7, 2003 - make the code a standalone file, data structure manipulation will be handled 
  **               elsewhere.
  ** Jul 23, 2003 - SE parameter added and implemented
- **
+ ** Oct 10, 2003 - added in PLM version
  **
  ************************************************************************/
 
@@ -203,7 +203,7 @@ double Tukey_Biweight_SE(double *x,double BW, int length){
  **
  ***********************************************************************************/ 
 
-void tukeybiweight(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE){
+void tukeybiweight(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
   int i,j;
   double *z = Calloc(nprobes*cols,double);
 
@@ -220,3 +220,30 @@ void tukeybiweight(double *data, int rows, int cols, int *cur_rows, double *resu
   Free(z);
 }
 
+
+void tukeybiweight_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
+  int i,j;
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
+    }
+  } 
+  
+  for (j=0; j < cols; j++){
+    results[j] = Tukey_Biweight(&z[j*nprobes],nprobes);
+    resultsSE[j] = Tukey_Biweight_SE(&z[j*nprobes],results[j],nprobes);
+  }
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      residuals[j*nprobes + i] = z[j*nprobes + i] - results[j];  
+    }
+  } 
+  
+
+
+
+  Free(z);
+}

@@ -58,6 +58,13 @@
  **                will be a requirement for AffyExtensions 0.5-1 and later
  ** Jun 11, 2003 - Modify Standard error routines to handle different psi_fns.
  ** Jul 23, 2003 - remove the warning about moduleCdynload by including appropriate header file
+ ** Sep 06, 2003 - now we return the whole variance covariance matrix and residual SE with appropriate
+ **                DF
+ ** Sep 07, 2003 - variance matrix from method == 4 now returned
+ ** Sep 08, 2003 - variance matrix from method == 1, 2, 3 returned
+ ** Sep 13, 2003 - copy only upper triangle of variance matrix into output.
+ **                Also if the variance matrix is the NULL pointer don't store anything
+ **                at all.
  **                
  ********************************************************************/
 
@@ -475,8 +482,8 @@ void R_SVD_inverse(double *X, double *Xinv, int *n){
  ************************************************************************/
 
 
-void RLM_SE_Method_1(double residvar, double *XTX, int p, double *se_estimates){
-  int i;
+void RLM_SE_Method_1(double residvar, double *XTX, int p, double *se_estimates,double *varcov){
+  int i,j;
   double *XTXinv = Calloc(p*p,double);
   double *work = Calloc(p*p,double);
 
@@ -487,6 +494,15 @@ void RLM_SE_Method_1(double residvar, double *XTX, int p, double *se_estimates){
   } else {
     printf("Singular matrix in SE inverse calculation");    
   }    
+
+
+  if (varcov != NULL)
+    for (i =0; i < p; i++){
+      for (j = i; j < p; j++){
+	varcov[j*p +i]= residvar*XTXinv[j*p +i];
+      }
+    }
+  
   Free(work);
   Free(XTXinv);
 }
@@ -510,8 +526,8 @@ void RLM_SE_Method_1(double residvar, double *XTX, int p, double *se_estimates){
  **
  ************************************************************************/
 
-void RLM_SE_Method_2(double residvar, double *W, int p, double *se_estimates){
-  int i; /* l,k; */
+void RLM_SE_Method_2(double residvar, double *W, int p, double *se_estimates,double *varcov){
+  int i,j; /* l,k; */
   double *Winv = Calloc(p*p,double);
   double *work = Calloc(p*p,double);
 
@@ -528,6 +544,15 @@ void RLM_SE_Method_2(double residvar, double *W, int p, double *se_estimates){
       /* printf("%f ", se_estimates[i]); */
     }
   }
+
+  if (varcov != NULL)
+    for (i =0; i < p; i++){
+      for (j = i; j < p; j++){
+	varcov[j*p +i]= residvar*Winv[j*p +i];
+      }
+    }
+  
+  
   Free(work);
   Free(Winv);
 
@@ -551,7 +576,7 @@ void RLM_SE_Method_2(double residvar, double *W, int p, double *se_estimates){
  **
  ************************************************************************/
 
-int RLM_SE_Method_3(double residvar, double *XTX, double *W, int p, double *se_estimates){
+int RLM_SE_Method_3(double residvar, double *XTX, double *W, int p, double *se_estimates,double *varcov){
   int i,j,k;   /* l; */
   int rv;
 
@@ -604,7 +629,12 @@ int RLM_SE_Method_3(double residvar, double *XTX, double *W, int p, double *se_e
    }
    
    rv = 0;
-   
+   if (varcov != NULL)
+     for (i =0; i < p; i++){
+       for (j = i; j < p; j++){
+	 varcov[j*p +i]= residvar*W[j*p +i];
+       }
+   }
   
   Free(work);
   Free(Winv);
@@ -654,8 +684,8 @@ int RLM_SE_Method_3(double residvar, double *XTX, double *W, int p, double *se_e
  *********************************************************************/
 
 
-void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *resids,double *weights,double *se_estimates, int method,double (* PsiFn)(double, double, int), double psi_k){
-
+void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *resids,double *weights,double *se_estimates, double *varcov, double *residSE, int method,double (* PsiFn)(double, double, int), double psi_k){
+  
   int i,j,k; /* counter/indexing variables */
   double k1 = psi_k;   /*  was 1.345; */
   double sumpsi2=0.0;  /* sum of psi(r_i)^2 */
@@ -679,6 +709,9 @@ void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *res
     }
     
     RMSEw = sqrt(RMSEw/(double)(n-p));
+
+    residSE[0] =  RMSEw;
+
     for (j =0; j < p;j++){
       for (k=0; k < p; k++){
 	W[k*p + j] = 0.0;
@@ -696,9 +729,17 @@ void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *res
       printf("Singular matrix in SE inverse: Method 4\n");
       
     }
+
+
+    if (varcov != NULL)
+      for (i = 0; i < p; i++)
+	for (j = i; j < p; j++)
+	  varcov[j*p + i] =  RMSEw*RMSEw*XTX[j*p + i];
   } else {
 
     scale = med_abs(resids,n)/0.6745;
+    
+    residSE[0] =  scale;
     
     /* compute most of what we will need to do each of the different standard error methods */
     for (i =0; i < n; i++){
@@ -725,17 +766,17 @@ void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *res
       Kappa = Kappa*Kappa;
       vs = scale*scale*sumpsi2/(double)(n-p);
       Kappa = Kappa*vs/(m*m);
-      RLM_SE_Method_1(Kappa, XTX, p, se_estimates);
+      RLM_SE_Method_1(Kappa, XTX, p, se_estimates,varcov);
     } else if (method==2){
       vs = scale*scale*sumpsi2/(double)(n-p);
       Kappa = Kappa*vs/m;
-      RLM_SE_Method_2(Kappa, W, p, se_estimates);
+      RLM_SE_Method_2(Kappa, W, p, se_estimates,varcov);
       
     } else if (method==3){
       
       vs = scale*scale*sumpsi2/(double)(n-p);
       Kappa = 1.0/Kappa*vs;
-      i = RLM_SE_Method_3(Kappa, XTX, W, p, se_estimates);
+      i = RLM_SE_Method_3(Kappa, XTX, W, p, se_estimates,varcov);
       if (i){
 	for (i=0; i <n; i++){
 	  printf("%2.1f ", PsiFn(resids[i]/scale,k1,1));

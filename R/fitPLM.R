@@ -65,15 +65,25 @@
 ## ** Andrews Sine - K = 1.339
 ##          the other methods have no tuning parameter so set to 1.
 ## Jul 27 - Clean up parameters passed to function
-## Sep 12 - Fix up applying constraint when variables are defined in
-##          parent enivronment rather than in pData slot.
-## Oct 7  - Some codetools warnings fixed.
+## Sep 2  - Residuals are now stored in the outputed PLMset
+## Sep 4  - may toggle what is actually outputed
+##          in particular in respect to weights, residuals
+##          var.cov and resid.SE
+## Sep6 - Sept 8  -  More changes to how naming is done.
+## Sep 12 - Fix how constraints are applied when factor variable
+##          is defined in parent enivronment. Basically the constraint
+##          was being ignored. Note that this fix was also applied to
+##          the 0.5-14 Series package.
+## Sep 12 - model.param was introduced as argument
+##          se.type, psi.type, psi.k were placed into
+##          this parameter
+## Oct 10 - fix spelling of McClure
 ##
 ###########################################################
 
-fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",se.type=4,psi.type="Huber",psi.k=NULL,background.param=list(),normalize.param=list()){
-
+fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=list(),model.param=list()){
   
+ 
   get.background.code <- function(name) {
     background.names <- c("RMA.1", "RMA.2", "IdealMM","MAS","MASIM","LESN2","LESN1","LESN0")
     if (!is.element(name, background.names)) {
@@ -95,7 +105,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   }
 
   get.psi.code <- function(name){
-    psi.names <- c("Huber","fair","Cauchy","Geman-Mclure","Welsch","Tukey","Andrews")
+    psi.names <- c("Huber","fair","Cauchy","Geman-McClure","Welsch","Tukey","Andrews")
      if (!is.element(name, psi.names)) {
       stop(paste(name, "is not a valid Psi type. Please use one of:",
                  "Huber","fair","Cauchy","Geman-Mclure","Welsch","Tukey","Andrews"))
@@ -423,7 +433,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
               if (!mt.intercept){
                 trt.effect <- model.matrix(~ -1+ as.factor(trt.values))
               } else {
-                trt.effect <- model.matrix(~  C(as.factor(trt.values),ct[trt]))[,-1]
+                trt.effect <- model.matrix(~ C(as.factor(trt.values),ct[trt]))[,-1]
               }
             } else {
               trt.effect <- model.matrix(~ C(as.factor(trt.values),ct[trt]))[,-1]
@@ -488,8 +498,8 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   #cat("Method is ",model.type,"\n")
   # now add other variables onto chip.covariates matrix
 
-##  rows <- length(probeNames(object))
-##  cols <- length(object)
+  rows <- length(probeNames(object))
+  cols <- length(object)
   ngenes <- length(geneNames(object))
   
   # background correction for RMA type backgrounds
@@ -511,16 +521,31 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   n.param <- list(scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
   n.param[names(normalize.param)] <- normalize.param
 
-    
-  if (is.null(psi.k)){
-    psi.k <- get.default.psi.k(psi.type)
+
+  op.param <- list(weights=TRUE,residuals=TRUE,varcov=c("none","chiplevel","all"),resid.SE=TRUE)
+  op.param[names(output.param)] <- output.param
+
+  op.param$varcov <- match.arg(op.param$varcov,c("none","chiplevel","all"))
+
+  
+  md.param <- list(se.type=4,psi.type="Huber",psi.k=NULL,max.its=20,init.method="ls")
+  md.param[names(model.param)] <- model.param
+
+ 
+  
+  
+  if (is.null(md.param$psi.k)){
+    md.param$psi.k <- get.default.psi.k(md.param$psi.type)
   }
-    
+  
+  md.param$psi.type <- get.psi.code(md.param$psi.type)
+
+  
   
   # lets do the actual model fitting
   fit.results <- .Call("R_rlmPLMset_c",pm(object),mm(object),probeNames(object),
         ngenes, normalize, background,
-        get.background.code(background.method), get.normalization.code(normalize.method),model.type, se.type,chip.covariates, get.psi.code(psi.type),psi.k,b.param,n.param)
+        get.background.code(background.method), get.normalization.code(normalize.method),model.type,chip.covariates,b.param,n.param,op.param,md.param)
   
 
   
@@ -542,8 +567,39 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   #cat(chip.param.names,"\n")
   #colnames(fit.results[[1]]) <- sampleNames(object)
   colnames(fit.results[[1]]) <- chip.param.names
-  colnames(fit.results[[3]]) <- sampleNames(object)
-  rownames(fit.results[[3]]) <- probenames
+  if (op.param$weights){
+    colnames(fit.results[[3]]) <- sampleNames(object)
+    rownames(fit.results[[3]]) <- probenames
+  }
+
+  if (op.param$residuals){
+   colnames(fit.results[[8]]) <- sampleNames(object)
+   rownames(fit.results[[8]]) <- probenames 
+  }
+
+  if (op.param$resid.SE){
+     colnames(fit.results[[9]]) <- c("residSE","df")
+     rownames(fit.results[[9]]) <- rownames(fit.results[[1]])
+  }
+
+
+  if (op.param$varcov != "none"){
+    names(fit.results[[10]]) <- rownames(fit.results[[1]])
+
+    if (op.param$varcov == "chiplevel"){
+      tmp.colnames <- colnames(fit.results[[1]])
+
+      name.matrix <- function(x,names){
+        colnames(x) <- names
+        rownames(x) <- names
+        x
+      }
+      fit.results[[10]] <- lapply(fit.results[[10]],name.matrix,tmp.colnames) 
+    }
+  }
+  
+
+  
   colnames(fit.results[[2]]) <- "ProbeEffects"
   rownames(fit.results[[2]]) <- probenames
   colnames(fit.results[[5]]) <- "SEProbeEffects"
@@ -571,8 +627,27 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   annotation <- annotation(object)
   description <- description(object)
   notes <- notes(object)
+
   
-  
-  new("PLMset",chip.coefs=fit.results[[1]],probe.coefs= fit.results[[2]],weights=fit.results[[3]],se.chip.coefs=fit.results[[4]],se.probe.coefs=fit.results[[5]],exprs=fit.results[[6]],se.exprs=fit.results[[7]],phenoData = phenodata, annotation = annotation, description = description, notes = notes,cdfName=object@cdfName,nrow=object@nrow,ncol=object@ncol)
+  x <- new("PLMset")
+  x@chip.coefs=fit.results[[1]]
+  x@probe.coefs= fit.results[[2]]
+  x@weights=fit.results[[3]]
+  x@se.chip.coefs=fit.results[[4]]
+  x@se.probe.coefs=fit.results[[5]]
+  x@exprs=fit.results[[6]]
+  x@se.exprs=fit.results[[7]]
+  x@residuals=fit.results[[8]]
+  x@residualSE=fit.results[[9]]
+  x@varcov = fit.results[[10]]
+  x@phenoData = phenodata
+  x@annotation = annotation
+  x@description = description
+  x@notes = notes
+  x@cdfName=object@cdfName
+  x@nrow=object@nrow
+  x@ncol=object@ncol
+  x@model.description = list(which.function="rmaPLM",preprocessing=list(bg.method=background.method,bg.param=b.param,background=background,norm.method=normalize.method,norm.param=n.param,normalize=normalize),modelsettings =list(model.param=md.param,summary.method=NULL,model=model,constraint.type=constraint.type,variable.type=variable.type),outputsettings=op.param)
+  x
 }
 

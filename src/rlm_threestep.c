@@ -23,6 +23,10 @@
  ** Jun 4, 2003  - add new parameter to rlm_fit call.
  ** Jul 23, 2003 - SE parameter added for threestep call (and implemented)
  **                commented out model_matrix_test
+ ** Sep 13, 2003 - altered call to rlm_compute_se to reflect new structure
+ ** Oct 5, 2003 - added summary_param, allow the user set parameters to control
+ **               tuning constant, and M estimation function
+ ** Oct 10, 2003 - a PLM threestep version added.
  **
  ********************************************************************/
 
@@ -66,7 +70,7 @@
  **
  **********************************************************************/
 
-void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE){
+void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
 
   int i, j, row,curcol;
   
@@ -79,6 +83,8 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
   double *out_se_estimates=Calloc(p,double);
   double *out_resids=Calloc(n,double);
   double *out_weights=Calloc(n,double);
+  double *residSE = Calloc(2,double);
+
 
   /* log2 transform and create Y vector */
  
@@ -115,8 +121,8 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
     
   }
 
-  rlm_fit(X,Y, n, p, out_beta, out_resids, out_weights,PsiFunc(0),1.345);
-  rlm_compute_se(X,Y, n, p, out_beta, out_resids, out_weights, out_se_estimates,1, PsiFunc(0),1.345);
+  rlm_fit(X,Y, n, p, out_beta, out_resids, out_weights,PsiFunc(summary_param->psi_method),summary_param->psi_k,20,0);
+  rlm_compute_se(X,Y, n, p, out_beta, out_resids, out_weights, out_se_estimates,NULL, residSE, 1, PsiFunc(summary_param->psi_method),summary_param->psi_k);
   
 
   for (i=0; i< cols; i++){
@@ -130,12 +136,82 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
   Free(out_beta);
   Free(out_resids);
   Free(out_weights);
+  Free(residSE);
   Free(X);
   Free(Y);
 }
 
 
+void rlm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
 
+  int i, j, row,curcol;
+  
+  int n = (nprobes*cols);
+  int p = (cols+(nprobes-1));
+  
+  double *Y = Calloc(n,double);
+  double *X = Calloc(n*p,double);
+  double *out_beta=Calloc(p,double);
+  double *out_se_estimates=Calloc(p,double);
+  //  double *out_resids=Calloc(n,double);
+  double *out_weights=Calloc(n,double);
+  double *residSE = Calloc(2,double);
+
+
+  /* log2 transform and create Y vector */
+ 
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      Y[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);
+    }
+  }
+
+  /* 
+     now make an X matrix. First columns for probe effect then chip effect columns 
+     Calloc puts everything to zero, so need change only non zero elements.
+     
+  */
+  
+  for (row =0; row < nprobes*cols; row++){
+    curcol = row%nprobes;
+    
+    if (curcol == nprobes -1){
+      for (j=0; j < (nprobes-1); j++){
+	X[j*n + row] = -1.0;
+      }
+    } else {
+      X[curcol*n + row] = 1.0;
+    }
+  }
+
+  /* now do chip effects */
+
+  for (row =0; row < nprobes*cols; row++){
+    curcol = row/nprobes;         /*integer division */
+    
+    X[(curcol+(nprobes-1))*n + row] = 1.0;
+    
+  }
+
+  rlm_fit(X,Y, n, p, out_beta, residuals, out_weights,PsiFunc(summary_param->psi_method),summary_param->psi_k,20,0);
+  rlm_compute_se(X,Y, n, p, out_beta, residuals, out_weights, out_se_estimates,NULL, residSE, 1, PsiFunc(summary_param->psi_method),summary_param->psi_k);
+  
+
+  for (i=0; i< cols; i++){
+    results[i] = out_beta[i+ (nprobes-1)];
+    resultsSE[i] = out_se_estimates[i+ (nprobes-1)];
+  }
+
+
+
+  Free(out_se_estimates);
+  Free(out_beta);
+  //  Free(out_resids);
+  Free(out_weights);
+  Free(residSE);
+  Free(X);
+  Free(Y);
+}
 
 
 

@@ -32,6 +32,7 @@
  **                also have added .Call() interface c functions which may be called
  **                now from R as alterative to traditonal means.
  **                Fixed a bug where use_median was not being dereferenced in "robust method"
+ ** Oct 7, 2003 - fix a bug with length is qnorm_robust
  **
  ***********************************************************/
 
@@ -249,7 +250,7 @@ void qnorm_c(double *data, int *rows, int *cols){
 
 void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use_median, int *use_log2){
   int i,j,ind;
-  int half, length;
+  int half,length;
   dataitem **dimat;
   double sum,sumweights;
   double *row_mean = malloc((*rows)*sizeof(double));

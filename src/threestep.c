@@ -12,7 +12,7 @@
  **
  ** last modified: January 17, 2003
  **
- ** License: GPL V2 or later (same as the rest of the Affy package)
+ ** License: GPL V2 or later
  **
  ** 
  ** Specific Modification History
@@ -28,6 +28,7 @@
  ** Jul 23, 2003 - added a little more documentation, standard errors from
  **                threestep. eliminate the copy step. It is not
  **                required under the current setup.
+ ** Oct 5, 2003 - SEXP summary_parameters added
  **
  ************************************************************************/
 
@@ -69,7 +70,7 @@
  **
  *******************************************************************************************/
 
-SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP summary_type){
+SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP summary_type, SEXP summary_parameters){
   
   int rows, cols;
   double *outexpr, *outSE;
@@ -79,9 +80,13 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   int i,nprobesets;
   int Method;
 
+  summary_plist *summary_param = malloc(sizeof(summary_plist));
+
   SEXP dim1;
   SEXP outvec, outSEvec, output_list;        /*outnamesvec */
   SEXP dimnames,names;
+  SEXP cur_param;
+
   
   /*
   pt2Summary funcArr[3];
@@ -115,8 +120,15 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   Method = asInteger(summary_type)-1;
   /*printf("%d ",asInteger(summary_type));*/
 
+  cur_param =  GetParameter(summary_parameters, "psi.k");
+  summary_param->psi_k = NUMERIC_POINTER(cur_param)[0];
+  
+  cur_param =  GetParameter(summary_parameters, "psi.type");
+  summary_param->psi_method = asInteger(cur_param);
+
+
   Rprintf("Calculating Expression\n");
-  do_3summary(PM, ProbeNames, &rows, &cols,outexpr,outnames,nprobesets,SummaryMethod(Method),outSE);
+  do_3summary(PM, ProbeNames, &rows, &cols,outexpr,outnames,nprobesets,SummaryMethod(Method),outSE,summary_param);
   UNPROTECT(3);
 
   /* now lets put names on the matrix */
@@ -134,6 +146,8 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   SET_VECTOR_ELT(output_list,0,outvec);
   SET_VECTOR_ELT(output_list,1,outSEvec);
   UNPROTECT(1);
+
+  free(summary_param);
   return output_list;
 } 
 
@@ -156,7 +170,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
  *******************************************************************************************/
 
 
-SEXP R_threestep_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP summary_type,SEXP background_parameters,SEXP norm_parameters){
+SEXP R_threestep_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP summary_type,SEXP background_parameters,SEXP norm_parameters, SEXP summary_parameters){
   
   SEXP dim1,PMcopy,exprs;
   int rows,cols;
@@ -187,7 +201,7 @@ SEXP R_threestep_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
   }
 
   /* Do Summarization */  
-  exprs = threestep_summary(PMcopy, MMmat, ProbeNamesVec,N_probes,summary_type);
+  exprs = threestep_summary(PMcopy, MMmat, ProbeNamesVec,N_probes,summary_type,summary_parameters);
   UNPROTECT(1);
   return exprs;
   

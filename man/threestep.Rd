@@ -7,7 +7,7 @@
  a three step expression measure.
 }
 \usage{
-threestep(object,subset=NULL, verbose=TRUE, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list())
+threestep(object,subset=NULL, verbose=TRUE, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),summary.param=list())
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -24,7 +24,8 @@ threestep(object,subset=NULL, verbose=TRUE, normalize=TRUE,background=TRUE,backg
   \item{summary.method}{name of summary method to use.}
   \item{background.param}{list of parameters for background correction methods}
   \item{normalize.param}{list of parameters for normalization methods}
-    
+  \item{summary.param}{list of parameters for summary methods}
+	    
 }
 \details{
   This function computes the expression measure using threestep methods.

@@ -20,11 +20,15 @@
  ** Jan 13, 2003 - move median() into threestep_common.c
  ** Feb 24, 2003 - make maxiter get used.
  ** Jul 23, 2003 - add ability to accept SE parameter
+ ** Sept 13, 2003 - introduced medianpolishPLM which returns 
+ **                 most of what is required by the fitting
+ **                 algorithm
+ ** Oct 05, 2003 - added in summary_param
  **
  ************************************************************************/
 
 
-//#include "rma_structures.h"
+#include "medianpolish.h"
 #include "rma_common.h"
 #include "threestep_common.h"
 
@@ -252,7 +256,7 @@ void cmod(double *c, double *cdelta, int cols){
  **
  *************************************************************************************/
 
-void median_polish(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE){
+void median_polish(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
 
   int i,j,iter;
   int maxiter = 10;
@@ -308,3 +312,146 @@ void median_polish(double *data, int rows, int cols, int *cur_rows, double *resu
   Free(c);
   Free(z); 
 }
+
+void median_polishPLM(double *data, int rows, int cols, int *cur_rows, double *probe_param, double *chip_param, double *intercept_param, int nprobes, double *residuals){
+
+  int i,j,iter;
+  int maxiter = 10;
+  double eps=0.01;
+  double oldsum = 0.0,newsum = 0.0;
+  double t = 0.0;
+  double delta;
+  double *rdelta = Calloc(nprobes,double);
+  double *cdelta = Calloc(cols,double);
+  
+  double *r = Calloc(nprobes,double);
+  double *c = Calloc(cols,double);
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
+    }
+  } 
+  
+  
+  for (iter = 1; iter <= maxiter; iter++){
+    get_row_median(z,rdelta,nprobes,cols);
+    subtract_by_row(z,rdelta,nprobes,cols);
+    rmod(r,rdelta,nprobes);
+    delta = median(c,cols);
+    for (j = 0; j < cols; j++){
+      c[j] = c[j] - delta;
+    }
+    t = t + delta;
+    get_col_median(z,cdelta,nprobes,cols);
+    subtract_by_col(z,cdelta,nprobes,cols);
+    cmod(c,cdelta,cols);
+    delta = median(r,nprobes);
+    for (i =0; i < nprobes; i ++){
+      r[i] = r[i] - delta;
+    }
+    t = t+delta;
+    newsum = sum_abs(z,nprobes,cols);
+    if (newsum == 0.0 || fabs(1.0 - oldsum/newsum) < eps)
+      break;
+    oldsum = newsum;
+  }
+
+  for (i=0; i < nprobes; i++){
+    probe_param[i] = r[i];
+  }
+
+  
+  for (j=0; j < cols; j++){
+    chip_param[j] =  c[j];
+  }
+
+  intercept_param[0] = t;
+
+  for (j =0; j < cols; j++){
+    for (i=0; i < nprobes; i++){
+      residuals[j*nprobes +i] = z[j*nprobes +i];
+    }
+  }
+
+
+  
+  Free(rdelta);
+  Free(cdelta);
+  Free(r);
+  Free(c);
+  Free(z); 
+}
+
+
+
+
+
+void median_polish_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
+
+  int i,j,iter;
+  int maxiter = 10;
+  double eps=0.01;
+  double oldsum = 0.0,newsum = 0.0;
+  double t = 0.0;
+  double delta;
+  double *rdelta = Calloc(nprobes,double);
+  double *cdelta = Calloc(cols,double);
+  
+  double *r = Calloc(nprobes,double);
+  double *c = Calloc(cols,double);
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
+    }
+  } 
+  
+  
+  for (iter = 1; iter <= maxiter; iter++){
+    get_row_median(z,rdelta,nprobes,cols);
+    subtract_by_row(z,rdelta,nprobes,cols);
+    rmod(r,rdelta,nprobes);
+    delta = median(c,cols);
+    for (j = 0; j < cols; j++){
+      c[j] = c[j] - delta;
+    }
+    t = t + delta;
+    get_col_median(z,cdelta,nprobes,cols);
+    subtract_by_col(z,cdelta,nprobes,cols);
+    cmod(c,cdelta,cols);
+    delta = median(r,nprobes);
+    for (i =0; i < nprobes; i ++){
+      r[i] = r[i] - delta;
+    }
+    t = t+delta;
+    newsum = sum_abs(z,nprobes,cols);
+    if (newsum == 0.0 || fabs(1.0 - oldsum/newsum) < eps)
+      break;
+    oldsum = newsum;
+  }
+  
+  for (j=0; j < cols; j++){
+    results[j] =  t + c[j]; 
+    resultsSE[j] = R_NaReal;
+  }
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      residuals[j*nprobes+i] = z[j*nprobes + i];
+    }
+  } 
+
+
+  
+  Free(rdelta);
+  Free(cdelta);
+  Free(r);
+  Free(c);
+  Free(z); 
+}
+
+
+

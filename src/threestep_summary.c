@@ -28,6 +28,7 @@
  ************************************************************************/
 
 #include "threestep_summary.h"
+#include "threestep_summary_methods.h"
 #include <R.h> 
 #include <Rdefines.h>
 #include <Rmath.h>
@@ -61,7 +62,7 @@
  **
  ************************************************************************************/
 
-void do_3summary(double *PM, char **ProbeNames, int *rows, int *cols, double *results, char **outNames, int nps,void (* SummaryMeth)(double*, int, int, int *,double *, int, double *),double *resultsSE){
+void do_3summary(double *PM, char **ProbeNames, int *rows, int *cols, double *results, char **outNames, int nps,void (* SummaryMeth)(double*, int, int, int *,double *, int, double *, summary_plist *),double *resultsSE, summary_plist *summary_param){
   int j = 0;
   int i = 0;
   int k = 0;
@@ -102,7 +103,7 @@ void do_3summary(double *PM, char **ProbeNames, int *rows, int *cols, double *re
 	  cur_rows[k] = (j - nprobes)+k; 
 	}
       }
-      SummaryMeth(PM, *rows, *cols, cur_rows, cur_exprs, nprobes,cur_se);
+      SummaryMeth(PM, *rows, *cols, cur_rows, cur_exprs, nprobes,cur_se,summary_param);
 
       for (k =0; k < *cols; k++){
 	results[k*nps + i] = cur_exprs[k];

@@ -20,9 +20,12 @@
  ** Jan 7, 2003 - Make function standalone, to prepare for later combination into
  **               a more general framework.
  ** Jul 23, 2003 - add parameter for computing SE and SE implemented
+ ** Oct 5, 2003 - add output_param
+ ** Oct 10, 2003 - added threestepPLM version of this summary.
  **
  ************************************************************************/
 
+#include "avg_log.h"
 #include "qnorm.h"
 
 #include <R.h> 
@@ -102,7 +105,7 @@ double AvgLogSE(double *x, double mean, int length){
  **
  ***************************************************************************/
 
-void AverageLog(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE){
+void AverageLog(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
   int i,j;
   double *z = Calloc(nprobes*cols,double);
 
@@ -157,3 +160,33 @@ void AverageLog_noSE(double *data, int rows, int cols, int *cur_rows, double *re
   Free(z);
 }
 
+
+
+
+void AverageLog_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
+  int i,j;
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
+    }
+  } 
+  
+  for (j=0; j < cols; j++){
+    results[j] = AvgLog(&z[j*nprobes],nprobes);
+    resultsSE[j] = AvgLogSE(&z[j*nprobes],results[j],nprobes);
+  }
+
+
+  for (j =0; j < cols; j++){
+    for (i=0; i < nprobes; i++){
+      residuals[j*nprobes + i] = z[j*nprobes + i] - results[j] ;
+    }
+  }
+
+
+
+
+  Free(z);
+}

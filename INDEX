@@ -1,10 +1,18 @@
 bg.correct.LESN         LESN - Low End Signal is Noise Background
                         corrections
+callPA                  Make Presence/Absence call
 fitPLM                  Fit a Probe Level Model to Affymetrix Genechip
                         Data.
 normalize.exprSet       Normalization applied to exprSets
 normalize.quantiles.probeset
                         Quantile Normalization applied to probesets
 normalize.scaling       Scaling normalization
+PLMset2exprSet          Convert a PLMset to an exprSet
 PLMset-class            Class PLMset
+PLM.tstat               Pairwise test statistics from PLM models
+pseudo.coloring         Coloring pseudo chip images
+rmaPLM                  Fit a RMA to Affymetrix Genechip Data as a
+                        PLMset
+threestepPLM            Three Step expression measures returned as a
+                        PLMset
 threestep               Three Step expression measures

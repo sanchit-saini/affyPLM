@@ -18,6 +18,7 @@
  ** Feb 6, 2003 - Initial version of this summarization method
  ** Feb 24, 2003 - remove unused int i from LogMedian()
  ** Jul 23, 2003 - add a parameter for storing SE (not yet implemented)
+ ** Oct 10, 2003 - PLM version of threestep
  **
  ************************************************************************/
 
@@ -87,5 +88,53 @@ void LogMedianPM(double *data, int rows, int cols, int *cur_rows, double *result
     results[j] = LogMedian(&z[j*nprobes],nprobes);
     resultsSE[j] = R_NaReal;
   }
+  Free(z);
+}
+
+
+
+
+void LogMedianPM_threestep(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
+  int i,j;
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = data[j*rows + cur_rows[i]];  
+    }
+  } 
+  
+  for (j=0; j < cols; j++){
+    results[j] = LogMedian(&z[j*nprobes],nprobes);
+    resultsSE[j] = R_NaReal;
+  }
+  Free(z);
+}
+
+
+void LogMedianPM_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
+  int i,j;
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = data[j*rows + cur_rows[i]];  
+    }
+  } 
+  
+  for (j=0; j < cols; j++){
+    results[j] = LogMedian(&z[j*nprobes],nprobes);
+    resultsSE[j] = R_NaReal;
+  }
+
+  
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      residuals[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0) - results[j];  
+    }
+  } 
+    
+
+
   Free(z);
 }

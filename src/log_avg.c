@@ -17,6 +17,7 @@
  **
  ** Feb 6, 2002 - Initial version of this summarization method
  ** Jul 23, 2003 - parameter for storing SE added (not yet implemented)
+ ** Oct 5, 2003 - method of adding parameters.
  **
  ************************************************************************/
 
@@ -94,5 +95,49 @@ void LogAverage(double *data, int rows, int cols, int *cur_rows, double *results
     results[j] = LogAvg(&z[j*nprobes],nprobes);
     resultsSE[j] = R_NaReal;
   }
+  Free(z);
+}
+
+
+void LogAverage_threestep(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
+  int i,j;
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = data[j*rows + cur_rows[i]];  
+    }
+  } 
+  
+  for (j=0; j < cols; j++){
+    results[j] = LogAvg(&z[j*nprobes],nprobes);
+    resultsSE[j] = R_NaReal;
+  }
+  Free(z);
+}
+
+
+void LogAverage_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
+  int i,j;
+  double *z = Calloc(nprobes*cols,double);
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      z[j*nprobes + i] = data[j*rows + cur_rows[i]];  
+    }
+  } 
+  
+  for (j=0; j < cols; j++){
+    results[j] = LogAvg(&z[j*nprobes],nprobes);
+    resultsSE[j] = R_NaReal;
+  }
+
+
+  for (j = 0; j < cols; j++){
+    for (i =0; i < nprobes; i++){
+      residuals[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0) - results[j] ;  
+    }
+  }
+  
   Free(z);
 }
