@@ -9,3 +9,5 @@ Description: A package for fitting Probe Level Models.
 License: GPL version 2 or newer
 URL: http://www.stat.berkeley.edu/users/bolstad/AffyExtensions
 Collate:  LESN.R PLMset.R fitPLM.R normalize.exprSet.R normalize.scaling.R quantile_extensions.R threestep.R PLMSet2exprSet.R rmaPLM.R init_fns.R threestepPLM.R
+ReleaseLevel: devel
+
