@@ -28,7 +28,7 @@
 \alias{show,PLMset-method}
 \alias{boxplot,PLMset-method}
 \alias{getCdfInfo,PLMset-method}
-\alias{indexProbes,PLMset-method}
+\alias{indexProbes,character,PLMset-method}
 
 
 \title{Class PLMset}
@@ -97,7 +97,7 @@ Class \code{"exprSet"}, directly.
     \item{image}{\code{signature(x = "PLMset")}: creates an
       image of the robust linear model fit weights for
       each sample.}
-    \item{indexProbes}{\code{signature(object = "PLMset"), which =
+    \item{indexProbes}{\code{signature(object = "PLMset", which =
 	"character")}: returns a list with locations of the probes in
       each probe  set. The list names defines the probe set
       names. \code{which} can be "pm", "mm", or "both". If "both" then
