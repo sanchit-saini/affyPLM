@@ -967,3 +967,45 @@ setMethod("MAplot",signature("PLMset"),
               }
             }  
           })
+
+
+if (!isGeneric("nuse"))
+  setGeneric("nuse",function(x,...)
+             standardGeneric("nuse"))
+
+
+
+setMethod("nuse",signature(x="PLMset"),
+          function(x,type=c("plot","values"),...){
+           
+
+            compute.nuse <- function(which){
+              nuse <- apply(x@weights[which,],2,sum)
+              1/sqrt(nuse)
+            }
+            
+            
+            type <- match.arg(type)
+            model <- x@model.description$modelsettings$model
+            if (type == "values"){
+              if ((model== (PM ~ -1 + probes + samples)) | (model== (PM ~ -1 + samples+probes))){
+                grp.rma.se1.median <- apply(se(x), 1,median)
+                grp.rma.rel.se1.mtx <- sweep(se(x),1,grp.rma.se1.median,FUN='/')
+                data.frame(grp.rma.rel.se1.mtx)
+              } else {
+                # not the default model try constructing them using weights.
+                which <-indexProbesProcessed(x)
+                ses <- matrix(0,length(which) ,4)
+
+                for (i in 1:length(which))
+                  ses[i,] <- compute.nuse(which[[i]])
+                
+                
+                grp.rma.se1.median <- apply(ses, 1,median)
+                grp.rma.rel.se1.mtx <- sweep(ses,1,grp.rma.se1.median,FUN='/')
+                data.frame(grp.rma.rel.se1.mtx)
+              }
+            } else {
+              boxplot(x)
+            }
+          })

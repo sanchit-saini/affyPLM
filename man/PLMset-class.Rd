@@ -20,6 +20,7 @@
 \alias{indexProbesProcessed}
 \alias{model.description}
 \alias{sampleNames<-}
+\alias{nuse}
 \alias{coefs,PLMset-method}
 \alias{weights<-,PLMset-method}
 \alias{weights,PLMset-method}
@@ -49,6 +50,7 @@
 \alias{summary,PLMset-method}
 \alias{sampleNames<-,PLMset-method}
 \alias{MAplot,PLMset-method}
+\alias{nuse,PLMset-method}
 
 \title{Class PLMset}
 \description{This is a class representation for Probe level Linear
@@ -136,6 +138,7 @@ Class \code{"exprSet"}, directly.
     \item{boxplot}{\code{signature(x = "PLMset")}: Boxplot of Normalized
       Unscaled Standard Errors (NUSE)}
     \item{MAplot}{\code{signature(x = "PLMset")}: MA plots of a PLMset}
+    \item{nuse}{\code{signature(x = "PLMset")}: NUSE values for a PLMset}
  }
 }
 \note{This class is better described in the vignette.}
