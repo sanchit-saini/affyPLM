@@ -1,0 +1,20 @@
+#ifndef THREESTEP_SUMMARY_METHODS_H 
+#define THREESTEP_SUMMARY_METHODS_H 1
+
+#include "medianpolish.h"
+#include "biweight.h"
+#include "avg_log.h"
+#include "rlm_threestep.h"
+#include "log_avg.h"
+#include "medianPM.h"
+#include "median_logPM.h"
+#include "nthLargestPM.h"
+#include "lm_threestep.h"
+
+
+typedef void (*pt2Summary)(double*, int, int, int *,double *, int, double *);
+
+pt2Summary SummaryMethod(int code);
+int threestep_summary_code(char *Name);
+
+#endif

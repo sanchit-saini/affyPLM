@@ -1,0 +1,10 @@
+bg.correct.LESN         LESN - Low End Signal is Noise Background
+                        corrections
+fitPLM                  Fit a Probe Level Model to Affymetrix Genechip
+                        Data.
+normalize.exprSet       Normalization applied to exprSets
+normalize.quantiles.probeset
+                        Quantile Normalization applied to probesets
+normalize.scaling       Scaling normalization
+PLMset-class            Class PLMset
+threestep               Three Step expression measures
