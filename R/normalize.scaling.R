@@ -14,7 +14,7 @@
 
 
 normalize.scaling <- function(X,trim=0.02,baseline=-1){
-  .Call("R_normalize_scaling",X,trim,baseline, PACKAGE="affPLM")
+  .Call("R_normalize_scaling",X,trim,baseline, PACKAGE="affyPLM")
 }
 
 
