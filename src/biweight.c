@@ -24,6 +24,7 @@
  **               elsewhere.
  ** Jul 23, 2003 - SE parameter added and implemented
  ** Oct 10, 2003 - added in PLM version
+ ** Apr 5, 2004 - Change mallocs to Callocs
  **
  ************************************************************************/
 
@@ -75,7 +76,7 @@ double Tukey_Biweight(double *x, int length){
   
   double median;
   int i;
-  double *buffer = (double *)malloc(length*sizeof(double));
+  double *buffer = (double *)Calloc(length,double);
   double c = 5.0;
   double epsilon = 0.0001;
   double S;
@@ -115,7 +116,7 @@ double Tukey_Biweight(double *x, int length){
     sum+= weight_bisquare(buffer[i])*x[i];
     sumw += weight_bisquare(buffer[i]);
   }
-  free(buffer);
+  Free(buffer);
   return(sum/sumw);
 }
 
@@ -137,7 +138,7 @@ double Tukey_Biweight_SE(double *x,double BW, int length){
   
   double median;
   int i;
-  double *buffer = (double *)malloc(length*sizeof(double));
+  double *buffer = (double *)Calloc(length,double);
   double c = 5.0;
   double epsilon = 0.0001;
   double S;
@@ -179,7 +180,7 @@ double Tukey_Biweight_SE(double *x,double BW, int length){
       sumw += (1.0-buffer[i]*buffer[i])*(1.0 - 5.0*buffer[i]*buffer[i]);
     }
   }
-  free(buffer);
+  Free(buffer);
   return(sqrt(sum)/fabs(sumw));
 }
 

@@ -16,6 +16,7 @@
  **
  ** Jan 13, 2003 - Initial version
  ** Jul 25, 2003 - Added median_low
+ ** Apr 5, 2004 - All malloc/free are now Calloc/Free
  **
  ********************************************************************/
 
@@ -24,6 +25,8 @@
 #include "threestep_common.h"
 
 #include <stdlib.h>
+#include <R.h> 
+#include <Rdefines.h>
 
 /**************************************************************************
  **
@@ -40,7 +43,7 @@ double median(double *x, int length){
   int i;
   int half;
   double med;
-  double *buffer = malloc(length*sizeof(double));
+  double *buffer = (double *)Calloc(length,double);
 
   for (i = 0; i < length; i++)
     buffer[i] = x[i];
@@ -53,7 +56,7 @@ double median(double *x, int length){
     med = (buffer[half] + buffer[half-1])/2.0;
   }
 
-  free(buffer);
+  Free(buffer);
   return med;
 }
 
@@ -73,7 +76,7 @@ double median_low(double *x, int length){
   int i;
   int half;
   double med;
-  double *buffer = malloc(length*sizeof(double));
+  double *buffer = Calloc(length,double);
 
   for (i = 0; i < length; i++)
     buffer[i] = x[i];
@@ -86,6 +89,6 @@ double median_low(double *x, int length){
     med = buffer[half-1];
   }
 
-  free(buffer);
+  Free(buffer);
   return med;
 }

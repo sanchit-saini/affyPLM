@@ -22,6 +22,7 @@
  ** Mar 11, 2003 - Add ability to do kernel density with arbitrary weights
  ** Apr 22, 2003 - fix computation of bandwidth. Add in linear interpolation
  **                so as to be more consistent with R.
+ ** Apr 5, 2004 - all calloc/free are now Calloc/Free
  **
  ****************************************************************************/
 
@@ -251,10 +252,10 @@ void fft_ditI(double *f_real, double *f_imag, int p){
 static void fft_density_convolve(double *y, double *kords, int n){
   int i;
   int nlog2 = (int)(log((double)n)/log(2.0) + 0.5); /* ugly hack to stop rounding problems */
-  double *y_imag = calloc(n,sizeof(double));
-  double *kords_imag = calloc(n,sizeof(double));
-  double *conv_real = calloc(n,sizeof(double));
-  double *conv_imag = calloc(n,sizeof(double));
+  double *y_imag = Calloc(n,double);
+  double *kords_imag = Calloc(n,double);
+  double *conv_real = Calloc(n,double);
+  double *conv_imag = Calloc(n,double);
  
 
   
@@ -276,10 +277,10 @@ static void fft_density_convolve(double *y, double *kords, int n){
   }
 
 
-  free(conv_real);
-  free(conv_imag);
-  free(kords_imag);
-  free(y_imag);
+  Free(conv_real);
+  Free(conv_imag);
+  Free(kords_imag);
+  Free(y_imag);
   
 
 }
@@ -483,10 +484,10 @@ void KernelDensity(double *x, int *nxxx, double *weights, double *output, double
   int n2= 2*n;
   int i;
   double low, high,iqr,bw,to,from;
-  double *kords = calloc(2*n,sizeof(double));
-  double *buffer = calloc(nx,sizeof(double));
-  double *y = calloc(2*n,sizeof(double));
-  double *xords = calloc(n,sizeof(double));
+  double *kords = Calloc(2*n,double);
+  double *buffer = Calloc(nx,double);
+  double *y = Calloc(2*n,double);
+  double *xords = Calloc(n,double);
 
   for (i =0; i < nx; i++){
     buffer[i] = x[i];
@@ -536,10 +537,10 @@ void KernelDensity(double *x, int *nxxx, double *weights, double *output, double
 
   linear_interpolate(xords, kords, output_x, output,n);
 
-  free(xords);
-  free(y);
-  free(buffer);
-  free(kords);
+  Free(xords);
+  Free(y);
+  Free(buffer);
+  Free(kords);
 
 }
 

@@ -39,7 +39,7 @@
  **                A similar change was made to the background code
  **                so that SEXP densfunc, SEXP rho, SEXP LESN_param
  **                were all subsumed into bg_parameters
- **                
+ ** Apr 5, 2004 - all malloc/free are now Calloc/Free
  **
  **
  *********************************************************************/
@@ -179,12 +179,12 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
     PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
     MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
 
-    ProbeNames =malloc(rows*(sizeof(char *)));
+    ProbeNames =(char **)Calloc(rows,char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
 
     IdealMM_correct(PM,MM, &rows, &cols,ProbeNames);
-    free(ProbeNames);
+    Free(ProbeNames);
     UNPROTECT(1);
 
   } else if (asInteger(bg_type) == 4){
@@ -206,12 +206,12 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
     PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
     MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
 
-    ProbeNames =malloc(rows*(sizeof(char *)));
+    ProbeNames = (char **)Calloc(rows,char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
 
     IdealMM_correct(PM,MM, &rows, &cols,ProbeNames);
-    free(ProbeNames);
+    Free(ProbeNames);
     UNPROTECT(1);
     
   } else if (asInteger(bg_type) == 6){
@@ -266,12 +266,12 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
     PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
     MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
 
-    ProbeNames =malloc(rows*(sizeof(char *)));
+    ProbeNames = (char **)Calloc(rows,char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
 
     SpecificBiweightCorrect(PM,MM, &rows, &cols,ProbeNames);
-    free(ProbeNames);
+    Free(ProbeNames);
     UNPROTECT(1);
 
 
@@ -349,15 +349,16 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
   if (asInteger(norm_type) == 1){
     qnorm_c(PM,&rows,&cols);
   } else if (asInteger(norm_type) == 2) { 
-    ProbeNames =malloc(rows*(sizeof(char *)));
+    ProbeNames = (char **)Calloc(rows,char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
-
+    
     param = GetParameter(norm_parameters,"use.median");
     usemedian = asInteger(param);
     param = GetParameter(norm_parameters,"use.log2");
     uselog2 = asInteger(param);
     qnorm_probeset_c(PM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
+    Free(ProbeNames);
   } else if (asInteger(norm_type) == 3) { 
     param = GetParameter(norm_parameters,"scaling.trim");
     trim = asReal(param);

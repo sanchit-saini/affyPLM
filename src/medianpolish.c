@@ -24,6 +24,7 @@
  **                 most of what is required by the fitting
  **                 algorithm
  ** Oct 05, 2003 - added in summary_param
+ ** Apr 5, 2004 - change malloc/free to Calloc/Free
  **
  ************************************************************************/
 
@@ -41,38 +42,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-/**************************************************************************
- **
- ** double median(double *x, int length)
- **
- ** double *x - vector
- ** int length - length of *x
- **
- ** returns the median of *x
- **
- *************************************************************************/
-
-/*double  median(double *x, int length){
-  int i;
-  int half;
-  double med;
-  double *buffer = malloc(length*sizeof(double));
-  
-  for (i = 0; i < length; i++)
-    buffer[i] = x[i];
-  
-  qsort(buffer,length,sizeof(double), (int(*)(const void*, const void*))sort_double);
-  half = (length + 1)/2;
-  if (length % 2 == 1){
-    med = buffer[half - 1];
-  } else {
-    med = (buffer[half] + buffer[half-1])/2.0;
-  }
-  
-  free(buffer);
-  return med;}
-
-*/
 
 /*******************************************************************************
  **
@@ -112,7 +81,7 @@ double sum_abs(double *z, int rows, int cols){
 
 void get_row_median(double *z, double *rdelta, int rows, int cols){
   int i,j;
-  double *buffer = malloc(cols*sizeof(double));
+  double *buffer = (double *)Calloc(cols,double);
 
   for (i = 0; i < rows; i++){ 
     for (j = 0; j < cols; j++){
@@ -121,7 +90,7 @@ void get_row_median(double *z, double *rdelta, int rows, int cols){
     rdelta[i] = median(buffer,cols);
   }
   
-  free(buffer);
+  Free(buffer);
 }
 
 /********************************************************************************
@@ -140,7 +109,7 @@ void get_col_median(double *z, double *cdelta, int rows, int cols){
   
   int i, j;
   
-  double *buffer = malloc(rows*sizeof(double));
+  double *buffer = (double *)Calloc(rows,double);
   for (j = 0; j < cols; j++){
     for (i = 0; i < rows; i++){  
       buffer[i] = z[j*rows + i];
@@ -148,7 +117,7 @@ void get_col_median(double *z, double *cdelta, int rows, int cols){
     cdelta[j] = median(buffer,rows);
   }
   
-  free(buffer);
+  Free(buffer);
 
 }
 

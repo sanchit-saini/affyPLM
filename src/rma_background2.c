@@ -33,6 +33,7 @@
  ** Feb 17,2003 - change a free to Free in find_max()
  ** Feb 25, 2003 - Fixes to remove some compiler warnings (show up when using -Wall with gcc)
  ** Apr 22, 2003 - fix error in bg_parameters2 so that can more closely duplicate the results in R
+ ** Mar 06, 2004 - Changed last remaining malloc to a Calloc
  **
  *****************************************************************************/
 
@@ -335,8 +336,8 @@ void bg_parameters2(double *PM,double *MM, double *param, int rows, int cols, in
   /* double MMmax; */
   double sd,alpha;
   int n_less=0,n_more=0;
-  double *tmp_less = (double *)malloc(rows*sizeof(double));
-  double *tmp_more = (double *)malloc(rows*sizeof(double));
+  double *tmp_less = (double *)Calloc(rows,double);
+  double *tmp_more = (double *)Calloc(rows,double);
   
   
   PMmax = max_density(PM,rows, cols, column,fn,rho);
@@ -369,8 +370,8 @@ void bg_parameters2(double *PM,double *MM, double *param, int rows, int cols, in
   /* printf("%f %f %f\n",param[0],param[1],param[2]); */
 
 
-  free(tmp_less);
-  free(tmp_more);
+  Free(tmp_less);
+  Free(tmp_more);
 }
 
 /************************************************************************************

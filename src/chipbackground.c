@@ -32,8 +32,14 @@
  **
  ** Mar 10, 2003 - Check indexing, see that it roams on x =1..ncol  and y=1..nrow. Note
  **                that affy cdf files are on x=0.. ncol-1  and y=0..nrow-1
+ ** Mar 6, 2004 - All mallocs/free are now Calloc/Free
  **
  ***********************************************************************/
+ 
+#include <R.h>
+#include <Rdefines.h>
+#include <Rmath.h>
+#include <Rinternals.h>
 
 #include <stdlib.h>
 #include <math.h>
@@ -55,8 +61,8 @@
 
 void static get_centroids(int rows, int cols, int grid_dim, int *centroidx, int *centroidy){
   int i;
-  int *cuts_x = (int *)malloc((int)sqrt(grid_dim)*sizeof(int));
-  int *cuts_y = (int *)malloc((int)sqrt(grid_dim)*sizeof(int));
+  int *cuts_x = (int *)Calloc((int)sqrt(grid_dim),int);
+  int *cuts_y = (int *)Calloc((int)sqrt(grid_dim),int);
   int grid_dim1d = (int)sqrt(grid_dim);
 
   if ((grid_dim == 16) && (rows == 640) && (cols == 640) && (0 == 1)){
@@ -105,8 +111,8 @@ void static get_centroids(int rows, int cols, int grid_dim, int *centroidx, int 
     }
   }
 
-  free(cuts_x);
-  free(cuts_y);
+  Free(cuts_x);
+  Free(cuts_y);
 }
 
 /**********************************************************************
@@ -195,14 +201,14 @@ void static find_distances(int x, int y, int grid_dim,int *centroidx, int *centr
 void static compute_weights_individual(int x, int y, int grid_dim, int *centroidx, int *centroidy, double *weights, double smooth){
 
   int i=0;
-  int *distance = (int *)malloc(grid_dim*sizeof(int));
+  int *distance = (int *)Calloc(grid_dim,int);
 
   find_distances(x, y, grid_dim, centroidx, centroidy, distance);
 
   for (i = 0; i < grid_dim; i++){
     weights[i] =  1.0/((double)distance[i] + smooth);
   }
-  free(distance);
+  Free(distance);
 }
 
 /*********************************************************************************************
@@ -365,9 +371,9 @@ void static compute_background_quadrant(double *probeintensity, int nprobes, int
 
   int lower2pc;
   int i=0,j=0;
-  int *nprobes_in_sec = (int *)malloc(grid_dim*sizeof(int)); 
-  int *cur_n = (int *)malloc(grid_dim*sizeof(int));
-  double **data_by_sector =(double **)malloc(grid_dim*sizeof(double *));
+  int *nprobes_in_sec = (int *)Calloc(grid_dim,int); 
+  int *cur_n = (int *)Calloc(grid_dim,int);
+  double **data_by_sector =(double **)Calloc(grid_dim,double *);
   double sumx,sumx2;
 
   for (j = 0; j < grid_dim; j++){  
@@ -379,7 +385,7 @@ void static compute_background_quadrant(double *probeintensity, int nprobes, int
   }
   
   for (j =0; j < grid_dim; j++){
-    data_by_sector[j] = (double *)malloc(nprobes_in_sec[j]*sizeof(double));
+    data_by_sector[j] = (double *)Calloc(nprobes_in_sec[j],double);
   }
   
   for (j =0; j < grid_dim; j++){
@@ -421,10 +427,14 @@ void static compute_background_quadrant(double *probeintensity, int nprobes, int
     bg_q[j] = sumx;
     noise_q[j] = sqrt(sumx2/(lower2pc -1));
   }
-
-  free(nprobes_in_sec);
-  free(cur_n);
-  free(data_by_sector);
+ 
+  for (j =0; j < grid_dim; j++){
+    Free(data_by_sector[j]);
+  }
+  
+  Free(nprobes_in_sec);
+  Free(cur_n);
+  Free(data_by_sector);
 }
 
 
@@ -488,14 +498,14 @@ double static max(double one, double two){
 
 void static affy_background_adjust(double *probeintensity,int *x, int *y, int nprobes, int nchips, int rows, int cols, int grid_dim){
   int i=0,j=0;
-  int *whichgrid = (int *)malloc(nprobes*sizeof(int));
-  double *bg_q = (double *)malloc(grid_dim*sizeof(double));
-  double *noise_q = (double *)malloc(grid_dim*sizeof(double));
-  double *weights = (double *)malloc(grid_dim*nprobes*sizeof(double));
-  int *centroidx = (int *)malloc(grid_dim*sizeof(int));
-  int *centroidy = (int *)malloc(grid_dim*sizeof(int));
-  int *gridpt_x = (int *)malloc(((int)(sqrt(grid_dim) -1.0))*sizeof(int));
-  int *gridpt_y = (int *)malloc(((int)(sqrt(grid_dim) -1.0))*sizeof(int));
+  int *whichgrid = (int *)Calloc(nprobes,int);
+  double *bg_q = (double *)Calloc(grid_dim,double);
+  double *noise_q = (double *)Calloc(grid_dim,double);
+  double *weights = (double *)Calloc(grid_dim*nprobes,double);
+  int *centroidx = (int *)Calloc(grid_dim,int);
+  int *centroidy = (int *)Calloc(grid_dim,int);
+  int *gridpt_x = (int *)Calloc(((int)(sqrt(grid_dim) -1.0)),int);
+  int *gridpt_y = (int *)Calloc(((int)(sqrt(grid_dim) -1.0)),int);
   
   get_centroids(rows, cols, grid_dim, centroidx, centroidy);
   get_gridpts(rows, cols, grid_dim, gridpt_x, gridpt_y);
@@ -512,14 +522,14 @@ void static affy_background_adjust(double *probeintensity,int *x, int *y, int np
     }
   }
 
-  free(gridpt_x);
-  free(gridpt_y);
-  free(centroidx);
-  free(centroidy);
-  free(weights);
-  free(whichgrid);
-  free(noise_q);
-  free(bg_q);
+  Free(gridpt_x);
+  Free(gridpt_y);
+  Free(centroidx);
+  Free(centroidy);
+  Free(weights);
+  Free(whichgrid);
+  Free(noise_q);
+  Free(bg_q);
 }
 
 

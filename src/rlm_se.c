@@ -4,7 +4,7 @@
  **
  ** Aim: implement computation of standard errors for robust linear models.
  **
- ** Copyright (C) 2003 Ben Bolstad
+ ** Copyright (C) 2003-2004 Ben Bolstad
  **
  ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
  ** 
@@ -65,6 +65,8 @@
  ** Sep 13, 2003 - copy only upper triangle of variance matrix into output.
  **                Also if the variance matrix is the NULL pointer don't store anything
  **                at all.
+ ** Jan 17, 2004 - tweak how kappa is estimated so it works better
+ **                in with non - huber psis
  **                
  ********************************************************************/
 
@@ -313,11 +315,11 @@ int SVD_compute(double *X, int n, double *s, double *u, double *v,int lapack){
   int lwork = 7*n*n + 4*n;
   int job = 21;
   char jobz = 'A';
-  double *Xcopy= calloc(n*n,sizeof(double));              //Calloc(n*n,double);
-  double *e =    calloc(n,sizeof(double));              // Calloc(n,double);
-  double *work =  calloc(n,sizeof(double));             //Calloc(n,double);
-  double *work2 =  calloc(lwork,sizeof(double));
-  int *iwork = calloc(8*n,sizeof(int));
+  double *Xcopy= Calloc(n*n,double);              //Calloc(n*n,double);
+  double *e =    Calloc(n,double);              // Calloc(n,double);
+  double *work =  Calloc(n,double);             //Calloc(n,double);
+  double *work2 =  Calloc(lwork,double);
+  int *iwork = Calloc(8*n,int);
 
 
   for (i=0; i < n; i++){
@@ -332,11 +334,11 @@ int SVD_compute(double *X, int n, double *s, double *u, double *v,int lapack){
   }
     
 
-  free(iwork);
-  free(work2);
-  free(work);
-  free(e);
-  free(Xcopy);
+  Free(iwork);
+  Free(work2);
+  Free(work);
+  Free(e);
+  Free(Xcopy);
   
   return error_code;
 
@@ -693,12 +695,12 @@ void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *res
   double sumderivpsi=0.0; /* sum of psi'(r_i) */
   double Kappa=0.0;      /* A correction factor */
   double scale=0.0;
-
+  
   double *XTX = Calloc(p*p,double);
   double *W = Calloc(p*p,double);
   double *work = Calloc(p*p,double);
   double RMSEw = 0.0;
-  double vs=0.0,m;  /* varpsiprime=0.0; */
+  double vs=0.0,m,varderivpsi=0.0; 
 
   /* Initialize Lapack library */
   if(!Lapack_initialized) Lapack_Init();
@@ -749,7 +751,17 @@ void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *res
     }
     
     m = (sumderivpsi/(double) n);
-    Kappa = 1.0 + (double)p/(double)n * (1.0-m)/(m);
+
+    for (i = 0; i < n; i++){
+      varderivpsi+=(PsiFn(resids[i]/scale,k1,1) - m)*(PsiFn(resids[i]/scale,k1,1) - m);
+    }
+    varderivpsi/=(double)(n);
+
+    //    Kappa = 1.0 + (double)p/(double)n * (1.0-m)/(m);
+
+
+    Kappa = 1.0 + ((double)p/(double)n) *varderivpsi/(m*m);
+
     
     /* prepare XtX and W matrices */
   

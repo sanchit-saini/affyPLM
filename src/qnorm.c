@@ -33,6 +33,7 @@
  **                now from R as alterative to traditonal means.
  **                Fixed a bug where use_median was not being dereferenced in "robust method"
  ** Oct 7, 2003 - fix a bug with length is qnorm_robust
+ ** Mar 6, 2004 - change malloc/free pairs to Calloc/Free
  **
  ***********************************************************/
 
@@ -117,7 +118,7 @@ dataitem **get_di_matrix(double *data, int rows, int cols){
   dataitem **dimat;
   /* dataitem *xtmp; */
   
-  dimat = (dataitem **)malloc((cols)*sizeof(dataitem *));
+  dimat = (dataitem **)Calloc((cols),dataitem *);
   
   if (dimat == NULL){
     printf("\nERROR - Sorry the normalization routine could not allocate adequate memory\n       You probably need more memory to work with a dataset this large\n");
@@ -127,7 +128,7 @@ dataitem **get_di_matrix(double *data, int rows, int cols){
      for (j=0; j < cols; j++, xtmp +=rows) dimat[j] = xtmp; */
   
   for (j=0; j < cols; j++)
-    dimat[j] = malloc(rows*sizeof(dataitem));
+    dimat[j] = Calloc(rows,dataitem);
 
 
 
@@ -182,9 +183,9 @@ void qnorm_c(double *data, int *rows, int *cols){
   int i,j,ind;
   dataitem **dimat;
   double sum;
-  double *row_mean = malloc((*rows)*sizeof(double));
-  double *datvec = malloc(*cols*sizeof(double));
-  double *ranks = malloc((*rows)*sizeof(double));
+  double *row_mean = (double *)Calloc(*rows,double);
+  double *datvec = (double *)Calloc(*cols,double);
+  double *ranks = (double *)Calloc(*rows,double);
 
   /*# sort original columns */
   
@@ -215,15 +216,15 @@ void qnorm_c(double *data, int *rows, int *cols){
       data[j*(*rows) + ind] = row_mean[(int)floor(ranks[i])-1];
     }
   }
-  free(ranks);
-  free(datvec);   
+  Free(ranks);
+  Free(datvec);   
 
   for (j=0; j < *cols; j++){
-    free(dimat[j]);
+    Free(dimat[j]);
   }
 
-  free(dimat);
-  free(row_mean); 
+  Free(dimat);
+  Free(row_mean); 
 }
 
 
@@ -253,9 +254,9 @@ void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use
   int half,length;
   dataitem **dimat;
   double sum,sumweights;
-  double *row_mean = malloc((*rows)*sizeof(double));
-  double *datvec = malloc(*cols*sizeof(double));
-  double *ranks = malloc((*rows)*sizeof(double));
+  double *row_mean = Calloc(*rows,double);
+  double *datvec = Calloc(*cols,double);
+  double *ranks = Calloc(*rows,double);
 
   /* Log transform the data if needed */
 
@@ -320,15 +321,15 @@ void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use
       }
    }
 
-  free(datvec);
-  free(ranks); 
+  Free(datvec);
+  Free(ranks); 
 
   for (j=0; j < *cols; j++){
-    free(dimat[j]);
+    Free(dimat[j]);
   }
 
-  free(dimat);
-  free(row_mean); 
+  Free(dimat);
+  Free(row_mean); 
 }
 
 

@@ -53,7 +53,7 @@ static void rmaPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outputsett
   Routput->nprotected = 0;
 
   
-  output->outnames = malloc(data->nprobesets*sizeof(char *));
+  output->outnames = (char **)Calloc(data->nprobesets,char *);
 
   if (store->weights){
     PROTECT(Routput->weights = allocMatrix(REALSXP, data->rows, data->cols));
@@ -129,11 +129,11 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
 
   int i;
 
-  outputsettings *store = malloc(sizeof(outputsettings));
-  Datagroup *data = malloc(sizeof(Datagroup));
-  PLMoutput *output = malloc(sizeof(PLMoutput));
-  PLMmodelparam *model = malloc(sizeof(PLMmodelparam));
-  PLMRoutput *Routput = malloc(sizeof(PLMRoutput));
+  outputsettings *store = (outputsettings *)Calloc(1,outputsettings);
+  Datagroup *data = (Datagroup *)Calloc(1,Datagroup);
+  PLMoutput *output = (PLMoutput *)Calloc(1,PLMoutput);
+  PLMmodelparam *model = (PLMmodelparam *)Calloc(1,PLMmodelparam);
+  PLMRoutput *Routput = (PLMRoutput *)Calloc(1,PLMRoutput);
   
   SEXP dim1;
   SEXP dimnames,names;
@@ -158,7 +158,7 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   
   /* Get the names corresponding to each row */
     
-  data->ProbeNames =malloc(data->rows*(sizeof(char *)));
+  data->ProbeNames = (char **)Calloc(data->rows,char *);
   for (i =0; i < data->rows; i++){
     data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
   }
@@ -251,13 +251,13 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   SET_VECTOR_ELT(output_list,9,Routput->varcov);
   UNPROTECT(Routput->nprotected + 4);
   
-  free(output->outnames);
-  free(data->ProbeNames);
-  free(data);
-  free(output);
-  free(Routput);
-  free(store);
-  free(model);
+  Free(output->outnames);
+  Free(data->ProbeNames);
+  Free(data);
+  Free(output);
+  Free(Routput);
+  Free(store);
+  Free(model);
   
   return output_list;
   

@@ -6,7 +6,7 @@
  ** aim: implement LESN - Low End Signal is Noise background/signal adjustment methods
  **                       implement stretching, shifting algorithms background/signal adjustments
  **
- ** Copyright (C) 2002-2003   Ben Bolstad
+ ** Copyright (C) 2002-2004   Ben Bolstad
  **
  **
  ** created by: B. M. Bolstad  on  Dec 12, 2002
@@ -42,6 +42,7 @@
  **                LESN (ie Lessen) for Low End Signal is Noise.
  ** Mar 21, 2003 - Rename this file to LESN.c. Add function LESN_correct to be called from outside
  ** Mar 22, 2003 - a few documentation touch ups
+ ** Apr 5,  2004 - All malloc/free are now Calloc/Free
  **
  *************************************************************************/
 
@@ -75,7 +76,7 @@
 
 static void shift_down(double *data, double P0, int rows, int cols){
 
-  double *buffer = malloc(rows*sizeof(double));
+  double *buffer = (double *)Calloc(rows,double);
   double Pmin;
   int i,j;
 
@@ -94,7 +95,7 @@ static void shift_down(double *data, double P0, int rows, int cols){
     }
   }
 
-  free(buffer);
+  Free(buffer);
 
 }
 
@@ -211,7 +212,7 @@ static double log2(double x){
 
 void stretch_down(double *data, double baseline, int rows, int cols, double theta, int use_logs, double (*BackWeighting)(double,double, double, double)){
 
-  double *buffer = malloc(rows*sizeof(double));
+  double *buffer = (double *)Calloc(rows,double);
   double Pmin,Pmax;
   int i,j;
 
@@ -246,7 +247,7 @@ void stretch_down(double *data, double baseline, int rows, int cols, double thet
   }
 
 
-  free(buffer);
+  Free(buffer);
  
 }
 
@@ -332,7 +333,7 @@ void R_stretch_down(double *data, double *baseline, int *rows, int *cols,int *ty
 
 void shift_down_log(double *data, double baseline, int rows, int cols){
 
-  double *buffer = malloc(rows*sizeof(double));
+  double *buffer = (double *)Calloc(rows,double);
   double Pmin;
   int i,j;
 
@@ -358,7 +359,7 @@ void shift_down_log(double *data, double baseline, int rows, int cols){
       }
     }
   }
-
+  Free(buffer);
 }
 
 

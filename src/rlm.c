@@ -35,6 +35,7 @@
  **                more general psi functions
  ** Jun 05, 2003 - move lm_wfit  to lm.c
  ** Sep 13, 2003 - rlm now has a parameter that controls the maximum number of iterations
+ ** Apr 5, 2004 - all malloc/free are now Calloc/Free
  **
  ********************************************************************/
 
@@ -106,11 +107,11 @@ double irls_delta(double *old, double *new, int length){
 
 double irls_rrxwr(double *x, double *w, double *r, int rows, int cols){
   int i =0,j=0;
-  double *weights = malloc(rows*sizeof(double));
-  double *rw = malloc(rows*sizeof(double));
-  double *wr2 = malloc(rows*sizeof(double));
-  double *numerator = malloc(cols*sizeof(double));
-  double *denominator = malloc(cols*sizeof(double));
+  double *weights = Calloc(rows,double);
+  double *rw = Calloc(rows,double);
+  double *wr2 = Calloc(rows,double);
+  double *numerator = Calloc(cols,double);
+  double *denominator = Calloc(cols,double);
   double max_num,sum=0.0;
 
   for (i =0; i < rows; i++){
@@ -142,11 +143,11 @@ double irls_rrxwr(double *x, double *w, double *r, int rows, int cols){
     sum+=wr2[i];
   }
   
-  free(numerator);
-  free(denominator);
-  free(wr2);
-  free(rw);
-  free(weights);
+  Free(numerator);
+  Free(denominator);
+  Free(wr2);
+  Free(rw);
+  Free(weights);
   return(max_num/sum);
 }  
 
@@ -169,14 +170,14 @@ double irls_rrxwr(double *x, double *w, double *r, int rows, int cols){
 double med_abs(double *x, int length){
   int i;
   double med_abs;
-  double *buffer = malloc(length*sizeof(double));
+  double *buffer = Calloc(length,double);
 
   for (i = 0; i < length; i++)
     buffer[i] = fabs(x[i]);
   
   med_abs = median(buffer,length);
     
-  free(buffer);
+  Free(buffer);
   return(med_abs);
 }
 

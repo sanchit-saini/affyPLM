@@ -5,7 +5,7 @@
  ** aim: provide the general framework for threestep analysis
  **      and provide interface to R code
  **
- ** Copyright (C) 2003 Ben Bolstad
+ ** Copyright (C) 2003-2004 Ben Bolstad
  **
  ** created by: B. M. Bolstad   <bolstad@stat.berkeley.edu>
  ** created on: Jan 7, 2003 (rma.c dates to June 26, 2002)
@@ -29,6 +29,7 @@
  **                threestep. eliminate the copy step. It is not
  **                required under the current setup.
  ** Oct 5, 2003 - SEXP summary_parameters added
+ ** Apr 5, 2004 - all malloc/free should now be Calloc/Free
  **
  ************************************************************************/
 
@@ -80,7 +81,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   int i,nprobesets;
   int Method;
 
-  summary_plist *summary_param = malloc(sizeof(summary_plist));
+  summary_plist *summary_param = (summary_plist *)Calloc(1,summary_plist);
 
   SEXP dim1;
   SEXP outvec, outSEvec, output_list;        /*outnamesvec */
@@ -103,10 +104,10 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   
   nprobesets=INTEGER(N_probes)[0];
   
-  ProbeNames =malloc(rows*(sizeof(char *)));
+  ProbeNames = (char **)Calloc(rows,char *);
   for (i =0; i < rows; i++)
     ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
-  outnames = malloc(nprobesets*sizeof(char *));
+  outnames = (char **)Calloc(nprobesets,char *);
 
   /* PROTECT(outvec = NEW_NUMERIC(nprobesets*cols)); */
   PROTECT(outvec = allocMatrix(REALSXP, nprobesets, cols));
@@ -116,7 +117,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   outSE = NUMERIC_POINTER(outSEvec);
 
 
- 	    
+  
   Method = asInteger(summary_type)-1;
   /*printf("%d ",asInteger(summary_type));*/
 
@@ -146,8 +147,8 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   SET_VECTOR_ELT(output_list,0,outvec);
   SET_VECTOR_ELT(output_list,1,outSEvec);
   UNPROTECT(1);
-
-  free(summary_param);
+  Free(ProbeNames);
+  Free(summary_param);
   return output_list;
 } 
 

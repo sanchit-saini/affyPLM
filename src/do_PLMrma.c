@@ -209,7 +209,7 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
   
   /* buffers of size 200 should be enough. */
 
-  modelfit *current = malloc(sizeof(modelfit));
+  modelfit *current = (modelfit *)Calloc(1,modelfit);
 
   current->cur_rows=Calloc(max_nrows,int);
   current->cur_weights = Calloc(data->cols,double);
@@ -288,5 +288,5 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
   Free(current->cur_params);
   //Free(current->cur_weights);
   Free(current->cur_rows);
-  free(current);
+  Free(current);
 }

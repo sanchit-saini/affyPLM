@@ -195,5 +195,5 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
   Free(current->cur_params);
   //Free(current->cur_weights);
   Free(current->cur_rows);
-  free(current);
+  Free(current);
 }

@@ -23,6 +23,7 @@
  ** Jul 27, 2003 - add ability to fit model without probe pair effects
  ** Jul 28, 2003 - robust average distance between PM and MM pairs
  **                see finct fit_Difference_model
+ ** Apr 5, 2004 - All calloc/free are now Calloc/Free
  **
  ******************************************************************/
 
@@ -31,6 +32,8 @@
 #include "rlm.h"
 #include "psi_fns.h"
 #include "threestep_common.h"
+#include <R.h> 
+#include <Rdefines.h>
 
 /*******************************************************************
  **
@@ -69,11 +72,11 @@ double fit_Probeset_model(double *PM, double *MM, int length, int robust, int ps
   double parameter;
   double tol = 1e-7;
   
-  double *y = calloc(2*length,sizeof(double));
-  double *weights= calloc(2*length,sizeof(double));
-  double *x; /* = calloc(2*length*(length +1),sizeof(double)); */
-  double *out_beta = calloc(length +1,sizeof(double));
-  double *out_resids = calloc(2*length,sizeof(double));
+  double *y = Calloc(2*length,double);
+  double *weights= Calloc(2*length,double);
+  double *x; /* = Calloc(2*length*(length +1),double); */
+  double *out_beta = Calloc(length +1,double);
+  double *out_resids = Calloc(2*length,double);
 
   
 
@@ -94,7 +97,7 @@ double fit_Probeset_model(double *PM, double *MM, int length, int robust, int ps
 
   if (probepair_effects){
     nparams = length +1;
-    x = calloc(2*length*(length +1),sizeof(double));
+    x = Calloc(2*length*(length +1),double);
     for (i=0; i < length; i++){
       x[2*length*(i+1) + i%length] = 1.0;
       x[2*length*(i+1) + (length) + i%length] = 1.0;  
@@ -106,7 +109,7 @@ double fit_Probeset_model(double *PM, double *MM, int length, int robust, int ps
   
   } else {
     nparams =1;
-    x = calloc(2*length*nparams,sizeof(double));  
+    x = Calloc(2*length*nparams,double);  
     for(i=0; i < length; i++){
       x[i] = 0.5;
     }
@@ -133,11 +136,11 @@ double fit_Probeset_model(double *PM, double *MM, int length, int robust, int ps
   parameter = out_beta[0];
 
   /*  printf("%f\n",parameter);*/
-  free(y);
-  free(weights);
-  free(x);
-  free(out_beta);
-  free(out_resids);
+  Free(y);
+  Free(weights);
+  Free(x);
+  Free(out_beta);
+  Free(out_resids);
 
   return parameter;
 
@@ -154,11 +157,11 @@ double fit_Difference_model(double *PM, double *MM, int length, int robust, int 
   double parameter;
   double tol = 1e-7;
   
-  double *y = calloc(length,sizeof(double));
-  double *weights= calloc(length,sizeof(double));
-  double *x; /* = calloc(2*length*(length +1),sizeof(double)); */
-  double *out_beta = calloc(1,sizeof(double));
-  double *out_resids = calloc(length,sizeof(double));
+  double *y = Calloc(length,double);
+  double *weights= Calloc(length,double);
+  double *x; /* = Calloc(2*length*(length +1),double); */
+  double *out_beta = Calloc(1,double);
+  double *out_resids = Calloc(length,double);
 
   
 
@@ -172,7 +175,7 @@ double fit_Difference_model(double *PM, double *MM, int length, int robust, int 
   /* make design matrix */
   
   nparams =1;
-  x = calloc(length*nparams,sizeof(double));  
+  x = Calloc(length*nparams,double);  
   for(i=0; i < length; i++){
     x[i] = 1;
   }
@@ -196,11 +199,11 @@ double fit_Difference_model(double *PM, double *MM, int length, int robust, int 
   parameter = out_beta[0];
 
   /*  printf("%f\n",parameter);*/
-  free(y);
-  free(weights);
-  free(x);
-  free(out_beta);
-  free(out_resids);
+  Free(y);
+  Free(weights);
+  Free(x);
+  Free(out_beta);
+  Free(out_resids);
 
   return parameter;
 
@@ -213,7 +216,7 @@ double median_Difference(double *PM, double *MM, int length){
   
   int i;
 
-  double *y = calloc(length,sizeof(double));
+  double *y = (double *)Calloc(length,double);
   double med_diff;
   /* create Y vector */
 
@@ -223,7 +226,7 @@ double median_Difference(double *PM, double *MM, int length){
 
   med_diff = median(y,length);
 
-  free(y);
+  Free(y);
 
   return med_diff;
 }

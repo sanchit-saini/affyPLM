@@ -21,6 +21,7 @@
  **
  ** Feb 6, 2003 - Initial version of this summarization method
  ** Oct 5, 2003 - added summary_param
+ ** Apr 5, 2004 - all malloc/free are now Calloc/Free
  **
  ************************************************************************/
 
@@ -53,7 +54,7 @@
 double LogNthLargest(double *x, int length,int n){
   int i;
   double nthLargest;
-  double *buffer = malloc(length*sizeof(double));
+  double *buffer = Calloc(length,double);
 
   for (i = 0; i < length; i++)
     buffer[i] = x[i];
@@ -67,7 +68,7 @@ double LogNthLargest(double *x, int length,int n){
   }
   nthLargest = log(nthLargest)/log(2.0);
 
-  free(buffer);
+  Free(buffer);
   return (nthLargest);    
 }
 

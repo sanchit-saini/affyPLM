@@ -53,6 +53,7 @@
  **                they are now in model_params
  ** Sept 14, 2003 - can intialize M estimatation starting with a fully iterated
  **                 Huber regression
+ ** Apr 5, 2004   - All malloc/free are now Calloc/Free
  **
  *********************************************************************/
 
@@ -94,7 +95,7 @@ static void rlmPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outputsett
   Routput->nprotected = 0;
 
   
-  output->outnames = malloc(data->nprobesets*sizeof(char *));
+  output->outnames = (char **)Calloc(data->nprobesets,char *);
 
   if (store->weights){
     PROTECT(Routput->weights = allocMatrix(REALSXP, data->rows, data->cols));
@@ -156,7 +157,7 @@ static void rlmPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outputsett
     output->out_varcov= NULL;
   } else if (store->varcov == 1){
     PROTECT(Routput->varcov = allocVector(VECSXP,data->nprobesets));
-    output->out_varcov = malloc(data->nprobesets*sizeof(double*));
+    output->out_varcov = Calloc(data->nprobesets,double*);
     for (i =0; i < data->nprobesets; i++){
       PROTECT(tmp = allocMatrix(REALSXP,model->nchipparams,model->nchipparams));
       SET_VECTOR_ELT(Routput->varcov,i,tmp);
@@ -222,11 +223,11 @@ SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rl
   
   int i;
 
-  outputsettings *store = malloc(sizeof(outputsettings));
-  Datagroup *data = malloc(sizeof(Datagroup));
-  PLMoutput *output = malloc(sizeof(PLMoutput));
-  PLMmodelparam *model = malloc(sizeof(PLMmodelparam));
-  PLMRoutput *Routput = malloc(sizeof(PLMRoutput));
+  outputsettings *store = (outputsettings *)Calloc(1,outputsettings);
+  Datagroup *data = (Datagroup *)Calloc(1,Datagroup);
+  PLMoutput *output = (PLMoutput *)Calloc(1,PLMoutput);
+  PLMmodelparam *model = (PLMmodelparam *)Calloc(1,PLMmodelparam);
+  PLMRoutput *Routput = (PLMRoutput *)Calloc(1,PLMRoutput);
   
   SEXP dim1,dim2;
   SEXP dimnames,names;
@@ -251,7 +252,7 @@ SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rl
   
   /* Get the names corresponding to each row */
     
-  data->ProbeNames =malloc(data->rows*(sizeof(char *)));
+  data->ProbeNames = (char **)Calloc(data->rows,char *);
   for (i =0; i < data->rows; i++){
     data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
   }
@@ -343,13 +344,13 @@ SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rl
   SET_VECTOR_ELT(output_list,9,Routput->varcov);
   UNPROTECT(Routput->nprotected + 5);
   
-  free(output->outnames);
-  free(data->ProbeNames);
-  free(data);
-  free(output);
-  free(Routput);
-  free(store);
-  free(model);
+  Free(output->outnames);
+  Free(data->ProbeNames);
+  Free(data);
+  Free(output);
+  Free(Routput);
+  Free(store);
+  Free(model);
   
   return output_list;
   

@@ -25,6 +25,7 @@
  ** Jan 11, 2003 - check up on some stack imbalance problems.(turns out to be in threestep.c)
  ** Feb 24, 2003 - add in missing #include <string.h>, remove or comment out unused variables
  ** Aug  7, 2003 - add a specific biweight only correction
+ ** Apr  5, 2003 - all calloc/free are now Calloc/Free. (Note that dynamic array sizing still needs implementation)
  **
  ***************************************************************************/
 
@@ -36,6 +37,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <R.h> 
+#include <Rdefines.h>
+
 
 /**************************************************************************************
  **
@@ -56,9 +60,9 @@ void IdealMM_correct_single(double *PM, double *MM, int rows, char** ProbeNames)
   double IM,SB;
   double contrast_tau = 0.03;
   double scale_tau = 10.0;
-  char *curname =calloc(200,sizeof(char));
-  int *cur_rows =calloc(200,sizeof(int)); 
-  double *buffer = calloc(200,sizeof(double));
+  char *curname =Calloc(200,char);
+  int *cur_rows =Calloc(200,int); 
+  double *buffer = Calloc(200,double);
   int k = 0;
   /*  int size; */
   char *first;
@@ -114,9 +118,9 @@ void IdealMM_correct_single(double *PM, double *MM, int rows, char** ProbeNames)
     nprobes++;
   }
     
-  free(buffer);
-  free(curname);
-  free(cur_rows);
+  Free(buffer);
+  Free(curname);
+  Free(cur_rows);
 
 }
 
@@ -161,9 +165,9 @@ void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, char** Pro
   double IM,SB;
   /*  double contrast_tau = 0.03; */
   /*double scale_tau = 10.0; */
-  char *curname =calloc(200,sizeof(char));
-  int *cur_rows =calloc(200,sizeof(int)); 
-  double *buffer = calloc(200,sizeof(double));
+  char *curname =Calloc(200,char);
+  int *cur_rows =Calloc(200,int); 
+  double *buffer = Calloc(200,double);
   int k = 0;
   /*  int size; */
   char *first;
@@ -217,9 +221,9 @@ void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, char** Pro
     nprobes++;
   }
     
-  free(buffer);
-  free(curname);
-  free(cur_rows);
+  Free(buffer);
+  Free(curname);
+  Free(cur_rows);
 
 }
 

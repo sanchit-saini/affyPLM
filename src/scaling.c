@@ -22,6 +22,7 @@
  ** Aug 22, 2003 - can call the function from R .Call using 
  **                R_normalize_scaling
  **                Remove a pesky debug printf
+ ** Apr 5, 2004 - all malloc/free should be Calloc/Free
  **
  *********************************************************************/
 
@@ -50,7 +51,7 @@ static double mean_trim(double *x, int length, double trim){
   int i;
   int low, high; /* where cutoffs are */
   double sum =0.0;
-  double *buffer = malloc(length*sizeof(double));
+  double *buffer = (double *)Calloc(length,double);
 
   if (trim < 0.0 || trim >= 0.5){
     error("Trying to trim the mean to much or negative value");
@@ -73,7 +74,7 @@ static double mean_trim(double *x, int length, double trim){
     for (i= low; i < high; i++){
       sum+=buffer[i];
     }
-    free(buffer);
+    Free(buffer);
     return (sum/(double)(high - low +1));
   }
 

@@ -70,7 +70,8 @@
  ** Sep 08, 2003 - more work on returning variance covariance
  ** Sep 13, 2003 - Modify rlm_PLM_block so it handles number of iterations
  **                and initialization method
- ** Oct 12, 2003 - fixed declaration order error                     
+ ** Oct 12, 2003 - fixed declaration order error             
+ ** Apr 5, 2004  - Changed a malloc to a Calloc        
  **
  *********************************************************************/
 
@@ -663,7 +664,7 @@ void do_PLMrlm(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
  
   /* buffers of size 200 should be enough. */
 
-  modelfit *current = malloc(sizeof(modelfit));
+  modelfit *current = (modelfit *)Calloc(1,modelfit);
 
   current->cur_rows=Calloc(max_nrows,int);
   current->cur_weights = Calloc(data->cols,double);
@@ -752,5 +753,5 @@ void do_PLMrlm(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
   Free(current->cur_params);
   Free(current->cur_weights);
   Free(current->cur_rows);
-  free(current);
+  Free(current);
 }
