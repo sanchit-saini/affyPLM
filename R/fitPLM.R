@@ -59,7 +59,7 @@
 ##          we set it to the default parameter. These defaults are the following:
 ## ** Huber - k = 1.345
 ## ** Fair - k = 1.3998
-## ** Cauchy - k=2.3849 
+## ** Cauchy - k=2.3849
 ## ** Welsch - k = 2.9846
 ## ** Tukey Biweight - k = 4.6851
 ## ** Andrews Sine - K = 1.339
@@ -81,7 +81,7 @@
 ## Jan 18, 2004 - move some of the sub functions to internalfunctions.R
 ## Feb 23, 2004 - subset paramter added
 ## Mar 1,  2004 - moved chip-level design matrix creation to its own function
-## Mar 2, 2004 - rewrote design matrix function to handle interaction terms 
+## Mar 2, 2004 - rewrote design matrix function to handle interaction terms
 ## May 26, 2004 - allow use of MM as response term in fitPLM
 ## May 27, 2004 - if default model ie -1 + probes + samples flag that a optimized
 ##                algorithm should be used.
@@ -91,36 +91,36 @@
 
 fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),subset=NULL,background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=list(),model.param=list()){
 
-  
-  if (class(object) != "AffyBatch"){
-    stop(paste("argument is",class(object),"fitPLM requires AffyBatch"))
-  }
+
+    if (! is(object, "AffyBatch") {
+        stop(paste("argument is",class(object),"fitPLM requires AffyBatch"))
+    }
 
 #  oldconstraints <- options()$contrasts
 #  if (constraint.type != "contr.treatment"){
 #    stop("only endpoint constraint currently implemented")
 #  }
-  
+
 #  options(contrasts=c(constraint.type,"contr.poly"))
 
   PLM.model.matrix <- PLM.designmatrix2(object,model,variable.type,constraint.type)
-  
+
   #check that chip covariates are not singular
-  
+
   if (qr(PLM.model.matrix$chip.covariates)$rank < ncol(PLM.model.matrix$chip.covariates)){
     stop("chiplevel effects is singular: singular fits are not implemented in fitPLM")
   }
- 
+
   if (PLM.model.matrix$response.term == "MM"){
     tmp <- mm(object)
     mm(object) <- pm(object)
-    pm(object) <- tmp	
+    pm(object) <- tmp
   }
-	
-	
 
 
-  
+
+
+
   #cat("Method is ",model.type,"\n")
   # now add other variables onto chip.covariates matrix
 
@@ -142,13 +142,13 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     cat("Background Correcting\n")
     object <- bg.correct.mas(object)
   }
-    
+
   LESN.param <-list(baseline=0.25,theta=4)
   LESN.param <- convert.LESN.param(LESN.param)
 
   b.param <- list(densfun =  body(bg.dens), rho = new.env(),lesnparam=LESN.param)
   b.param[names(background.param)] <- background.param
-  
+
   n.param <- list(scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
   n.param[names(normalize.param)] <- normalize.param
 
@@ -158,34 +158,34 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
   op.param$varcov <- match.arg(op.param$varcov,c("none","chiplevel","all"))
 
-  
+
   md.param <- list(se.type=4,psi.type="Huber",psi.k=NULL,max.its=20,init.method="ls",isdefaultmodel=PLM.model.matrix$isdefaultmodel,MMorPM.covariate=PLM.model.matrix$MMorPM.covariate)
   md.param[names(model.param)] <- model.param
 
- 
-  
-  
+
+
+
   if (is.null(md.param$psi.k)){
     md.param$psi.k <- get.default.psi.k(md.param$psi.type)
   }
-  
+
   md.param$psi.type <- get.psi.code(md.param$psi.type)
 
-  
-  
+
+
   # lets do the actual model fitting
   fit.results <- .Call("R_rlmPLMset_c",pm(object,subset),mm(object,subset),probeNames(object,subset),
         ngenes, normalize, background,
         get.background.code(background.method), get.normalization.code(normalize.method),PLM.model.matrix$model.type,PLM.model.matrix$chip.covariates,b.param,n.param,op.param,md.param,PACKAGE="affyPLM")
-  
 
-  
+
+
  #put names on matrices and return finished object
 
   #chip.param.names <- NULL
 
 #  if (has.chipeffects){
-    #chip.param.names <- c(chip.param.names,sampleNames(object))    
+    #chip.param.names <- c(chip.param.names,sampleNames(object))
 #  } else {
     chip.param.names <- colnames(PLM.model.matrix$chip.covariates)
 #  }
@@ -205,7 +205,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
   if (op.param$residuals){
    colnames(fit.results[[8]]) <- sampleNames(object)
-   rownames(fit.results[[8]]) <- probenames 
+   rownames(fit.results[[8]]) <- probenames
   }
 
   if (op.param$resid.SE){
@@ -225,12 +225,12 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
         rownames(x) <- names
         x
       }
-      fit.results[[10]] <- lapply(fit.results[[10]],name.matrix,tmp.colnames) 
+      fit.results[[10]] <- lapply(fit.results[[10]],name.matrix,tmp.colnames)
     }
   }
-  
 
-  
+
+
   colnames(fit.results[[2]]) <- "ProbeEffects"
   rownames(fit.results[[2]]) <- probenames
   colnames(fit.results[[5]]) <- "SEProbeEffects"
@@ -259,7 +259,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   description <- description(object)
   notes <- notes(object)
 
-  
+
   x <- new("PLMset")
   x@chip.coefs=fit.results[[1]]
   x@probe.coefs= fit.results[[2]]
@@ -297,17 +297,17 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
 
   model.terms <- terms(model)
   mt.variables <- attr(model.terms,"variables")
-  
+
   if ((mt.variables[[2]] != "PM") & (mt.variables[[2]] != "pm")){
     stop(paste("Response term in model should be 'PM' or 'pm'"))
   }
-  
+
   mt.intercept <- attr(model.terms,"intercept")
   mt.termlabels <- attr(model.terms,"term.labels")
 
-  
+
   length.parameters <- length(mt.termlabels)
-  
+
   if (length.parameters < 1){
     stop("Insufficent parameters supplied in model")
   }
@@ -315,11 +315,11 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
   # check to see if there is other chip level parameters and that they are valid
   mt.termlabels.abbrev <- mt.termlabels[mt.termlabels != "samples"]
   mt.termlabels.abbrev <- mt.termlabels.abbrev[mt.termlabels.abbrev != "probes"]
-  
+
   has.probeeffects <- is.element("probes",mt.termlabels)
   has.chipeffects <- is.element("samples",mt.termlabels)
 
-  
+
  if (!is.null(variable.type$probes)){
     cat("A variable type has been specified for probes parameter, this will be ignored. Assuming variable type is factor\n")
   }
@@ -330,11 +330,11 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
   #now go through the non default parameters seeing which type they should be treated as.
 
   #cat(mt.termlabels.abbrev,"\n")
-  
+
   vt <- NULL
 
   #check to see that everything is either "factor" or "covariate"
-  #figure out what the default type is 
+  #figure out what the default type is
   if (is.na(variable.type["default"])){
     cat("No default type given. Assuming default variable type is factor\n")
     vt.default <- "factor"
@@ -344,25 +344,25 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
     } else {
       stop("Incorrect default variable.type given")
     }
-  } 
-    
+  }
+
   if (sum(!is.element(variable.type,c("factor","covariate")))){
     stop("An incorrect variable type provided")
   }
 
-  
+
   if (length(mt.termlabels.abbrev) >=1){
-    
+
     vt <- rep(vt.default,length(mt.termlabels.abbrev))
     names(vt) <- mt.termlabels.abbrev
-    
-    vt[names(variable.type)] <- variable.type    
-    #has.vt <- is.element(mt.termlabels.abbrev,names(variable.type))    
+
+    vt[names(variable.type)] <- variable.type
+    #has.vt <- is.element(mt.termlabels.abbrev,names(variable.type))
   }
   #cat(has.vt,"\n");
   #print(vt)
 
-  #figure out what the default constraint type is 
+  #figure out what the default constraint type is
 
   if (is.na(constraint.type["default"])){
     cat("No default type given. Assuming default constraint type is contr.treatment\n")
@@ -373,41 +373,41 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
     } else {
       stop("Incorrect default constraint.type given")
     }
-  } 
+  }
 
   # check to see if there are any constraints on for the "probes" and "samples" parameters. Constraints on the first chip
   # level parameter will be ignored unless, the default constraint on probes will always "contr.sum", however
   # will allow the user to shoot themselves in the foot by setting it to something else (ie "contr.treatment") and there may be times when
   # this is useful.
-  
+
 
   if (is.na(constraint.type["probes"])){
     ct.probe <- "contr.sum"
   } else {
     ct.probe <- constraint.type["probes"]
- }	
+ }
 
   if (is.na(constraint.type["samples"])){
     ct.samples <- ct.default
   } else {
     ct.samples <- constraint.type["samples"]
   }
- 
+
 
   # Constraint.types given for each variable.
   # note that if user puts a constraint on a covariate variable it will be ignored.
 
   if (length(mt.termlabels.abbrev) >=1){
-    
+
     ct <- rep(ct.default,length(mt.termlabels.abbrev))
     names(ct) <- mt.termlabels.abbrev
-    
-    ct[names(constraint.type)] <- constraint.type 
+
+    ct[names(constraint.type)] <- constraint.type
   #  print(ct)
-  }	
+  }
   #print(ct.probe)
   #print(ct.samples)
-  
+
   if (mt.intercept == 0){
     if (has.probeeffects){
       if (ct.probe == "contr.sum"){
@@ -430,8 +430,8 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       model.type <- 21
     }
   }
-	
-  
+
+
   if (!has.chipeffects & (length(mt.termlabels.abbrev) < 1)){
     stop("Model does not have enough chip level parameters")
   }
@@ -444,7 +444,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
   #print(nsamples)
   chip.param.names <- NULL
 
-  
+
   if (has.chipeffects){
     our.samples <- 1:nsamples
     if (!mt.intercept){
@@ -459,11 +459,11 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       }
     }
   } else {
-    chip.effects <- NULL    
+    chip.effects <- NULL
   }
 
 
-  
+
   if (length(mt.termlabels.abbrev) >=1){
 
     in.pheno <- is.element(mt.termlabels.abbrev, names(pData(object)))
@@ -472,13 +472,13 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
     #cat(mt.termlabels.abbrev)
     #cat(in.pheno,in.parent.frame,"\n")
 
-    
+
     if (sum(in.pheno | in.parent.frame) != length(mt.termlabels.abbrev)){
       stop("Specified parameter does not exist in phenoData or parent frames")
     }
 
     chipeffect.names <-  NULL
-    
+
     if (has.chipeffects){
       # chip.effects will handle intercept, use constraints on treatments
       # if chip.effects then the matrix will be singular, but we will go
@@ -486,7 +486,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       #options(contrasts=c("contr.treatment","contr.poly"))
 
       stop("Can not fit a model with an effect for every chip and additional parameters")
-      
+
       #for (trt in mt.termlabels.abbrev){
       #   if (is.element(trt,  names(pData(object)))){
       #     trt.values <- pData(object)[,names(pData(object))==trt]
@@ -494,7 +494,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       #       trt.effect <- model.matrix(~ -1 + trt.values)
       #     } else {
       #       trt.effect <- model.matrix(~ as.factor(trt.values))[,-1]
-      #     }           
+      #     }
       #   } else {
       #     trt.values <- eval(as.name(trt))
       #     if (length(trt.values) != nsamples){
@@ -515,7 +515,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       # no chipeffect, first factor treatment will be unconstrained if no intercept
       #
       #
-      
+
       #options(contrasts=c("contr.treatment","contr.poly"))
       #print(ct)
       first.factor <- FALSE
@@ -535,10 +535,10 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
                 trt.effect <- model.matrix(~ C(as.factor(trt.values),ct[trt]))[,-1]
               }
              } else {
-              
+
                trt.effect <- model.matrix(~  C(as.factor(trt.values),ct[trt]))[,-1]
              }
-          }           
+          }
         } else {
           trt.values <- eval(as.name(trt))
           if (length(trt.values) != nsamples){
@@ -557,10 +557,10 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
             } else {
               trt.effect <- model.matrix(~ C(as.factor(trt.values),ct[trt]))[,-1]
             }
-          }  
+          }
         }
         chip.effects <- cbind(chip.effects,trt.effect)
-        
+
         if (vt[names(vt)==trt] == "covariate"){
           chipeffect.names <- c(chipeffect.names,trt)
         } else {
@@ -586,7 +586,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
                 for (levs in levels(as.factor(trt.values))[-1]){
                   chipeffect.names <- c(chipeffect.names,paste(trt,"_",levs,sep=""))
                 }
-              } else {                
+              } else {
                 for (levs in levels(as.factor(trt.values))[-length(levels(as.factor(trt.values)))]){
                   chipeffect.names <- c(chipeffect.names,paste(trt,"_",levs,sep=""))
                 }
@@ -607,9 +607,9 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
   #print(chip.effects)
   #print(colnames(chip.covariates))
 
-  
+
   #check that chip covariates are not singular
-  
+
   if (qr(chip.covariates)$rank < ncol(chip.covariates)){
     stop("chiplevel effects is singular: singular fits are not implemented in fitPLM")
   }
@@ -638,32 +638,32 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
   model.terms <- terms(model)
   mt.variables <- attr(model.terms,"variables")
-  
+
   if (!is.element(as.character(mt.variables[[2]]),c("PM","pm","MM","mm"))){
     stop(paste("Response term in model should be 'PM' or 'pm' or 'MM' or 'mm'."))
   }
-  
+
   if (is.element(as.character(mt.variables[[2]]),c("PM","pm"))){
     response.term <- "PM"
   } else {
     response.term <- "MM"
   }
-	
-	
 
 
-  
+
+
+
   mt.intercept <- attr(model.terms,"intercept")
   mt.termlabels <- attr(model.terms,"term.labels")
   mt.order <- attr(model.terms,"order")
-  
+
   length.parameters <- length(mt.termlabels)
-  
+
   if (length.parameters < 1){
     stop("Insufficent parameters supplied in model")
   }
-  
-  
+
+
   # checking for probes and samples as model variables
   # Also check for  MM
   # check to see if there is other chip level parameters and that they are valid
@@ -675,7 +675,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   has.chipeffects <- is.element("samples",mt.termlabels)
 
   has.covariate.PMorMM <- is.element(c("MM","mm","PM","pm"),mt.termlabels)
-  
+
   if(sum(has.covariate.PMorMM) > 1){
     stop("Can't have both PM and MM as covariates in model\n")
   }
@@ -691,7 +691,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   if((!is.null(variable.type$pm)) |  (!is.null(variable.type$mm)) |  (!is.null(variable.type$pm)) | (!is.null(variable.type$pm))){
     cat("Warning: A variable type has been specified for PM or MM variable, this will be ignored. Assuming variable type is covariate\n")
   }
-  
+
   if (!is.null(variable.type$probes)){
     cat("Warning: A variable type has been specified for probes parameter, this will be ignored. Assuming variable type is factor\n")
   }
@@ -702,11 +702,11 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   #now go through the non default parameters seeing which type they should be treated as.
 
   #cat(mt.termlabels.abbrev,"\n")
-  
+
   vt <- NULL
 
   #check to see that everything is either "factor" or "covariate"
-  #figure out what the default type is 
+  #figure out what the default type is
   if (is.na(variable.type["default"])){
     cat("No default type given. Assuming default variable type is factor\n")
     vt.default <- "factor"
@@ -716,24 +716,24 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     } else {
       stop("Incorrect default variable.type given")
     }
-  } 
-    
+  }
+
   if (sum(!is.element(variable.type,c("factor","covariate")))){
     stop("An incorrect variable type provided")
   }
 
-  
+
   vt <- rep(vt.default,length(mt.variables)-2)
   names(vt) <- as.character(mt.variables[3:length(mt.variables)])
   vt[names(variable.type)] <- variable.type
-  
-  
 
-  
+
+
+
   #cat(has.vt,"\n");
   #print(vt)
 
-  #figure out what the default constraint type is 
+  #figure out what the default constraint type is
 
   if (is.na(constraint.type["default"])){
     cat("No default type given. Assuming default constraint type is contr.treatment\n")
@@ -744,41 +744,41 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     } else {
       stop("Incorrect default constraint.type given")
     }
-  } 
+  }
 
   # check to see if there are any constraints on for the "probes" and "samples" parameters. Constraints on the first chip
   # level parameter will be ignored unless, the default constraint on probes will always "contr.sum", however
   # will allow the user to shoot themselves in the foot by setting it to something else (ie "contr.treatment") and there may be times when
   # this is useful.
-  
+
 
   if (is.na(constraint.type["probes"])){
     ct.probe <- "contr.sum"
   } else {
     ct.probe <- constraint.type["probes"]
- }	
+ }
 
   if (is.na(constraint.type["samples"])){
     ct.samples <- ct.default
   } else {
     ct.samples <- constraint.type["samples"]
   }
- 
+
 
   # Constraint.types given for each variable.
   # note that if user puts a constraint on a covariate variable it will be ignored.
 
   if (length(mt.termlabels.abbrev) >=1){
-    
+
     ct <- rep(ct.default,length(mt.termlabels.abbrev))
     names(ct) <- mt.termlabels.abbrev
-    
-    ct[names(constraint.type)] <- constraint.type 
+
+    ct[names(constraint.type)] <- constraint.type
   #  print(ct)
-  }	
+  }
   #print(ct.probe)
   #print(ct.samples)
-  
+
   if (mt.intercept == 0){
     if (has.probeeffects){
       if (ct.probe == "contr.sum"){
@@ -801,8 +801,8 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
       model.type <- 21
     }
   }
-	
-  
+
+
   if (!has.chipeffects & (length(mt.termlabels.abbrev) < 1)){
     stop("Model does not have enough chip level parameters")
   }
@@ -815,7 +815,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   #print(nsamples)
   chip.param.names <- NULL
 
-  
+
   if (has.chipeffects){
     our.samples <- 1:nsamples
     if (!mt.intercept){
@@ -830,7 +830,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
       }
     }
   } else {
-    chip.effects <- NULL    
+    chip.effects <- NULL
   }
 
 
@@ -842,7 +842,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
    # print(mt.termlabels.abbrev)
    # print(vt)
-   # print(ct) 
+   # print(ct)
 
     if (mt.intercept){
       the.formula <- "~"
@@ -854,7 +854,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     the.frame <- NULL
     the.frame.names <- NULL
     terms.names <- NULL
-   
+
     for (i in 1:length(mt.termlabels.abbrev)){
       if (mt.order.abbrev[i] == 1){
         if (is.element(mt.termlabels.abbrev[i],  names(pData(object)))){
@@ -880,7 +880,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
                 terms.names <- c(terms.names,paste(mt.termlabels.abbrev[i],"_",levs,sep=""))
               }
               firstfactor <- FALSE
-            }           
+            }
           } else {
             the.formula <- paste(the.formula, "C(as.factor(",mt.termlabels.abbrev[i],"),","contr.sum",")")
             if (!firstfactor){
@@ -895,7 +895,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
             }
           }
         }
-        
+
 
         the.frame.names <- c(the.frame.names,mt.termlabels.abbrev[i])
       } else {
@@ -912,8 +912,8 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
             stop("Can't have interaction terms involving covariate variables")
           }
         }
-        
-        
+
+
         for (current.term in in.term[[1]]){
           if (!(is.element(current.term,mt.termlabels.abbrev))){
             if (is.element(current.term,  names(pData(object)))){
@@ -924,9 +924,9 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
             the.frame.names <- c(the.frame.names,current.term)
           }
         }
-        
+
         # now lets make the actual formula
-        
+
         this.term <- "C("
         for (current.term in in.term[[1]]){
           this.term <- paste(this.term,"as.factor(",current.term,")")
@@ -952,7 +952,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
           } else {
             trt.values <- eval(as.name(current.term))
           }
-          
+
           levs <- levels(as.factor(trt.values))
           if (!firstterm){
             interaction.terms <-  as.vector(t(outer(interaction.terms,paste(":",current.term,"_",levs,sep=""),paste,sep="")))
@@ -961,7 +961,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
             firstterm <- FALSE
           }
           #print(interaction.terms)
-          
+
         }
         if (!firstfactor){
           if (ct[mt.termlabels.abbrev[i]] == "contr.treatment"){
@@ -975,7 +975,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
         terms.names <- c(terms.names,interaction.terms)
 
-        
+
         the.formula <- paste(the.formula,"+",this.term)
       }
       if ( i != length(mt.termlabels.abbrev) & mt.order.abbrev[i+1] == 1 ){
@@ -984,7 +984,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     }
     the.frame <- as.data.frame(the.frame)
     colnames(the.frame) <- the.frame.names  ###mt.termlabels.abbrev[mt.order.abbrev==1]
-    
+
     #print(the.formula)
     #print(the.frame)
     #print(as.list(ct))
@@ -994,13 +994,13 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     if (mt.intercept){
       chip.effects <- as.matrix(chip.effects[,-1])
     }
-    
+
   }
 
 
   #print(terms.names)
 
-  
+
   #print(chip.effects)
   #colnames(chip.effects) <- chipeffect.names
   #if (mt.intercept){
@@ -1012,7 +1012,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
   if (!has.chipeffects){
     colnames(chip.covariates) <- terms.names
-  
+
   } else {
       colnames(chip.covariates) <- chip.param.names
   }
@@ -1028,7 +1028,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     isdefaultmodel <- FALSE
   }
 
-  
+
 
   list(chip.covariates = chip.covariates,model.type=model.type,mt.intercept=mt.intercept,has.probeeffects=has.probeeffects,response.term=response.term,isdefaultmodel=isdefaultmodel, MMorPM.covariate=any(has.covariate.PMorMM))
 
