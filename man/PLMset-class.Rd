@@ -28,7 +28,7 @@
 \alias{show,PLMset-method}
 \alias{boxplot,PLMset-method}
 \alias{getCdfInfo,PLMset-method}
-\alias{indexProbes,character,PLMset-method}
+\alias{indexProbes,PLMset,character-method}
 
 
 \title{Class PLMset}
