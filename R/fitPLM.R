@@ -67,6 +67,7 @@
 ## Jul 27 - Clean up parameters passed to function
 ## Sep 12 - Fix up applying constraint when variables are defined in
 ##          parent enivronment rather than in pData slot.
+## Oct 7  - Some codetools warnings fixed.
 ##
 ###########################################################
 
@@ -487,8 +488,8 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   #cat("Method is ",model.type,"\n")
   # now add other variables onto chip.covariates matrix
 
-  rows <- length(probeNames(object))
-  cols <- length(object)
+##  rows <- length(probeNames(object))
+##  cols <- length(object)
   ngenes <- length(geneNames(object))
   
   # background correction for RMA type backgrounds

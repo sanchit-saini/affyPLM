@@ -10,6 +10,7 @@
 ## Feb 14, 2003 - give reasonable defaults to functions
 ## Feb 27, 2003 - clean out two commented out functions
 ## Mar 21, 2003 - Rename file LESN.R to keep consistant naming across methods
+## Oct 7, 2003 - fix problem with shifting not proper function call
 ##
 ###########################################################################
 
@@ -52,7 +53,7 @@ bg.correct.LESN <- function(object,method = 2,baseline = 0.25, theta=4){
   } else if (method == 1){
     bg.correct.stretch(object, baseline, type="logexponential",theta) 
   } else {
-    bg.shift(object,baseline)
+    bg.correct.shift(object,baseline)
   }
 }
 

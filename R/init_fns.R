@@ -14,6 +14,7 @@
 ##                the a normalize method for exprSet objects
 ## Aug 23, 2003 - make sure to make scaling available via normalize
 ## Sep 25, 2003 - Port to R-1.8
+## Oct 7, 2003 - Remove unused variable
 ##
 ############################################################
 
@@ -44,7 +45,7 @@
 
 
 .First.lib <- function(libname, pkgname) {
-  s <- search() 
+
 
   .initNormfunctions(match(paste("package:",pkgname,sep=""),search()))
     

@@ -26,6 +26,7 @@
 # Jul 26, 2003 - introduced normalization options parameter
 #                converted background parameters in same manner
 # Jul 27, 2003 - cleaned up parameter list
+# Oct 7, 2003 - comment out 
 #
 #####################################################################
 
@@ -74,8 +75,8 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
   }
 
 
-  rows <- length(probeNames(object))
-  cols <- length(object)
+  #rows <- length(probeNames(object))
+  #cols <- length(object)
  
   ngenes <- length(geneNames(object))
   
