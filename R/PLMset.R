@@ -891,28 +891,28 @@ pseudoColorBar <- function (x, horizontal = TRUE, col = heat.colors(50), scale =
 ###
 ###
 
-ma.plot <- function(A,M,subset=sample(1:length(M),min(c(10000, length(M)))),show.statistics=TRUE,span=2/3,family.loess="gaussian",cex=2,...){
-  sigma <- IQR(M)
-  mean <- median(M)
-  xloc <- max(A) - 1
-  yloc <- max(M)*0.75
-  aux <- loess(M[subset]~A[subset],degree=1,span=span,family=family.loess)$fitted
-  
-  plot(A,M,...)
-  o <- order(A[subset])
-  A <- A[subset][o]
-  M <- aux[o]
-  o <-which(!duplicated(A))
-  lines(approx(A[o],M[o]),col="red")
-  abline(0,0,col="blue")
+###ma.plot <- function(A,M,subset=sample(1:length(M),min(c(10000, length(M)))),show.statistics=TRUE,span=2/3,family.loess="gaussian",cex=2,...){
+###  sigma <- IQR(M)
+###  mean <- median(M)
+###  xloc <- max(A) - 1
+###  yloc <- max(M)*0.75
+###  aux <- loess(M[subset]~A[subset],degree=1,span=span,family=family.loess)$fitted
+###  
+###  plot(A,M,...)
+###  o <- order(A[subset])
+###  A <- A[subset][o]
+### M <- aux[o]
+### o <-which(!duplicated(A))
+###  lines(approx(A[o],M[o]),col="red")
+###  abline(0,0,col="blue")
 
-  # write IQR and Median on to plot
-  if (show.statistics){
-    txt <- format(sigma,digits=3)
-    txt2 <- format(mean,digits=3)
-    text(xloc ,yloc,paste(paste("Median:",txt2),paste("IQR:",txt),sep="\n"),cex=cex)
-  } 
-}
+###  # write IQR and Median on to plot
+###  if (show.statistics){
+###    txt <- format(sigma,digits=3)
+###    txt2 <- format(mean,digits=3)
+###    text(xloc ,yloc,paste(paste("Median:",txt2),paste("IQR:",txt),sep="\n"),cex=cex)
+###  } 
+###}
 
 
 
