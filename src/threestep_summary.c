@@ -24,6 +24,7 @@
  ** Feb 24, 2003 - eliminate a compiler warning (for some compilers) unused variable OLDPM
  ** Apr 4, 2003 - make the number of rows allowed in a probeset dynamic.
  ** Jul 23, 2003 - standard errors should now be returned by threestep summarization routines
+ ** May 11, 2004 - fix a small memory leak
  **
  ************************************************************************/
 
@@ -121,5 +122,6 @@ void do_3summary(double *PM, char **ProbeNames, int *rows, int *cols, double *re
   }
 
   Free(cur_exprs);
+  Free(cur_se);
   Free(cur_rows);
 }
