@@ -1,3 +1,4 @@
+MAplot                  Relative M vs. A plots
 PLMset-class            Class PLMset
 PLMset2exprSet          Convert a PLMset to an exprSet
 bg.correct.LESN         LESN - Low End Signal is Noise Background
