@@ -29,7 +29,7 @@
 \alias{boxplot,PLMset-method}
 \alias{getCdfInfo,PLMset-method}
 \alias{indexProbes,PLMset,character-method}
-
+\alias{cdfName,PLMset-method}
 
 \title{Class PLMset}
 \description{This is a class representation for Probe level Linear
