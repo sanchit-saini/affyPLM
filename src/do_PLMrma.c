@@ -14,6 +14,7 @@
  ** Sept 14, 2003 - Initial version
  ** Oct 5, 2003 - add missing #include
  ** Oct 12, 2003 - fix declaration order error
+ ** May 11, 2004 - fix a memory leak
  **
  *********************************************************************/
 
@@ -286,7 +287,7 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
   Free(current->cur_resids);
   Free(current->cur_se_estimates);
   Free(current->cur_params);
-  //Free(current->cur_weights);
+  Free(current->cur_weights);
   Free(current->cur_rows);
   Free(current);
 }

@@ -147,6 +147,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   SET_VECTOR_ELT(output_list,0,outvec);
   SET_VECTOR_ELT(output_list,1,outSEvec);
   UNPROTECT(1);
+  Free(outnames);
   Free(ProbeNames);
   Free(summary_param);
   return output_list;
