@@ -4,7 +4,7 @@ library(affyPLM)
 data(affybatch.example)
 
 
-eset <- threestep(affybatch.example,background.method="RMA.1")
+### NO LONGER SUPPORTED eset <- threestep(affybatch.example,background.method="RMA.1")
 eset <- threestep(affybatch.example,background.method="RMA.2")
 eset <- threestep(affybatch.example,background.method="IdealMM")
 eset <- threestep(affybatch.example,background.method="MAS")

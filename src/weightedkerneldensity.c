@@ -6,7 +6,7 @@
  **
  ** Copyright (C) 2003 Ben Bolstad
  **
- ** created on: Mar 9, 2003
+ ** created on: Mar 24, 2003
  **
  ** Description
  ** 
@@ -23,6 +23,7 @@
  ** Apr 22, 2003 - fix computation of bandwidth. Add in linear interpolation
  **                so as to be more consistent with R.
  ** Apr 5, 2004 - all calloc/free are now Calloc/Free
+ ** Mar 24, 2005 - Add in IQR function to handle obscure cases.
  **
  ****************************************************************************/
 
@@ -459,7 +460,7 @@ void linear_interpolate(double *x, double *y, double *xout, double *yout, int le
      yout[i] = linear_interpolate_helper(xout[i], x, y, length);
 }
 
-
+static double IQR(double *x, int length);
 
 /**********************************************************************
  **
@@ -497,7 +498,7 @@ void KernelDensity(double *x, int *nxxx, double *weights, double *output, double
   
   low  = buffer[0];
   high = buffer[nx-1];
-  iqr =  buffer[(int)(0.75*nx + 0.5)] - buffer[(int)(0.25*nx+0.5)];
+  iqr =  IQR(buffer,nx);  //buffer[(int)(0.75*nx + 0.5)] - buffer[(int)(0.25*nx+0.5)];
   
 
   bw = bandwidth(x,nx,iqr);
@@ -544,4 +545,51 @@ void KernelDensity(double *x, int *nxxx, double *weights, double *output, double
 
 }
 
+/**
+ **
+ ** Note the following function assumes that data (x) is sorted
+ **
+ ** Aim is to duplicate R quantile function
+ **
+ **/
 
+
+static double IQR(double *x, int length){
+
+  double lowindex, highindex;
+  double lowfloor, highfloor;
+  double lowceil, highceil;
+  int low_i, high_i;
+  double low_h, high_h;
+
+
+  double qslow, qshigh;
+  
+  lowindex = (double)(length -1)*0.25;
+  highindex = (double)(length -1)*0.75;
+
+  lowfloor = floor(lowindex);
+  highfloor = floor(highindex);
+
+  lowceil = ceil(lowindex);
+  highceil = ceil(highindex);
+  
+  low_i = lowindex > lowfloor;
+  high_i = highindex > highfloor;
+  
+  qslow = x[(int)lowfloor];
+  qshigh = x[(int)highfloor];
+  
+  low_h = lowindex - lowfloor;
+  high_h = highindex - highfloor;
+  
+  if (low_h > 1e-10){
+    qslow = (1.0 - low_h)*qslow + low_h*x[(int)lowceil];
+  }
+  if (high_h > 1e-10){
+    qshigh = (1.0 - high_h)*qshigh + high_h*x[(int)highceil];
+  }
+
+  return qshigh - qslow;
+
+}

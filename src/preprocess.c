@@ -40,6 +40,7 @@
  **                so that SEXP densfunc, SEXP rho, SEXP LESN_param
  **                were all subsumed into bg_parameters
  ** Apr 5, 2004 - all malloc/free are now Calloc/Free
+ ** Aug 4, 2004 - Change functions to deal with new structure and pmonly/mmonly/separate/together methodology.
  **
  **
  *********************************************************************/
@@ -140,37 +141,78 @@ SEXP GetParameter(SEXP alist, char *param_name){
  ********************************************************************************************/
 
 SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP bg_type,SEXP background_param){
-  int i;
+  int i,j;
   double *PM,*MM;
   
   double theta, baseline;
   int rows, cols;
   char **ProbeNames;
   
+  int allrows;
+  int which_lesn;
+
   SEXP dim1;
   SEXP densfunc;
   SEXP rho;
   SEXP LESN_param;
-
-
-
-
-  /*printf("Background correcting\n");*/
+  SEXP param;
   
-  if (asInteger(bg_type) == 1){
-    /* Version 1 RMA Background */
+  SEXP rma_bg_type;
+  SEXP allPMMM;
+  
+
+  PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
+  rows = INTEGER(dim1)[0];
+  cols = INTEGER(dim1)[1]; 
+  UNPROTECT(1);
+
+  PROTECT(rma_bg_type = allocVector(REALSXP,10));
+  NUMERIC_POINTER(rma_bg_type)[0] = 2.0;
+  
+
+
+  if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"RMA.2") == 0){
     densfunc = GetParameter(background_param,"densfun");
     rho = GetParameter(background_param,"rho");
-    PMmat = bg_correct_c(PMmat, MMmat, densfunc,rho,bg_type);
-  } else if (asInteger(bg_type) == 2){
-    /* Version 2 RMA BAckground */
-    densfunc = GetParameter(background_param,"densfun");
-    rho = GetParameter(background_param,"rho");
-    PMmat = bg_correct_c(PMmat, MMmat, densfunc,rho,bg_type);
-  } else if (asInteger(bg_type) == 3){
-    /* Correction using Ideal Mismatch */ 
-    /* printf("Background correcting\n");*/
-    Rprintf("Background correcting\n");
+    param = GetParameter(background_param,"type");
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Background correcting PM\n");
+      PMmat = bg_correct_c(PMmat, MMmat, densfunc,rho,rma_bg_type);
+    }
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Background correcting MM\n");
+      MMmat = bg_correct_c(MMmat, PMmat, densfunc,rho,rma_bg_type);
+    }
+    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
+      Rprintf("Background correcting PM and MM together\n");
+      PROTECT(allPMMM = allocMatrix(REALSXP,2*rows,cols));
+      allrows = 2*rows;
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  NUMERIC_POINTER(allPMMM)[j*2*rows + i] = NUMERIC_POINTER(PMmat)[j*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  NUMERIC_POINTER(allPMMM)[j*2*rows + i + rows] = NUMERIC_POINTER(MMmat)[j*rows + i];
+	}
+      }
+      allPMMM = bg_correct_c(allPMMM, MMmat, densfunc,rho,rma_bg_type);
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  NUMERIC_POINTER(PMmat)[j*rows + i] = NUMERIC_POINTER(allPMMM)[j*2*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  NUMERIC_POINTER(MMmat)[j*rows + i] = NUMERIC_POINTER(allPMMM)[j*2*rows + i + rows];
+	}
+      }
+      UNPROTECT(1);
+    }
+  } else if ((strcmp(CHAR(VECTOR_ELT(bg_type,0)),"IdealMM") == 0 )|| (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"MASIM") == 0)){
+    
+    Rprintf("Background correcting");
 
     PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
     rows = INTEGER(dim1)[0];
@@ -182,101 +224,78 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
     ProbeNames =(char **)Calloc(rows,char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+    param = GetParameter(background_param,"ideal");
+    if (strcmp(CHAR(VECTOR_ELT(param,0)),"MM") == 0){
+      Rprintf(" PM using MM\n");
+      IdealMM_correct(PM,MM, &rows, &cols,ProbeNames);
+    } else {
+      Rprintf(" MM using PM\n");
+      IdealMM_correct(MM,PM, &rows, &cols,ProbeNames);
+    }
 
-    IdealMM_correct(PM,MM, &rows, &cols,ProbeNames);
+
+
     Free(ProbeNames);
     UNPROTECT(1);
+  } else if (strncmp(CHAR(VECTOR_ELT(bg_type,0)),"LESN",4) == 0){
+    LESN_param = GetParameter(background_param,"lesnparam");
 
-  } else if (asInteger(bg_type) == 4){
-    /* Mas 5 location dependent background */
-    /* MAS5 will be handled within R code */
+    if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"LESN2") == 0){
+      which_lesn =2;
+    } else  if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"LESN1") == 0){
+      which_lesn=1;
+    } else if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"LESN0") == 0){
+      which_lesn=0;
+    }
 
-    /* Rprintf("Background correcting - MAS Method currently not implemented\n"); */
-    /* affy_background_adjust_R(probeintensity,x, y, *nprobes, *nchips, *rows, *cols, *grid_dim); */
-  } else if (asInteger(bg_type) == 5){
-    /* Mas 5 location dependent background 
-       followed by IMM correction */
-    /* MAS5 will be handled within R code */
-    /* Rprintf("Background correcting - MAS Method currently not implemented, using only ideal mismatch\n"); */
-    /* affy_background_adjust_R(probeintensity,x, y, *nprobes, *nchips, *rows, *cols, *grid_dim); */
+   
     PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
     rows = INTEGER(dim1)[0];
     cols = INTEGER(dim1)[1]; 
-    
     PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
     MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
-
-    ProbeNames = (char **)Calloc(rows,char *);
-    for (i =0; i < rows; i++)
-      ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
-
-    IdealMM_correct(PM,MM, &rows, &cols,ProbeNames);
-    Free(ProbeNames);
-    UNPROTECT(1);
-    
-  } else if (asInteger(bg_type) == 6){
-    /* LESN proposal 2 - half gaussian weighting */
-    LESN_param = GetParameter(background_param,"lesnparam");
-
-
-    Rprintf("Background correcting\n");
-    PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
-    rows = INTEGER(dim1)[0];
-    cols = INTEGER(dim1)[1]; 
-    PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
     baseline = NUMERIC_POINTER(LESN_param)[0];
     theta = NUMERIC_POINTER(LESN_param)[1];
-    LESN_correct(PM, rows, cols, 2, baseline,theta);
+    param = GetParameter(background_param,"type");
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){ 
+      Rprintf("Background correcting PM\n");
+      LESN_correct(PM, rows, cols, 2, baseline,theta);
+    }
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){ 
+      Rprintf("Background correcting MM\n");
+      LESN_correct(MM, rows, cols, 2, baseline,theta);
+    }
+    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
+      Rprintf("Background correcting PM and MM together\n");
+      PROTECT(allPMMM = allocMatrix(REALSXP,2*rows,cols));
+      allrows = 2*rows;
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  NUMERIC_POINTER(allPMMM)[j*2*rows + i] = NUMERIC_POINTER(PMmat)[j*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  NUMERIC_POINTER(allPMMM)[j*2*rows + i + rows] = NUMERIC_POINTER(MMmat)[j*rows + i];
+	}
+      }
+      LESN_correct(NUMERIC_POINTER(allPMMM), allrows, cols, 2, baseline,theta);
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  NUMERIC_POINTER(PMmat)[j*rows + i] = NUMERIC_POINTER(allPMMM)[j*2*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  NUMERIC_POINTER(MMmat)[j*rows + i] = NUMERIC_POINTER(allPMMM)[j*2*rows + i + rows];
+	}
+      }
+      UNPROTECT(1);
+    }
     UNPROTECT(1);
-  } else if (asInteger(bg_type) == 7){
-    /* LESN proposal 1 - half gaussian weighting */
-    Rprintf("Background correcting\n");
-    LESN_param = GetParameter(background_param,"lesnparam");
-     
-    PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
-    rows = INTEGER(dim1)[0];
-    cols = INTEGER(dim1)[1]; 
-    PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
-    baseline = NUMERIC_POINTER(LESN_param)[0];
-    theta = NUMERIC_POINTER(LESN_param)[1];
-    LESN_correct(PM, rows, cols, 1, baseline, theta);
-    UNPROTECT(1);
-  } else if (asInteger(bg_type) == 8){
-    /*      LESN proposal 0 - shifting */
-    Rprintf("Background correcting\n");
-    LESN_param = GetParameter(background_param,"lesnparam");
-    
-    PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
-    rows = INTEGER(dim1)[0];
-    cols = INTEGER(dim1)[1]; 
-    PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
-    baseline = NUMERIC_POINTER(LESN_param)[0];
-    theta = NUMERIC_POINTER(LESN_param)[1];
-    LESN_correct(PM, rows, cols, 0, baseline, theta);
-    UNPROTECT(1);
-
-  } else if (asInteger(bg_type) == 9){
-    /* Specific biweight correction */
-    Rprintf("Background correcting\n");
-
-    PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
-    rows = INTEGER(dim1)[0];
-    cols = INTEGER(dim1)[1]; 
-    
-    PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
-    MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
-
-    ProbeNames = (char **)Calloc(rows,char *);
-    for (i =0; i < rows; i++)
-      ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
-
-    SpecificBiweightCorrect(PM,MM, &rows, &cols,ProbeNames);
-    Free(ProbeNames);
-    UNPROTECT(1);
-
-
   }
-
+  
+  UNPROTECT(1);
   return PMmat;
 }
 
@@ -313,9 +332,11 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
   int rows, cols;
   /* double *outexpr; */
   double *PM,*MM;
+  double *allPMMM;
+  int allrows;
   /*  char **outnames; */
   char **ProbeNames; 
-  int i;
+  int i,j;
   int nprobesets;
   
   double trim;
@@ -342,13 +363,55 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
   /* printf("%d ",INTEGER(norm_flag)[0]); */
   /* normalize PM using quantile normalization */
   /* printf("Normalizing\n"); */
-  Rprintf("Normalizing\n");
+  /* Rprintf("Normalizing\n"); */
 
 
 
-  if (asInteger(norm_type) == 1){
-    qnorm_c(PM,&rows,&cols);
-  } else if (asInteger(norm_type) == 2) { 
+
+
+  if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"quantile") == 0){
+    param = GetParameter(norm_parameters,"type");
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Normalizing PM\n");
+      qnorm_c(PM,&rows,&cols);
+    } 
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0)|| (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Normalizing MM\n");
+      qnorm_c(MM,&rows,&cols);
+    }
+    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
+      Rprintf("Normalizing PM and MM together\n");
+      allPMMM = (double *)Calloc(2*rows*cols,double);
+      allrows = 2*rows;
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  allPMMM[j*2*rows + i] = PM[j*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  allPMMM[j*2*rows + i + rows] = MM[j*rows + i];
+	}
+      }
+      qnorm_c(allPMMM,&allrows,&cols);
+      
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  PM[j*rows + i] = allPMMM[j*2*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  MM[j*rows + i] = allPMMM[j*2*rows + i + rows];
+	}
+      }
+      Free(allPMMM);
+
+    }
+
+
+
+  } else if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"quantile.probeset") == 0){
     ProbeNames = (char **)Calloc(rows,char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
@@ -357,15 +420,116 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
     usemedian = asInteger(param);
     param = GetParameter(norm_parameters,"use.log2");
     uselog2 = asInteger(param);
-    qnorm_probeset_c(PM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
+
+    param = GetParameter(norm_parameters,"type");
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Normalizing PM\n");
+      qnorm_probeset_c(PM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
+    } 
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Normalizing MM\n");
+      qnorm_probeset_c(MM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
+    }
+    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
+      Rprintf("Normalizing PM and MM together\n");
+      allPMMM = (double *)Calloc(2*rows*cols,double);
+      allrows = 2*rows;
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  allPMMM[j*2*rows + i] = PM[j*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  allPMMM[j*2*rows + i + rows] = MM[j*rows + i];
+	}
+      }
+      ProbeNames = (char **)Realloc(ProbeNames,2*rows,char *);
+      for (i =0; i < rows; i++)
+	ProbeNames[rows + i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+      qnorm_probeset_c(allPMMM, allrows, cols, 2*nprobesets, ProbeNames, usemedian, uselog2);
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  PM[j*rows + i] = allPMMM[j*2*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  MM[j*rows + i] = allPMMM[j*2*rows + i + rows];
+	}
+      }
+      Free(allPMMM);
+    }
+
+
+
+
     Free(ProbeNames);
-  } else if (asInteger(norm_type) == 3) { 
+
+  } else if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"scaling") == 0){
     param = GetParameter(norm_parameters,"scaling.trim");
     trim = asReal(param);
     param = GetParameter(norm_parameters, "scaling.baseline");
-    baseline = asInteger(param);
-    scaling_norm(PM, rows, cols,trim, baseline);
+    baseline = asInteger(param); 
+
+    param = GetParameter(norm_parameters,"type");
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Normalizing PM\n");
+      scaling_norm(PM, rows, cols,trim, baseline);
+    }
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Normalizing MM\n");
+      scaling_norm(MM, rows, cols,trim, baseline);
+    }
+    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
+      Rprintf("Normalizing PM and MM together\n");
+      allPMMM = (double *)Calloc(2*rows*cols,double);
+      allrows = 2*rows;
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  allPMMM[j*2*rows + i] = PM[j*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  allPMMM[j*2*rows + i + rows] = MM[j*rows + i];
+	}
+      }
+      scaling_norm(allPMMM, allrows, cols,trim, baseline);
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  PM[j*rows + i] = allPMMM[j*2*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  MM[j*rows + i] = allPMMM[j*2*rows + i + rows];
+	}
+      }
+      Free(allPMMM);
+    }
   }
+      
+  /*** if (asInteger(norm_type) == 1){
+       qnorm_c(PM,&rows,&cols);
+       } else if (asInteger(norm_type) == 2) { 
+       ProbeNames = (char **)Calloc(rows,char *);
+       for (i =0; i < rows; i++)
+       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+       
+       param = GetParameter(norm_parameters,"use.median");
+       usemedian = asInteger(param);
+       param = GetParameter(norm_parameters,"use.log2");
+       uselog2 = asInteger(param);
+       qnorm_probeset_c(PM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
+       Free(ProbeNames);
+       } else if (asInteger(norm_type) == 3) { 
+       param = GetParameter(norm_parameters,"scaling.trim");
+       trim = asReal(param);
+       param = GetParameter(norm_parameters, "scaling.baseline");
+       baseline = asInteger(param);
+       scaling_norm(PM, rows, cols,trim, baseline);
+       }       **/
   UNPROTECT(1);
   return PMmat;
 }

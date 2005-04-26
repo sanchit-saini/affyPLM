@@ -181,8 +181,8 @@ void lm_wfit(double *x, double *y, double *w, int rows, int cols, double tol, do
       for (j = 0; j < k; j++){
 	out_beta[j] = beta[jpvt[j]];
       }
-      for(j =k; k < cols; j++){
-	out_beta[jpvt[j]] =  R_NaN;
+      for(j =k; j < cols; j++){
+	out_beta[j] =  R_NaN;// out_beta[jpvt[j]] =  R_NaN;
       }
     } else {
     

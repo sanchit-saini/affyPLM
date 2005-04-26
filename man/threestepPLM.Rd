@@ -37,7 +37,11 @@ An \code{\link{PLMset}}
 
 \author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
 
-\references{Under preparation}
+\references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
+    Oligonucleotide Array Data: Background, Normalization and
+    Summarization}. PhD Dissertation. University of California,
+  Berkeley.}
+
 \seealso{\code{\link[affy]{expresso}},
   \code{\link[affy]{rma}}, \code{\link{threestep}},
   \code{\link{rmaPLM}}, \code{\link{fitPLM}}

@@ -4,7 +4,7 @@
  ** 
  ** aim: provide a summarization framework for three step computation of expression 
  **
- ** Copyright (C) 2003 Ben Bolstad
+ ** Copyright (C) 2003-2005 Ben Bolstad
  **
  ** created by: B. M. Bolstad  <bolstad@stat.berkeley.edu>
  ** created on: Jan 7, 2002 (based on code extending back as far as June 2002)
@@ -25,6 +25,7 @@
  ** Apr 4, 2003 - make the number of rows allowed in a probeset dynamic.
  ** Jul 23, 2003 - standard errors should now be returned by threestep summarization routines
  ** May 11, 2004 - fix a small memory leak
+ ** Mar 13, 2005 - change loop
  **
  ************************************************************************/
 
@@ -82,30 +83,23 @@ void do_3summary(double *PM, char **ProbeNames, int *rows, int *cols, double *re
 
   first = ProbeNames[0];
   first_ind = 0;
-  i =0;
-  nprobes = 1;
-  for (j = 1; j < *rows; j++){
-    if ((strcmp(first,ProbeNames[j]) != 0) | (j == (*rows -1))){
-      if (j == (*rows -1)){
-	nprobes++;
-       	for (k = 0; k < nprobes; k++){
-	  if (k >= max_nrows){
-	    max_nrows = 2*max_nrows;
-	    cur_rows = Realloc(cur_rows, max_nrows, int);
-	  }
-	  cur_rows[k] = (j+1 - nprobes)+k; 
-	}
-      } else {
-	for (k = 0; k < nprobes; k++){
-	  if (k >= max_nrows){
-	    max_nrows = 2*max_nrows;
-	    cur_rows = Realloc(cur_rows, max_nrows, int);
-	  }
-	  cur_rows[k] = (j - nprobes)+k; 
-	}
+  i = 0;     /* indexes current probeset */
+  j = 0;    /* indexes current row in PM matrix */
+  k = 0;    /* indexes current probe in probeset */
+  
+  while ( j < *rows){
+    if (strcmp(first,ProbeNames[j]) == 0){
+      if (k >= max_nrows){
+	max_nrows = 2*max_nrows;
+	cur_rows = Realloc(cur_rows, max_nrows, int);
       }
+      cur_rows[k] = j;
+      k++;
+      j++;
+      
+    } else {
+      nprobes = k;
       SummaryMeth(PM, *rows, *cols, cur_rows, cur_exprs, nprobes,cur_se,summary_param);
-
       for (k =0; k < *cols; k++){
 	results[k*nps + i] = cur_exprs[k];
 	resultsSE[k*nps + i] = cur_se[k];
@@ -115,12 +109,20 @@ void do_3summary(double *PM, char **ProbeNames, int *rows, int *cols, double *re
       strcpy(outNames[i],first);
       i++;
       first = ProbeNames[j];
-      first_ind = j;
-      nprobes = 0;
+      k = 0;
     }
-    nprobes++;
   }
-
+  nprobes = k;
+  SummaryMeth(PM, *rows, *cols, cur_rows, cur_exprs, nprobes,cur_se,summary_param);
+  for (k =0; k < *cols; k++){
+    results[k*nps + i] = cur_exprs[k];
+    resultsSE[k*nps + i] = cur_se[k];
+  } 
+  size = strlen(first);
+  outNames[i] = Calloc(size+1,char);
+  strcpy(outNames[i],first);
+  
+  
   Free(cur_exprs);
   Free(cur_se);
   Free(cur_rows);

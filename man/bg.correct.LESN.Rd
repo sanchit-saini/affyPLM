@@ -28,6 +28,13 @@ bg.correct.LESN(object,method = 2,baseline = 0.25, theta=4)
 An \code{\link[affy]{AffyBatch}}
 }
 
+
+
+\references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
+    Oligonucleotide Array Data: Background, Normalization and
+    Summarization}. PhD Dissertation. University of California, Berkeley.}
+
+
 \author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
 
 \examples{

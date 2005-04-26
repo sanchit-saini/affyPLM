@@ -5,7 +5,7 @@
 ## Aim: Implement traditional "RMA" (Background, QN and median
 ##      polish) as a PLM (probe level model).
 ##
-## Copyright (C) 2003-2004     B. M. Bolstad 
+## Copyright (C) 2003-2005     B. M. Bolstad 
 ##
 ## Created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
 ##
@@ -16,10 +16,17 @@
 ## Dec 14, 2003 - Added model.description
 ## Jan 18, 2004 - removR to C code mapping functions to internalfunctions.R
 ## Feb 24, 2004 - added a "subset" parameter (and made it active)
+## Aug 5, 2004 - some changes to deal with new pre-processing structure
+##               Changes to deal with new PLMset structure
+## Mar 12, 2005 - fix it so that probe effects are returned
 ##
 #############################################################
 
 rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",background.param = list(),normalize.param=list(),output.param=list(),model.param=list()){
+
+  if (!is(object, "AffyBatch")) {
+    stop(paste("argument is",class(object),"fitPLM requires AffyBatch"))
+  }
 
   rows <- length(probeNames(object,subset))
   cols <- length(object)
@@ -30,31 +37,27 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
   } else {
     ngenes <- length(unique(subset))
   }
-  
-    
-  # background correction for RMA type backgrounds
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
+
+  op.param <- list(weights=FALSE,residuals=TRUE, pseudo.SE=FALSE,resid.SE=FALSE)
+  op.param[names(output.param)] <- output.param
+  #output <- verify.output.param(output.param)
+  modelparam <- verify.model.param(object,PM ~ -1 + probes + samples, model.param=model.param)
+  R.model <- PLM.designmatrix3(object,PM ~ -1 + probes + samples, variable.type=list(default="factor"),constraint.type=list(default="contr.sum"))
+
+  
+  b.param <- verify.bg.param(R.model, background.method,background.param = background.param)
+  n.param <- verify.norm.param(R.model, normalize.method,normalize.param=normalize.param)
 
   # to avoid having to pass location information to the c code, we will just call the R code method
   if (is.element(background.method,c("MAS","MASIM")) & background){
     cat("Background Correcting\n")
     object <- bg.correct.mas(object)
   }
-    
-  LESN.param <-list(baseline=0.25,theta=4)
-  LESN.param <- convert.LESN.param(LESN.param)
-
-  b.param <- list(densfun =  body(bg.dens), rho = new.env(),lesnparam=LESN.param)
-  b.param[names(background.param)] <- background.param
-  
-  n.param <- list(scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
-  n.param[names(normalize.param)] <- normalize.param
-  
-  
-  op.param <- list(weights=FALSE,residuals=TRUE, pseudo.SE=FALSE,resid.SE=FALSE)
-  op.param[names(output.param)] <- output.param
-
+  if (is.element(background.method,c("gcrma","GCRMA")) & background){
+    cat("Background Correcting\n")
+    object <- bg.correct.gcrma(object)
+  }
   md.param <- list(psi.type = "Huber",psi.k=NULL)
   md.param[names(model.param)] <- model.param
   
@@ -63,7 +66,7 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
   }
   md.param$psi.type <- get.psi.code(md.param$psi.type)
   
-  fit.results <- .Call("R_rmaPLMset_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method),b.param,n.param,op.param,md.param,PACKAGE="affyPLM") #, PACKAGE="AffyExtensions") 
+  fit.results <- .Call("R_rmaPLMset_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, background.method, normalize.method,b.param,n.param,op.param,md.param,PACKAGE="affyPLM") #, PACKAGE="affyPLM") 
   probenames <- rownames(pm(object,subset))
   colnames(fit.results[[1]]) <- sampleNames(object)
   colnames(fit.results[[4]]) <- sampleNames(object)
@@ -94,13 +97,13 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
   
   x <- new("PLMset")
   x@chip.coefs=fit.results[[1]]
-  x@probe.coefs= fit.results[[2]]
-  x@weights=fit.results[[3]]
+  x@probe.coefs= split(fit.results[[2]],probeNames(object,subset))
+  x@weights=list(PM.weights=fit.results[[3]],MM.weights=matrix(0,0,0))
   x@se.chip.coefs=fit.results[[4]]
-  x@se.probe.coefs=fit.results[[5]]
+  x@se.probe.coefs=split(fit.results[[5]],probeNames(object,subset))
   x@exprs=fit.results[[6]]
   x@se.exprs=fit.results[[7]]
-  x@residuals=fit.results[[8]]
+  x@residuals=list(PM.resid=fit.results[[8]],MM.resid=matrix(0,0,0))
   x@residualSE=fit.results[[9]]
   x@varcov = fit.results[[10]]
   x@phenoData = phenodata
@@ -112,7 +115,7 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
   x@ncol=object@ncol
 
   x@model.description = list(which.function="rmaPLM",preprocessing=list(bg.method=background.method,bg.param=b.param,background=background,norm.method=normalize.method,norm.param=n.param,normalize=normalize),modelsettings =list(model.param=md.param,summary.method=NULL,model=NULL,constraint.type=NULL,variable.type=NULL),outputsettings=op.param)
-  
+   x@model.description = c(x@model.description, list(R.model=R.model))
   
   x
 

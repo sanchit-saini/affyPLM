@@ -11,15 +11,15 @@ Pset <- fitPLM(affybatch.example)
 
 coefs(Pset)[1:5,]
 se(Pset)[1:5,]
-coefs.probe(Pset)[1:5,]
-se.probe(Pset)[1:5,]
-coefs.const(Pset)[1:5]
-se.const(Pset)[1:5]
+coefs.probe(Pset)[1:5]
+se.probe(Pset)[1:5]
+coefs.const(Pset)
+se.const(Pset)
 
 #accessors for weights and residuals
 
-weights(Pset)[1:5,]
-resid(Pset)[1:5,]
+weights(Pset)[[1]][1:5,]
+resid(Pset)[[1]][1:5,]
 
 
 #test varcov
@@ -95,8 +95,9 @@ coefs(Pset)[1:5,]
 se(Pset)[1:5,]
 coefs.probe(Pset)[1:16] 
 
-
-
+#
+#Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,model.param=list(se.type=3))
+#se(Pset)[1:10,]
 
 #check that fitPLM rlm agrees with threestep rlm and threestepPLM rlm
 
@@ -105,10 +106,10 @@ Pset <- fitPLM(affybatch.example)
 eset <- threestep(affybatch.example,summary.method="rlm")
 Pset2 <- threestepPLM(affybatch.example,summary.method="rlm")
 
-if (any(coefs(Pset) != exprs(eset))){
+if (any(abs(coefs(Pset) - exprs(eset)) > 1e-14)){
   stop("no agreement between fitPLM and threestep")
 }
 
-if (any(coefs(Pset) != coefs(Pset2))){
+if (any(abs(coefs(Pset) - coefs(Pset2)) > 1e-14)){
   stop("no agreement between fitPLM and threestep")
 }

@@ -20,7 +20,6 @@
 \alias{indexProbesProcessed}
 \alias{model.description}
 \alias{sampleNames<-}
-\alias{nuse}
 \alias{coefs,PLMset-method}
 \alias{weights<-,PLMset-method}
 \alias{weights,PLMset-method}
@@ -48,9 +47,14 @@
 \alias{indexProbesProcessed,PLMset-method}
 \alias{model.description,PLMset-method}
 \alias{summary,PLMset-method}
+\alias{sampleNames,PLMset-method}
 \alias{sampleNames<-,PLMset-method}
-\alias{MAplot,PLMset-method}
+\alias{nuse}
+\alias{NUSE}
+\alias{RLE}
 \alias{nuse,PLMset-method}
+\alias{NUSE,PLMset-method}
+\alias{RLE,PLMset-method}
 
 \title{Class PLMset}
 \description{This is a class representation for Probe level Linear
@@ -137,14 +141,21 @@ Class \code{"exprSet"}, directly.
     \item{residSE}{\code{signature(x = "PLMset")}: will return the residual SE (if it has been stored)}
     \item{boxplot}{\code{signature(x = "PLMset")}: Boxplot of Normalized
       Unscaled Standard Errors (NUSE)}
-    \item{MAplot}{\code{signature(x = "PLMset")}: MA plots of a PLMset}
-    \item{nuse}{\code{signature(x = "PLMset")}: NUSE values for a PLMset}
+    \item{NUSE}{\code{signature(x = "PLMset")} : Boxplot of Normalized
+      Unscaled Standard Errors (NUSE) or NUSE values}
+    \item{RLE|}{\code{signature(x = "PLMset")} : Relative Log Expression
+      boxplot or values}
  }
 }
 \note{This class is better described in the vignette.}
 
 \author{B. M. Bolstad \email{bolstad@stat.berkeley.edu}}
 
+
+\references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
+    Oligonucleotide Array Data: Background, Normalization and
+    Summarization}. PhD Dissertation. University of California,
+  Berkeley.}
 
 \examples{
 }

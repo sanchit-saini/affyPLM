@@ -37,7 +37,17 @@ rmaPLM(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.
 
 \author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
 
-\references{Under Preparation}
+\references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
+    Oligonucleotide Array Data: Background, Normalization and
+    Summarization}. PhD Dissertation. University of California,
+  \cr \cr Irizarry RA, Bolstad BM, Collin F, Cope LM, Hobbs B and Speed
+  TP (2003) \emph{Summaries of Affymetrix GeneChip probe level data}
+  Nucleic Acids Research 31(4):e15
+  \cr \cr Bolstad, BM, Irizarry RA, Astrand, M, and Speed, TP (2003)
+  \emph{A Comparison of Normalization Methods for High Density
+    Oligonucleotide Array Data Based on Bias and Variance.}
+  Bioinformatics 19(2):185-193}
+
 \seealso{\code{\link[affy]{expresso}},
   \code{\link[affy]{rma}}, \code{\link{threestep}},\code{\link{fitPLM}}, \code{\link{threestepPLM}}
 }

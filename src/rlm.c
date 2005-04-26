@@ -39,6 +39,7 @@
  ** May 26, 2004 - rlm specialised for anova model. 
  ** June 21, 2004 - fixed up specialization for default anova model.
  ** June 23, 2004 - move specialization to its own file
+ ** July 26, 2004 - rlm_wfit added
  **
  ********************************************************************/
 
@@ -325,3 +326,133 @@ void rlm_fit_R(double *x, double *y, int *rows, int *cols, double *out_beta, dou
 }
 
 
+
+
+
+
+
+
+
+
+
+/**********************************************************************************
+ **
+ ** void rlm_wfit(double *x, double *y, int rows, int cols, double *out_beta, double *out_resids, double *out_weights)
+ **
+ ** double *x - model matrix: dimension rows*cols
+ ** double *y - independent variable: dimension cols
+ ** int rows,cols - dimensions of matrix
+ ** double *out_beta - already allocated space to store beta estimates: length cols
+ ** double *out_resids - already allocated space to store residuals: length rows
+ ** double *out_weights - already allocated space to store regression weights: length rows
+ ** 
+ ** This function fits a robust linear model using M estimation, convergence is
+ ** determined by the change in residuals.
+ **
+ **
+ **********************************************************************************/
+
+
+void rlm_wfit(double *x, double *y, double *w, int rows, int cols, double *out_beta, double *out_resids, double *out_weights,double (* PsiFn)(double, double, int), double psi_k,int max_iter, int initialized){
+
+  int i; /* ,j; */
+  /* double k = 1.345; */
+  /* double k2 = 1.345; */
+  double tol = 1e-7;
+  double acc = 1e-4;
+  double scale =0.0;
+  double conv;
+  //int max_iter=20;
+  int iter;
+  
+
+
+  double *wts = out_weights; //Calloc(rows,double);
+  double *beta = out_beta; // Calloc(cols,double);
+  double *resids = out_resids; //Calloc(rows,double);
+  double *old_resids = Calloc(rows,double);
+  
+
+
+
+  if (!initialized){
+
+    /* intially use equal weights */
+    for (i=0; i < rows; i++){
+      wts[i] = w[i]*1.0;
+    }
+    
+    /* get our intial beta estimates by standard linear regression */
+    
+    
+    lm_wfit(x, y, wts, rows, cols, tol, beta, resids);
+  }
+  /* printf("%f %f %f\n",beta[0],beta[1],beta[2]); */
+
+  /*
+    done <- FALSE
+    conv <- NULL
+    n1 <- nrow(x) - ncol(x)
+    if (scale.est != "MM")
+    scale <- mad(resid, 0)
+    theta <- 2 * pnorm(k2) - 1
+    gamma <- theta + k2^2 * (1 - theta) - 2 * k2 * dnorm(k2)
+  */
+
+  for (iter = 0; iter < max_iter; iter++){
+    
+    scale = med_abs(resids,rows)/0.6745;
+
+    if (fabs(scale) < 1e-10){
+      /*printf("Scale too small \n"); */
+      break;
+    }
+    
+    for (i =0; i < rows; i++){
+      old_resids[i] = resids[i];
+    }
+
+    for (i=0; i < rows; i++){
+      wts[i] = w[i]*PsiFn(resids[i]/scale,psi_k,0);  /*           psi_huber(resids[i]/scale,k,0); */
+    }
+   
+    lm_wfit(x, y, wts, rows, cols, tol, beta, resids);
+
+
+    /*check convergence  based on residuals */
+    
+    conv = irls_delta(old_resids,resids, rows);
+
+    if (conv < acc){
+      /*    printf("Converged \n");*/
+      break; 
+      
+    }
+  }
+
+ 
+  /*  for (j=0; j < cols; j++){
+    out_beta[j] = beta[j];
+    } */
+  
+  /* for (i=0; i < rows; i++){
+     out_resids[i] = resids[i];*/
+    /*  out_weights[i] = wts[i]; */
+  /* } */
+
+
+
+  Free(old_resids);
+  //  Free(wts);
+  // Free(beta);
+  // Free(resids);
+}
+
+
+
+
+
+void rlm_wfit_R(double *x, double *y, double *w, int *rows, int *cols, double *out_beta, double *out_resids, double *out_weights){
+
+  rlm_wfit(x, y, w, *rows, *cols, out_beta, out_resids,out_weights,psi_huber,1.345, 20,0);
+}

@@ -12,6 +12,10 @@
  **
  ** Last modified: June 23, 2003
  **
+ ** History:
+ ** July 29, 2004 - change routines so output order is the same as 
+ **                 in new structure.
+ **
  *********************************************************************/
 
 
@@ -480,17 +484,17 @@ void rlm_fit_anova(double *y, int y_rows, int y_cols,double *out_beta, double *o
   }
     
   /* order output in probes, samples order */
-
-  for (i=0;i < y_rows+y_cols-1; i++){
+  /*
+    for (i=0;i < y_rows+y_cols-1; i++){
     old_resids[i] = out_beta[i];
-  }  
-  for (i=0; i <y_rows-1;i++){
+    }  
+    for (i=0; i <y_rows-1;i++){
     out_beta[i] = old_resids[i+y_cols];
-  }
-  for (i=0; i < y_cols; i++){
+    }
+    for (i=0; i < y_cols; i++){
     out_beta[i+(y_rows-1)] = old_resids[i];
-  }
-
+    }
+  */
 
 
 
@@ -567,29 +571,46 @@ static void RLM_SE_Method_1_anova(double residvar, double *XTX, int y_rows,int y
   int p = y_rows + y_cols -1;
   
   XTWXinv(y_rows, y_cols,XTX);
-  for (i =0; i < y_rows-1; i++){
-    se_estimates[i] = sqrt(residvar*XTX[(i+y_cols)*p + (i+y_cols)]);
-  }
-  for (i =0; i < y_cols; i++){
-    se_estimates[i+(y_rows -1)] = sqrt(residvar*XTX[i*p + i]);
-  }
-
-  if (varcov != NULL){
-       /* copy across varcov matrix in right order */
-      for (i = 0; i < y_rows-1; i++)
-	for (j = i; j < y_rows-1; j++)
-	  varcov[j*p + i] =  residvar*XTX[(j+y_cols)*p + (i+y_cols)];
-      
-      for (i = 0; i < y_cols; i++)
-	for (j = i; j < y_cols; j++)
-	  varcov[(j+(y_rows-1))*p + (i+(y_rows -1))] =  residvar*XTX[j*p + i];
 
 
-      
-      for (i = 0; i < y_cols; i++)
-	for (j = y_cols; j < p; j++)
-	  varcov[(i+ y_rows -1)*p + (j - y_cols)] =  residvar*XTX[j*p + i];
+  for (i =0; i < p; i++){
+    se_estimates[i] = sqrt(residvar*XTX[i*p + i]);
   }
+  
+
+  /*** for (i =0; i < y_rows-1; i++){
+       se_estimates[i] = sqrt(residvar*XTX[(i+y_cols)*p + (i+y_cols)]);
+       }
+       for (i =0; i < y_cols; i++){
+       se_estimates[i+(y_rows -1)] = sqrt(residvar*XTX[i*p + i]);
+       }  ***/
+
+  if (varcov != NULL)
+    for (i =0; i < p; i++){
+      for (j = i; j < p; j++){
+	varcov[j*p +i]= residvar*XTX[j*p +i];
+      }
+    }
+  
+
+  /*** if (varcov != NULL){
+       // copy across varcov matrix in right order 
+       for (i = 0; i < y_rows-1; i++)
+       for (j = i; j < y_rows-1; j++)
+       varcov[j*p + i] =  residvar*XTX[(j+y_cols)*p + (i+y_cols)];
+       
+       for (i = 0; i < y_cols; i++)
+       for (j = i; j < y_cols; j++)
+       varcov[(j+(y_rows-1))*p + (i+(y_rows -1))] =  residvar*XTX[j*p + i];
+       
+       
+       
+       for (i = 0; i < y_cols; i++)
+       for (j = y_cols; j < p; j++)
+       varcov[(i+ y_rows -1)*p + (j - y_cols)] =  residvar*XTX[j*p + i];
+       
+       }  **/
+
 }
 
 
@@ -620,39 +641,53 @@ static void RLM_SE_Method_2_anova(double residvar, double *W, int y_rows,int y_c
   
   
   if (!Choleski_inverse(W,Winv,work,p,1)){
-    for (i =0; i < y_rows-1; i++){
+   for (i =0; i < p; i++){
+      se_estimates[i] = sqrt(residvar*Winv[i*p + i]);
+      /* printf("%f ", se_estimates[i]); */
+    }
+   /*for (i =0; i < y_rows-1; i++){
       se_estimates[i] = sqrt(residvar*Winv[(i+y_cols)*p + (i+y_cols)]);
-    }
-    for (i =0; i < y_cols; i++){
+      }
+      for (i =0; i < y_cols; i++){
       se_estimates[i+(y_rows -1)] = sqrt(residvar*Winv[i*p + i]);
-    }
+      } */
   } else {
     //printf("Using a G-inverse\n");
     SVD_inverse(W, Winv,p);
-    for (i =0; i < y_rows-1; i++){
-      se_estimates[i] = sqrt(residvar*Winv[(i+y_cols)*p + (i+y_cols)]);
+    for (i =0; i < p; i++){
+      se_estimates[i] = sqrt(residvar*Winv[i*p + i]);
+      /* printf("%f ", se_estimates[i]); */
     }
-    for (i =0; i < y_cols; i++){
-      se_estimates[i+(y_rows -1)] = sqrt(residvar*Winv[i*p + i]);
-    }
+    /* for (i =0; i < y_rows-1; i++){
+       se_estimates[i] = sqrt(residvar*Winv[(i+y_cols)*p + (i+y_cols)]);
+       }
+       for (i =0; i < y_cols; i++){
+       se_estimates[i+(y_rows -1)] = sqrt(residvar*Winv[i*p + i]);
+       } */
   }
   
-  if (varcov != NULL){
-       /* copy across varcov matrix in right order */
+  if (varcov != NULL)
+    for (i =0; i < p; i++){
+      for (j = i; j < p; j++){
+	varcov[j*p +i]= residvar*Winv[j*p +i];
+      }
+    }
+  /** if (varcov != NULL){
+       copy across varcov matrix in right order 
       for (i = 0; i < y_rows-1; i++)
-	for (j = i; j < y_rows-1; j++)
-	  varcov[j*p + i] =  residvar*Winv[(j+y_cols)*p + (i+y_cols)];
+      for (j = i; j < y_rows-1; j++)
+      varcov[j*p + i] =  residvar*Winv[(j+y_cols)*p + (i+y_cols)];
       
       for (i = 0; i < y_cols; i++)
-	for (j = i; j < y_cols; j++)
-	  varcov[(j+(y_rows-1))*p + (i+(y_rows -1))] =  residvar*Winv[j*p + i];
-
-
+      for (j = i; j < y_cols; j++)
+      varcov[(j+(y_rows-1))*p + (i+(y_rows -1))] =  residvar*Winv[j*p + i];
+      
+      
       
       for (i = 0; i < y_cols; i++)
-	for (j = y_cols; j < p; j++)
-	  varcov[(i+ y_rows -1)*p + (j - y_cols)] =  residvar*Winv[j*p + i];
-  }
+      for (j = y_cols; j < p; j++)
+      varcov[(i+ y_rows -1)*p + (j - y_cols)] =  residvar*Winv[j*p + i];
+      } **/
   
   Free(work);
   Free(Winv);
@@ -729,30 +764,43 @@ static int RLM_SE_Method_3_anova(double residvar, double *XTX, double *W,  int y
 
    /* make sure in right order */
 
-   for (i =0; i < y_rows-1; i++){
-     se_estimates[i] = sqrt(residvar*W[(i+y_cols)*p + (i+y_cols)]);
-   }
-   for (i =0; i < y_cols; i++){
-     se_estimates[i+(y_rows -1)] = sqrt(residvar*W[i*p + i]);
-   }
+   /*  for (i =0; i < y_rows-1; i++){
+       se_estimates[i] = sqrt(residvar*W[(i+y_cols)*p + (i+y_cols)]);
+       }
+       for (i =0; i < y_cols; i++){
+       se_estimates[i+(y_rows -1)] = sqrt(residvar*W[i*p + i]);
+       }*/
    
-   rv = 0;
-   if (varcov != NULL){
-     /* copy across varcov matrix in right order */
-     for (i = 0; i < y_rows-1; i++)
-       for (j = i; j < y_rows-1; j++)
-	 varcov[j*p + i] =  residvar*W[(j+y_cols)*p + (i+y_cols)];
-     
-     for (i = 0; i < y_cols; i++)
-       for (j = i; j < y_cols; j++)
-	 varcov[(j+(y_rows-1))*p + (i+(y_rows -1))] =  residvar*W[j*p + i];
-     
-     
-     
-     for (i = 0; i < y_cols; i++)
-       for (j = y_cols; j < p; j++)
-	 varcov[(i+ y_rows -1)*p + (j - y_cols)] =  residvar*W[j*p + i];
+   for (i =0; i < p; i++){
+     se_estimates[i] = sqrt(residvar*W[i*p + i]);
+     // printf("%f ", se_estimates[i]);
    }
+
+   rv = 0;
+   
+   if (varcov != NULL)
+     for (i =0; i < p; i++){
+       for (j = i; j < p; j++){
+	 varcov[j*p +i]= residvar*W[j*p +i];
+       }
+     }
+
+   /* if (varcov != NULL){
+       copy across varcov matrix in right order 
+      for (i = 0; i < y_rows-1; i++)
+      for (j = i; j < y_rows-1; j++)
+      varcov[j*p + i] =  residvar*W[(j+y_cols)*p + (i+y_cols)];
+      
+      for (i = 0; i < y_cols; i++)
+      for (j = i; j < y_cols; j++)
+      varcov[(j+(y_rows-1))*p + (i+(y_rows -1))] =  residvar*W[j*p + i];
+      
+      
+      
+      for (i = 0; i < y_cols; i++)
+      for (j = y_cols; j < p; j++)
+      varcov[(i+ y_rows -1)*p + (j - y_cols)] =  residvar*W[j*p + i];
+      } */
    Free(work);
    Free(Winv);
 
@@ -804,31 +852,43 @@ void rlm_compute_se_anova(double *Y, int y_rows,int y_cols, double *beta, double
     XTWX(y_rows,y_cols,weights,XTX);
     XTWXinv(y_rows, y_cols,XTX);
     
-    /* make sure in right order */
-
+    /* make sure in right order 
+       
     for (i =0; i < y_rows-1; i++){
-      se_estimates[i] = RMSEw*sqrt(XTX[(i+y_cols)*p + (i+y_cols)]);
+    se_estimates[i] = RMSEw*sqrt(XTX[(i+y_cols)*p + (i+y_cols)]);
     }
-     for (i =0; i < y_cols; i++){
-      se_estimates[i+(y_rows -1)] = RMSEw*sqrt(XTX[i*p + i]);
+    for (i =0; i < y_cols; i++){
+    se_estimates[i+(y_rows -1)] = RMSEw*sqrt(XTX[i*p + i]);
+    } */
+    
+    for (i =0; i < p; i++){
+      se_estimates[i] = RMSEw*sqrt(XTX[i*p + i]);
     }
     
-     if (varcov != NULL){
-       /* copy across varcov matrix in right order */
-      for (i = 0; i < y_rows-1; i++)
-	for (j = i; j < y_rows-1; j++)
-	  varcov[j*p + i] =  RMSEw*RMSEw*XTX[(j+y_cols)*p + (i+y_cols)];
-      
-      for (i = 0; i < y_cols; i++)
-	for (j = i; j < y_cols; j++)
-	  varcov[(j+(y_rows-1))*p + (i+(y_rows -1))] =  RMSEw*RMSEw*XTX[j*p + i];
+    
+    if (varcov != NULL)
+      for (i = 0; i < p; i++)
+	for (j = i; j < p; j++)
+	  varcov[j*p + i] =  RMSEw*RMSEw*XTX[j*p + i];
+    
 
 
+    /*     if (varcov != NULL){
+	   copy across varcov matrix in right order 
+	   for (i = 0; i < y_rows-1; i++)
+	   for (j = i; j < y_rows-1; j++)
+	   varcov[j*p + i] =  RMSEw*RMSEw*XTX[(j+y_cols)*p + (i+y_cols)];
+	   
+	   for (i = 0; i < y_cols; i++)
+	   for (j = i; j < y_cols; j++)
+	   varcov[(j+(y_rows-1))*p + (i+(y_rows -1))] =  RMSEw*RMSEw*XTX[j*p + i];
+	   
+	   
       
-      for (i = 0; i < y_cols; i++)
-	for (j = y_cols; j < p; j++)
-	  varcov[(i+ y_rows -1)*p + (j - y_cols)] =  RMSEw*RMSEw*XTX[j*p + i];
-     }
+	   for (i = 0; i < y_cols; i++)
+	   for (j = y_cols; j < p; j++)
+	   varcov[(i+ y_rows -1)*p + (j - y_cols)] =  RMSEw*RMSEw*XTX[j*p + i];
+	   } */
 
 
   } else {

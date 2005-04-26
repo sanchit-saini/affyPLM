@@ -59,7 +59,7 @@
 ##          we set it to the default parameter. These defaults are the following:
 ## ** Huber - k = 1.345
 ## ** Fair - k = 1.3998
-## ** Cauchy - k=2.3849
+## ** Cauchy - k=2.3849 
 ## ** Welsch - k = 2.9846
 ## ** Tukey Biweight - k = 4.6851
 ## ** Andrews Sine - K = 1.339
@@ -81,46 +81,49 @@
 ## Jan 18, 2004 - move some of the sub functions to internalfunctions.R
 ## Feb 23, 2004 - subset paramter added
 ## Mar 1,  2004 - moved chip-level design matrix creation to its own function
-## Mar 2, 2004 - rewrote design matrix function to handle interaction terms
+## Mar 2, 2004 - rewrote design matrix function to handle interaction terms 
 ## May 26, 2004 - allow use of MM as response term in fitPLM
 ## May 27, 2004 - if default model ie -1 + probes + samples flag that a optimized
 ##                algorithm should be used.
 ## Jun 28, 2004 - allow MM or PM as a covariate term in the model
+## Jul 14, 2004 - introduce PLM.designmatrix3 for dealing with new fitting algorithms
+## Aug 3, 2004 -  a new fitPLM introduced along with various support functions.
+## Feb 18, 2005 - gcrma background is also now an option
 ##
 ###########################################################
 
-fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),subset=NULL,background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=list(),model.param=list()){
+fitPLM.old <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),subset=NULL,background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=list(),model.param=list()){
 
-
-    if (! is(object, "AffyBatch")) {
-        stop(paste("argument is",class(object),"fitPLM requires AffyBatch"))
-    }
+  
+  if (class(object) != "AffyBatch"){
+    stop(paste("argument is",class(object),"fitPLM requires AffyBatch"))
+  }
 
 #  oldconstraints <- options()$contrasts
 #  if (constraint.type != "contr.treatment"){
 #    stop("only endpoint constraint currently implemented")
 #  }
-
+  
 #  options(contrasts=c(constraint.type,"contr.poly"))
 
   PLM.model.matrix <- PLM.designmatrix2(object,model,variable.type,constraint.type)
-
+  
   #check that chip covariates are not singular
-
+  
   if (qr(PLM.model.matrix$chip.covariates)$rank < ncol(PLM.model.matrix$chip.covariates)){
     stop("chiplevel effects is singular: singular fits are not implemented in fitPLM")
   }
-
+ 
   if (PLM.model.matrix$response.term == "MM"){
     tmp <- mm(object)
     mm(object) <- pm(object)
-    pm(object) <- tmp
+    pm(object) <- tmp	
   }
+	
+	
 
 
-
-
-
+  
   #cat("Method is ",model.type,"\n")
   # now add other variables onto chip.covariates matrix
 
@@ -143,12 +146,15 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
     object <- bg.correct.mas(object)
   }
 
+
+
+  
   LESN.param <-list(baseline=0.25,theta=4)
   LESN.param <- convert.LESN.param(LESN.param)
 
   b.param <- list(densfun =  body(bg.dens), rho = new.env(),lesnparam=LESN.param)
   b.param[names(background.param)] <- background.param
-
+  
   n.param <- list(scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
   n.param[names(normalize.param)] <- normalize.param
 
@@ -158,34 +164,34 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
   op.param$varcov <- match.arg(op.param$varcov,c("none","chiplevel","all"))
 
-
+  
   md.param <- list(se.type=4,psi.type="Huber",psi.k=NULL,max.its=20,init.method="ls",isdefaultmodel=PLM.model.matrix$isdefaultmodel,MMorPM.covariate=PLM.model.matrix$MMorPM.covariate)
   md.param[names(model.param)] <- model.param
 
-
-
-
+ 
+  
+  
   if (is.null(md.param$psi.k)){
     md.param$psi.k <- get.default.psi.k(md.param$psi.type)
   }
-
+  
   md.param$psi.type <- get.psi.code(md.param$psi.type)
 
-
-
+  
+  
   # lets do the actual model fitting
   fit.results <- .Call("R_rlmPLMset_c",pm(object,subset),mm(object,subset),probeNames(object,subset),
         ngenes, normalize, background,
         get.background.code(background.method), get.normalization.code(normalize.method),PLM.model.matrix$model.type,PLM.model.matrix$chip.covariates,b.param,n.param,op.param,md.param,PACKAGE="affyPLM")
+  
 
-
-
+  
  #put names on matrices and return finished object
 
   #chip.param.names <- NULL
 
 #  if (has.chipeffects){
-    #chip.param.names <- c(chip.param.names,sampleNames(object))
+    #chip.param.names <- c(chip.param.names,sampleNames(object))    
 #  } else {
     chip.param.names <- colnames(PLM.model.matrix$chip.covariates)
 #  }
@@ -205,7 +211,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
   if (op.param$residuals){
    colnames(fit.results[[8]]) <- sampleNames(object)
-   rownames(fit.results[[8]]) <- probenames
+   rownames(fit.results[[8]]) <- probenames 
   }
 
   if (op.param$resid.SE){
@@ -225,12 +231,12 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
         rownames(x) <- names
         x
       }
-      fit.results[[10]] <- lapply(fit.results[[10]],name.matrix,tmp.colnames)
+      fit.results[[10]] <- lapply(fit.results[[10]],name.matrix,tmp.colnames) 
     }
   }
+  
 
-
-
+  
   colnames(fit.results[[2]]) <- "ProbeEffects"
   rownames(fit.results[[2]]) <- probenames
   colnames(fit.results[[5]]) <- "SEProbeEffects"
@@ -259,7 +265,7 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
   description <- description(object)
   notes <- notes(object)
 
-
+  
   x <- new("PLMset")
   x@chip.coefs=fit.results[[1]]
   x@probe.coefs= fit.results[[2]]
@@ -297,17 +303,17 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
 
   model.terms <- terms(model)
   mt.variables <- attr(model.terms,"variables")
-
+  
   if ((mt.variables[[2]] != "PM") & (mt.variables[[2]] != "pm")){
     stop(paste("Response term in model should be 'PM' or 'pm'"))
   }
-
+  
   mt.intercept <- attr(model.terms,"intercept")
   mt.termlabels <- attr(model.terms,"term.labels")
 
-
+  
   length.parameters <- length(mt.termlabels)
-
+  
   if (length.parameters < 1){
     stop("Insufficent parameters supplied in model")
   }
@@ -315,11 +321,11 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
   # check to see if there is other chip level parameters and that they are valid
   mt.termlabels.abbrev <- mt.termlabels[mt.termlabels != "samples"]
   mt.termlabels.abbrev <- mt.termlabels.abbrev[mt.termlabels.abbrev != "probes"]
-
+  
   has.probeeffects <- is.element("probes",mt.termlabels)
   has.chipeffects <- is.element("samples",mt.termlabels)
 
-
+  
  if (!is.null(variable.type$probes)){
     cat("A variable type has been specified for probes parameter, this will be ignored. Assuming variable type is factor\n")
   }
@@ -330,11 +336,11 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
   #now go through the non default parameters seeing which type they should be treated as.
 
   #cat(mt.termlabels.abbrev,"\n")
-
+  
   vt <- NULL
 
   #check to see that everything is either "factor" or "covariate"
-  #figure out what the default type is
+  #figure out what the default type is 
   if (is.na(variable.type["default"])){
     cat("No default type given. Assuming default variable type is factor\n")
     vt.default <- "factor"
@@ -344,25 +350,25 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
     } else {
       stop("Incorrect default variable.type given")
     }
-  }
-
+  } 
+    
   if (sum(!is.element(variable.type,c("factor","covariate")))){
     stop("An incorrect variable type provided")
   }
 
-
+  
   if (length(mt.termlabels.abbrev) >=1){
-
+    
     vt <- rep(vt.default,length(mt.termlabels.abbrev))
     names(vt) <- mt.termlabels.abbrev
-
-    vt[names(variable.type)] <- variable.type
-    #has.vt <- is.element(mt.termlabels.abbrev,names(variable.type))
+    
+    vt[names(variable.type)] <- variable.type    
+    #has.vt <- is.element(mt.termlabels.abbrev,names(variable.type))    
   }
   #cat(has.vt,"\n");
   #print(vt)
 
-  #figure out what the default constraint type is
+  #figure out what the default constraint type is 
 
   if (is.na(constraint.type["default"])){
     cat("No default type given. Assuming default constraint type is contr.treatment\n")
@@ -373,41 +379,41 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
     } else {
       stop("Incorrect default constraint.type given")
     }
-  }
+  } 
 
   # check to see if there are any constraints on for the "probes" and "samples" parameters. Constraints on the first chip
   # level parameter will be ignored unless, the default constraint on probes will always "contr.sum", however
   # will allow the user to shoot themselves in the foot by setting it to something else (ie "contr.treatment") and there may be times when
   # this is useful.
-
+  
 
   if (is.na(constraint.type["probes"])){
     ct.probe <- "contr.sum"
   } else {
     ct.probe <- constraint.type["probes"]
- }
+ }	
 
   if (is.na(constraint.type["samples"])){
     ct.samples <- ct.default
   } else {
     ct.samples <- constraint.type["samples"]
   }
-
+ 
 
   # Constraint.types given for each variable.
   # note that if user puts a constraint on a covariate variable it will be ignored.
 
   if (length(mt.termlabels.abbrev) >=1){
-
+    
     ct <- rep(ct.default,length(mt.termlabels.abbrev))
     names(ct) <- mt.termlabels.abbrev
-
-    ct[names(constraint.type)] <- constraint.type
+    
+    ct[names(constraint.type)] <- constraint.type 
   #  print(ct)
-  }
+  }	
   #print(ct.probe)
   #print(ct.samples)
-
+  
   if (mt.intercept == 0){
     if (has.probeeffects){
       if (ct.probe == "contr.sum"){
@@ -430,8 +436,8 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       model.type <- 21
     }
   }
-
-
+	
+  
   if (!has.chipeffects & (length(mt.termlabels.abbrev) < 1)){
     stop("Model does not have enough chip level parameters")
   }
@@ -444,7 +450,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
   #print(nsamples)
   chip.param.names <- NULL
 
-
+  
   if (has.chipeffects){
     our.samples <- 1:nsamples
     if (!mt.intercept){
@@ -459,11 +465,11 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       }
     }
   } else {
-    chip.effects <- NULL
+    chip.effects <- NULL    
   }
 
 
-
+  
   if (length(mt.termlabels.abbrev) >=1){
 
     in.pheno <- is.element(mt.termlabels.abbrev, names(pData(object)))
@@ -472,13 +478,13 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
     #cat(mt.termlabels.abbrev)
     #cat(in.pheno,in.parent.frame,"\n")
 
-
+    
     if (sum(in.pheno | in.parent.frame) != length(mt.termlabels.abbrev)){
       stop("Specified parameter does not exist in phenoData or parent frames")
     }
 
     chipeffect.names <-  NULL
-
+    
     if (has.chipeffects){
       # chip.effects will handle intercept, use constraints on treatments
       # if chip.effects then the matrix will be singular, but we will go
@@ -486,7 +492,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       #options(contrasts=c("contr.treatment","contr.poly"))
 
       stop("Can not fit a model with an effect for every chip and additional parameters")
-
+      
       #for (trt in mt.termlabels.abbrev){
       #   if (is.element(trt,  names(pData(object)))){
       #     trt.values <- pData(object)[,names(pData(object))==trt]
@@ -494,7 +500,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       #       trt.effect <- model.matrix(~ -1 + trt.values)
       #     } else {
       #       trt.effect <- model.matrix(~ as.factor(trt.values))[,-1]
-      #     }
+      #     }           
       #   } else {
       #     trt.values <- eval(as.name(trt))
       #     if (length(trt.values) != nsamples){
@@ -515,7 +521,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
       # no chipeffect, first factor treatment will be unconstrained if no intercept
       #
       #
-
+      
       #options(contrasts=c("contr.treatment","contr.poly"))
       #print(ct)
       first.factor <- FALSE
@@ -535,10 +541,10 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
                 trt.effect <- model.matrix(~ C(as.factor(trt.values),ct[trt]))[,-1]
               }
              } else {
-
+              
                trt.effect <- model.matrix(~  C(as.factor(trt.values),ct[trt]))[,-1]
              }
-          }
+          }           
         } else {
           trt.values <- eval(as.name(trt))
           if (length(trt.values) != nsamples){
@@ -557,10 +563,10 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
             } else {
               trt.effect <- model.matrix(~ C(as.factor(trt.values),ct[trt]))[,-1]
             }
-          }
+          }  
         }
         chip.effects <- cbind(chip.effects,trt.effect)
-
+        
         if (vt[names(vt)==trt] == "covariate"){
           chipeffect.names <- c(chipeffect.names,trt)
         } else {
@@ -586,7 +592,7 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
                 for (levs in levels(as.factor(trt.values))[-1]){
                   chipeffect.names <- c(chipeffect.names,paste(trt,"_",levs,sep=""))
                 }
-              } else {
+              } else {                
                 for (levs in levels(as.factor(trt.values))[-length(levels(as.factor(trt.values)))]){
                   chipeffect.names <- c(chipeffect.names,paste(trt,"_",levs,sep=""))
                 }
@@ -607,9 +613,9 @@ PLM.designmatrix <- function(object,model=PM ~ -1 + probes + samples,variable.ty
   #print(chip.effects)
   #print(colnames(chip.covariates))
 
-
+  
   #check that chip covariates are not singular
-
+  
   if (qr(chip.covariates)$rank < ncol(chip.covariates)){
     stop("chiplevel effects is singular: singular fits are not implemented in fitPLM")
   }
@@ -638,32 +644,32 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
   model.terms <- terms(model)
   mt.variables <- attr(model.terms,"variables")
-
+  
   if (!is.element(as.character(mt.variables[[2]]),c("PM","pm","MM","mm"))){
     stop(paste("Response term in model should be 'PM' or 'pm' or 'MM' or 'mm'."))
   }
-
+  
   if (is.element(as.character(mt.variables[[2]]),c("PM","pm"))){
     response.term <- "PM"
   } else {
     response.term <- "MM"
   }
+	
+	
 
 
-
-
-
+  
   mt.intercept <- attr(model.terms,"intercept")
   mt.termlabels <- attr(model.terms,"term.labels")
   mt.order <- attr(model.terms,"order")
-
+  
   length.parameters <- length(mt.termlabels)
-
+  
   if (length.parameters < 1){
     stop("Insufficent parameters supplied in model")
   }
-
-
+  
+  
   # checking for probes and samples as model variables
   # Also check for  MM
   # check to see if there is other chip level parameters and that they are valid
@@ -675,7 +681,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   has.chipeffects <- is.element("samples",mt.termlabels)
 
   has.covariate.PMorMM <- is.element(c("MM","mm","PM","pm"),mt.termlabels)
-
+  
   if(sum(has.covariate.PMorMM) > 1){
     stop("Can't have both PM and MM as covariates in model\n")
   }
@@ -691,7 +697,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   if((!is.null(variable.type$pm)) |  (!is.null(variable.type$mm)) |  (!is.null(variable.type$pm)) | (!is.null(variable.type$pm))){
     cat("Warning: A variable type has been specified for PM or MM variable, this will be ignored. Assuming variable type is covariate\n")
   }
-
+  
   if (!is.null(variable.type$probes)){
     cat("Warning: A variable type has been specified for probes parameter, this will be ignored. Assuming variable type is factor\n")
   }
@@ -702,11 +708,11 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   #now go through the non default parameters seeing which type they should be treated as.
 
   #cat(mt.termlabels.abbrev,"\n")
-
+  
   vt <- NULL
 
   #check to see that everything is either "factor" or "covariate"
-  #figure out what the default type is
+  #figure out what the default type is 
   if (is.na(variable.type["default"])){
     cat("No default type given. Assuming default variable type is factor\n")
     vt.default <- "factor"
@@ -716,24 +722,24 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     } else {
       stop("Incorrect default variable.type given")
     }
-  }
-
+  } 
+    
   if (sum(!is.element(variable.type,c("factor","covariate")))){
     stop("An incorrect variable type provided")
   }
 
-
+  
   vt <- rep(vt.default,length(mt.variables)-2)
   names(vt) <- as.character(mt.variables[3:length(mt.variables)])
   vt[names(variable.type)] <- variable.type
+  
+  
 
-
-
-
+  
   #cat(has.vt,"\n");
   #print(vt)
 
-  #figure out what the default constraint type is
+  #figure out what the default constraint type is 
 
   if (is.na(constraint.type["default"])){
     cat("No default type given. Assuming default constraint type is contr.treatment\n")
@@ -744,41 +750,41 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     } else {
       stop("Incorrect default constraint.type given")
     }
-  }
+  } 
 
   # check to see if there are any constraints on for the "probes" and "samples" parameters. Constraints on the first chip
   # level parameter will be ignored unless, the default constraint on probes will always "contr.sum", however
   # will allow the user to shoot themselves in the foot by setting it to something else (ie "contr.treatment") and there may be times when
   # this is useful.
-
+  
 
   if (is.na(constraint.type["probes"])){
     ct.probe <- "contr.sum"
   } else {
     ct.probe <- constraint.type["probes"]
- }
+ }	
 
   if (is.na(constraint.type["samples"])){
     ct.samples <- ct.default
   } else {
     ct.samples <- constraint.type["samples"]
   }
-
+ 
 
   # Constraint.types given for each variable.
   # note that if user puts a constraint on a covariate variable it will be ignored.
 
   if (length(mt.termlabels.abbrev) >=1){
-
+    
     ct <- rep(ct.default,length(mt.termlabels.abbrev))
     names(ct) <- mt.termlabels.abbrev
-
-    ct[names(constraint.type)] <- constraint.type
+    
+    ct[names(constraint.type)] <- constraint.type 
   #  print(ct)
-  }
+  }	
   #print(ct.probe)
   #print(ct.samples)
-
+  
   if (mt.intercept == 0){
     if (has.probeeffects){
       if (ct.probe == "contr.sum"){
@@ -801,8 +807,8 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
       model.type <- 21
     }
   }
-
-
+	
+  
   if (!has.chipeffects & (length(mt.termlabels.abbrev) < 1)){
     stop("Model does not have enough chip level parameters")
   }
@@ -815,7 +821,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
   #print(nsamples)
   chip.param.names <- NULL
 
-
+  
   if (has.chipeffects){
     our.samples <- 1:nsamples
     if (!mt.intercept){
@@ -830,7 +836,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
       }
     }
   } else {
-    chip.effects <- NULL
+    chip.effects <- NULL    
   }
 
 
@@ -842,7 +848,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
    # print(mt.termlabels.abbrev)
    # print(vt)
-   # print(ct)
+   # print(ct) 
 
     if (mt.intercept){
       the.formula <- "~"
@@ -854,7 +860,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     the.frame <- NULL
     the.frame.names <- NULL
     terms.names <- NULL
-
+   
     for (i in 1:length(mt.termlabels.abbrev)){
       if (mt.order.abbrev[i] == 1){
         if (is.element(mt.termlabels.abbrev[i],  names(pData(object)))){
@@ -880,7 +886,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
                 terms.names <- c(terms.names,paste(mt.termlabels.abbrev[i],"_",levs,sep=""))
               }
               firstfactor <- FALSE
-            }
+            }           
           } else {
             the.formula <- paste(the.formula, "C(as.factor(",mt.termlabels.abbrev[i],"),","contr.sum",")")
             if (!firstfactor){
@@ -895,7 +901,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
             }
           }
         }
-
+        
 
         the.frame.names <- c(the.frame.names,mt.termlabels.abbrev[i])
       } else {
@@ -912,8 +918,8 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
             stop("Can't have interaction terms involving covariate variables")
           }
         }
-
-
+        
+        
         for (current.term in in.term[[1]]){
           if (!(is.element(current.term,mt.termlabels.abbrev))){
             if (is.element(current.term,  names(pData(object)))){
@@ -924,9 +930,9 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
             the.frame.names <- c(the.frame.names,current.term)
           }
         }
-
+        
         # now lets make the actual formula
-
+        
         this.term <- "C("
         for (current.term in in.term[[1]]){
           this.term <- paste(this.term,"as.factor(",current.term,")")
@@ -952,7 +958,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
           } else {
             trt.values <- eval(as.name(current.term))
           }
-
+          
           levs <- levels(as.factor(trt.values))
           if (!firstterm){
             interaction.terms <-  as.vector(t(outer(interaction.terms,paste(":",current.term,"_",levs,sep=""),paste,sep="")))
@@ -961,7 +967,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
             firstterm <- FALSE
           }
           #print(interaction.terms)
-
+          
         }
         if (!firstfactor){
           if (ct[mt.termlabels.abbrev[i]] == "contr.treatment"){
@@ -975,7 +981,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
         terms.names <- c(terms.names,interaction.terms)
 
-
+        
         the.formula <- paste(the.formula,"+",this.term)
       }
       if ( i != length(mt.termlabels.abbrev) & mt.order.abbrev[i+1] == 1 ){
@@ -984,7 +990,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     }
     the.frame <- as.data.frame(the.frame)
     colnames(the.frame) <- the.frame.names  ###mt.termlabels.abbrev[mt.order.abbrev==1]
-
+    
     #print(the.formula)
     #print(the.frame)
     #print(as.list(ct))
@@ -994,13 +1000,13 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     if (mt.intercept){
       chip.effects <- as.matrix(chip.effects[,-1])
     }
-
+    
   }
 
 
   #print(terms.names)
 
-
+  
   #print(chip.effects)
   #colnames(chip.effects) <- chipeffect.names
   #if (mt.intercept){
@@ -1012,7 +1018,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
   if (!has.chipeffects){
     colnames(chip.covariates) <- terms.names
-
+  
   } else {
       colnames(chip.covariates) <- chip.param.names
   }
@@ -1028,7 +1034,7 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
     isdefaultmodel <- FALSE
   }
 
-
+  
 
   list(chip.covariates = chip.covariates,model.type=model.type,mt.intercept=mt.intercept,has.probeeffects=has.probeeffects,response.term=response.term,isdefaultmodel=isdefaultmodel, MMorPM.covariate=any(has.covariate.PMorMM))
 
@@ -1038,3 +1044,1065 @@ PLM.designmatrix2 <- function(object,model=PM ~ -1 + probes + samples,variable.t
 
 #PLM.designmatrix2(Dilution,PM ~ -1 + samples + probes)
 #PLM.designmatrix2(Dilution,PM ~ MM + -1 + samples + probes)
+
+
+
+
+
+
+
+###
+###
+### check the model and supplied constraint.type vector (or list)
+### output a constraint.type vector 
+###
+
+verify.constraint.types <- function(model,constraint.type){
+
+  if (!(is.vector(constraint.type) | is.list(constraint.type))){
+    stop("constraint.type must be a vector or list.")
+  }
+  model.terms <- terms(model)
+  ct.type <- NULL
+  if (!any(is.element(c("Default","default"),names(constraint.type)))){
+    cat("Warning: No default constraint specified. Assuming 'contr.treatment'.\n")
+    ct.type <- c(ct.type,"default"="contr.treatment")
+  }
+
+  if (length(names(constraint.type)) != length(constraint.type)){
+    stop("constraint.type is incorrectly named\n")
+  }
+
+  if (any(is.element("",names(constraint.type)))){
+    stop("Some elements are not named in constraint.type")
+  }
+
+  if (any(!is.element(constraint.type,c("contr.treatment","contr.sum")))){
+    stop("Constraints must be either 'contr.treatment' or 'contr.sum'")
+  }
+  
+
+  if (is.list(constraint.type)){
+    constraint.type <- do.call("c",constraint.type)
+  }
+  
+
+  return(c(ct.type,constraint.type))
+
+}
+
+
+
+##  verify.constraint.types(PM ~ -1 + probes + samples,c(blah="blah"))
+
+
+verify.variable.types <- function(model,variable.type){
+
+  vt <- NULL
+
+  if (!(is.vector(variable.type) | is.list(variable.type))){
+    stop("variable.type must be a vector or list.")
+  }
+  
+  if (!any(is.element(c("Default","default"),names(variable.type)))){
+    cat("Warning: No default variable type so assuming 'factor'\n")
+    vt <- c(vt,"default"="factor")
+  }
+
+  if (length(names(variable.type)) != length(variable.type)){
+    stop("variable.type is incorrectly named\n")
+  }
+
+
+  if (is.list(variable.type)){
+    variable.type <- do.call("c",variable.type)
+  }
+
+  if (any(is.element("",names(variable.type)))){
+    stop("Some elements are not named in variable.type")
+  }
+  
+  if (any(!is.element(variable.type,c("factor","covariate")))){
+    stop("variable.type must be either 'factor' or 'covariate'")
+  }
+
+  for (cur.vt in c("probes","probe.type","samples")){
+    if (is.element(cur.vt,names(variable.type))){
+      if (variable.type[cur.vt] == "covariate"){
+        stop(cur.vt, " must not be specified as being a 'covariate'. It must be treated as 'factor'.")
+      }
+    }
+  }
+
+  for (cur.vt in c("mm","MM","pm","PM"))
+    if (is.element(cur.vt,names(variable.type))){
+      if (variable.type[cur.vt] == "factor")
+        stop(cur.vt," variable must be a 'covariate'.")
+    }
+
+  
+  return(c(vt,variable.type))
+
+}
+
+
+
+#verify.variable.types(PM ~ -1 + probes + samples,c(blah="blah"))
+
+
+
+verify.model.param <- function(object,model,subset=NULL,model.param=list()){
+
+  defaults <- list(trans.fn="log2", se.type = 4, psi.type = 0, psi.k =NULL,max.its = 20, init.method = "ls",weights.chip=NULL,weights.probe=NULL)
+
+  if (!is.list(model.param)){
+    stop("model.param must be a list")
+  }
+
+  if (length(model.param)==0){
+    return (defaults)
+  }
+
+  if (any(!is.element(names(model.param),c("trans.fn","se.type","psi.type","psi.k","max.its","init.method","weights.chip","weights.probe")))){
+    stop("model.param should only have items named: ,",paste("trans.fn","se.type","psi.type","psi.k","max.its","init.method","weights.chip","weights.probe",sep=", "))
+  }
+
+  
+  for (item in names(model.param)){
+    if (item == "trans.fn"){
+      if (!is.element(model.param[item][[1]],c("log2","loge","ln","log10","sqrt","cuberoot"))){
+        stop("trans.fn in model.param should be one of: ",paste("log2","loge","ln","log10","sqrt","cuberoot",sep=", "))
+      } else {
+        defaults[item] <- model.param[item]
+      }
+    }
+    if (item == "se.type"){
+      if (!is.numeric(model.param[item][[1]])){
+        stop("se.type should be numeric")
+      } else if (!is.element(model.param[item][[1]],1:4)){
+        stop("se.type should be 1,2,3,4")
+      } else {
+        defaults[item] <- model.param[item]
+      }
+    }
+    if (item == "psi.type"){
+      if (is.numeric(model.param[item][[1]])){
+        if (!is.element(model.param[item][[1]],0:6)){
+          stop("psi.type should be a string")
+        } else {
+          defaults[item] <- model.param[item]
+        }
+      } else {
+        defaults[item] <- get.psi.code(model.param[item])
+      }
+
+    }
+
+    if (item == "max.its"){
+      if (!is.numeric(model.param[item][[1]])){
+        stop(item," should be numeric")
+      } else {
+        defaults[item] <- model.param[item]
+      }
+    }
+    if (item == "init.method"){
+      if (!is.element(model.param[item][[1]],c("ls","Huber"))){
+        stop("init.method should be one of: ls, Huber")
+      } else {
+        defaults[item] <- model.param[item]
+      }
+    }
+    if (item == "weights.chip"){
+      if (!is.null(model.param[item][[1]])){
+        if (!is.vector(model.param[item][[1]])){
+          stop("weights.chip should be a vector")
+        } else if (length(model.param[item][[1]]) != dim(exprs(object))[2]){
+          stop("weights.chip is of incorrect length")
+        } else {
+          defaults[item] <- model.param[item]
+        }
+      }
+    }
+    if (item == "weights.probe"){
+      if (!is.null(model.param[item][[1]])){
+        response.term <- attr(terms(model),"variables")[[2]]
+        if (is.element(as.character(response.term),c("MM","PM","pm","mm"))){
+          weights.probe.length <- dim(pm(object,subset))[1]
+        } else {
+          weights.probe.length <- 2*dim(pm(object,subset))[1]
+        }
+        if (!is.vector(model.param[item][[1]])){
+          stop("weights.probe should be a vector")
+        } else if (length(model.param[item][[1]]) !=weights.probe.length) {
+          stop("weights.probe is of incorrect length")
+        } else {
+           defaults[item] <- model.param[item]
+        }
+      }
+    }
+  }
+  
+  if (is.element("psi.k",names(model.param))){
+    if (is.null(model.param["psi.k"][[1]])){
+      defaults["psi.k"] <- get.default.psi.k(defaults["psi.type"][[1]])
+    }
+  }
+  
+  return(defaults)
+
+
+}
+
+##verify.model.param(list(trans.fn="cuberoot", se.type = 4, psi.type = 0, psi.k =1.345,max.its = 20, init.method = "ls",weights.chip=NULL,weights.probe=NULL))
+
+
+
+
+
+
+
+
+verify.output.param <- function(output.param=list()){
+  
+  if (!is.list(output.param)){
+    stop("output.param must be a list")
+  }
+
+  if (length(output.param) == 0){
+    ### this is the default output
+    return(list(weights = TRUE, residuals = TRUE, varcov ="all", resid.SE = TRUE))
+  }
+
+  if (any(!is.element(names(output.param),c("weights","residuals","varcov","resid.SE")))){
+    stop("Only items named 'weights', 'residuals', 'varcov' or 'resid.SE' should be in output.param")
+  }
+
+  out.list <- list(weights = TRUE, residuals = TRUE, varcov ="all", resid.SE = TRUE)
+
+  for (item in names(output.param)){
+    if (item == "weights"){
+      if (is.logical(output.param[item][[1]])){
+        out.list[item] <- output.param[item]
+      } else {
+        stop("Logical needed for ",item," in output.param.")
+      }
+    }
+    if (item == "residuals"){
+      if (is.logical(output.param[item][[1]])){
+        out.list[item] <- output.param[item]
+      } else {
+        stop("Logical needed for ",item," in output.param.")
+      }
+    }
+    if (item == "varcov"){
+      if (!is.element(output.param[item][[1]],c("none","chiplevel","all"))){
+        stop("varcov in ouput.param must be: 'none', 'chiplevel' or 'all'")
+      } else {
+        out.list[item] <- output.param[item]
+      }
+    }
+    if (item == "resid.SE"){
+      if (is.logical(output.param[item][[1]])){
+        out.list[item] <- output.param[item]
+      } else {
+        stop("Logical needed for ",item," in output.param.")
+      }
+    }   
+  }
+  return(out.list)
+
+}
+
+
+###
+### PLM.designmatrix3  -  Third generation function. Produces  a list
+### 
+###  
+###
+### Input: the AffyBatch
+###        a model formula
+###        a variable types list
+###        a constraints list
+###
+### Output: a list which must contain all of the following items
+###             mmorpm.covariate  :  an integer  either -1  meaning PM is covariate, 0 means no covariate,   1 meaning MM is covariate
+###             response.variable :  an integer  either -1  meaning MM is response,  0 means PM and MM are response,  1 is PM response variable
+###             which.parameter.types : an integer vector of length 5 values should be only 0 or 1
+###                                    element 1 - 0 means no intercept, 1 means intercept
+###                                    element 2 - 0 means no chip-level factor or covariate variables, 1 means there are. Only one of elements 2 and 3 should have value 1
+###                                    element 3 - 0 means no sample effects, 1 means there are sample effects
+###                                    element 4 - 0 means no probe.type effect,  1 means probe.type effect
+###                                    element 5 - 0 means no probe effect, 1 means probe effect
+###             strata: an integer vector of length 5,
+###                                    element 1 - ignored
+###                                    element 2 - ignored
+###                                    element 3 - ignored
+###                                    element 4 - 0 means overall probe.type effect,
+###                                                1 means sample specific probe.type effect,
+###                                                2 means within levels of a treatment/genotype factor variable
+###                                                OTHER INVALID
+###                                    element 5 - 0 means overall probe effects
+###                                                1 INVALID
+###                                                2 means within levels of a treatment/genotype factor variable
+###                                                3 means within probe.types
+###                                                4 means within probe.types within levels of treatment/genotype factor variable
+###                                                OTHER INVALID
+###              constraints: an integer vector of length 5,
+###                                    element 1 - ignored
+###                                    element 2 - ignored
+###                                    element 3 - sample effect: 0 means unconstrainted, -1 means sum to zero, 1 means contr.treatment
+###                                                OTHER INVALID
+###                                    element 4 - probe.type effect: 0 means unconstrainted, -1 means sum to zero, 1 means contr.treatment
+###                                                OTHER INVALID
+###                                    element 5 - probe effect:  0 means unconstrainted, -1 means sum to zero, 1 means contr.treatment
+###                                                OTHER INVALID
+###              probe.type.trt.factor:  a vector of the same length as the number of arrays.
+###                                      values should be between 0 and max.probe.type.trt.factor
+###                                      the values should correspond to which level of the treatment or genotype variable is assigned to the respective array     
+###              max.probe.type.trt.factor: the maximum value in "probe.type.trt.factor"
+###              probe.type.levels: A list of only one element. The element should be named for the factor and it should contain a vector of character strings
+###                                of length max.probe.type.trt.factor with the names being those of the levels of the factor
+###              probe.trt.factor: a vector of the same length as the number of arrays.
+###                                values should be between 0 and max.probe.trt.factor
+###                                the values should correspond to which level of the treatment or genotype variable is assigned to the respective array
+###              max.probe.trt.factor: the maximum value in "probe.trt.factor"
+###              probe.trt.levels: A list of only one element. The element should be named for the factor and it should contain a vector of character strings
+###                                of length max.probe.trt.factor with the names being those of the levels of the factor
+###              chipcovariates: a matrix.
+###                              if which.parameter.types[2] == 0 then should be matrix(0,0,0)
+###                              otherwise it should be a matrix containing values of chip-level factor variables
+###                              for each array (ie dim n_arrays * n_chiplevelcovariates)
+###
+### There are other rules governing what is and what is not a permissible model. Please see other documentation for those rules.
+
+PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment")){
+
+  ## a function for working out which constraints are applied to a named term
+  ## note that "probes", "probe.type" have
+  ## special defaults that will used irrespective of
+  ## default unless there is a specifically specified constraint
+  ## for that parameter.
+  ## probes -- "contr.sum"
+  ## probe.type -- "contr.treatment"
+  ##
+  ##
+  which.constraint <- function(term,constraint.type){
+    if (term == "probes"){
+      if (is.element("probes",names(constraint.type))){
+        if (constraint.type[term]=="contr.sum"){
+          return("contr.sum")
+        } else if (constraint.type[term] =="contr.treatment"){
+          return("contr.treatment")
+        } else {
+          stop("The constraint type ",names(constraint.type)[term]," for ", term, "is not understood.")
+        }
+      } else {
+        return("contr.sum")
+      }
+      
+    }
+    if (term == "probe.type"){
+      if (is.element("probe.type",names(constraint.type))){
+        if (constraint.type[term]=="contr.sum"){
+          return("contr.sum")
+        } else if (constraint.type[term] =="contr.treatment"){
+          return("contr.treatment")
+        } else {
+          stop("The constraint type ",names(constraint.type)[term]," for ", term, "is not understood.")
+        }
+      } else {
+        return("contr.treatment")
+      }
+    }
+    
+    if (is.element(term,names(constraint.type))){
+      if (constraint.type[term]=="contr.sum"){
+        return("contr.sum")
+      } else if (constraint.type[term] =="contr.treatment"){
+        return("contr.treatment")
+      } else {
+        stop("The constraint type ",names(constraint.type)[term]," for ", term, "is not understood.")
+      }
+    } else {
+      if (any(is.element(names(constraint.type),"default"))){
+        return(constraint.type["default"])
+      } else {
+        warning("No default constraint was supplied so assuming : contr.treatment for ",term)
+        return("contr.treatment")
+      }
+    }
+  }
+  which.variabletype <- function(term,variable.type){
+    if (is.element(term,names(variable.type))){
+      if (variable.type[term]=="covariate"){
+        return("covariate")
+      } else if (variable.type[term] =="factor"){
+        return("factor")
+      } else {
+        stop("The variable type ",names(variable.type)[term]," for ", term, "is not understood.")
+      }
+    } else {
+      if (any(is.element(names(variable.type),"default"))){
+        return(variable.type["default"])
+      } else {
+        warning("No default variable type was supplied so assuming : factor for ",term)
+        return("factor")
+      }
+    }
+  }
+  
+
+
+  
+  model.terms <- terms(model)
+  mt.variables <- attr(model.terms,"variables")
+
+  ## establish the response variable
+  if (!is.element(as.character(mt.variables[[2]]),c("PM","pm","MM","mm","PMMM","pmmm"))){
+    stop(paste("Response term in model should be 'PM' or 'pm' or 'MM' or 'mm' or 'PMMM' or 'pmmm'."))
+  }
+  
+  if (is.element(as.character(mt.variables[[2]]),c("PM","pm"))){
+    response.variable <- 1
+  } else if (is.element(as.character(mt.variables[[2]]),c("MM","mm"))){
+    response.variable <- -1  
+  } else   if (is.element(as.character(mt.variables[[2]]),c("PMMM","pmmm"))){
+    response.variable <- 0
+  } else {
+    stop("Response term in model should be 'PM' or 'pm' or 'MM' or 'mm' or 'PMMM' or 'pmmm'.")
+  }
+
+  ## check to see if there is a PM or MM covariate
+
+  mt.termlabels <- attr(model.terms,"term.labels")
+
+  if (any(is.element(as.character(mt.termlabels),c("PM","pm")))){
+    mmorpm.covariate <- -1
+  } else if (any(is.element(as.character(mt.termlabels),c("MM","mm")))){
+    mmorpm.covariate <- 1
+  } else {
+    mmorpm.covariate <- 0
+  }
+
+  ## check to see if there is a PMMM covariate (which is not allowable)
+  if (any(is.element(as.character(mt.termlabels),c("PMMM","pmmm")))){
+     stop("Cannot have PMMM or pmmm as a covariate variable.")
+   }
+
+  
+  ## check to see if there is a PM or MM covariate when response is PMMM (note we will allow PM ~ PM and MM ~ MM stupidity)
+
+  if (response.variable ==0 & mmorpm.covariate!=0){
+    stop("Cannot have PMMM as response and MM or PM as a covariate.")
+  }
+
+
+
+  
+
+  ## initialize some of the output
+  which.parameter.types <- rep(0,5)
+  strata <- rep(0,5)
+  constraints <- rep(0,5)
+
+  probe.type.trt.factor <- rep(0,dim(intensity(object))[2])
+  max.probe.type.trt.factor <- 0
+  probe.type.levels <- list()
+  probe.trt.factor <- rep(0,dim(intensity(object))[2])
+  max.probe.trt.factor <- 0
+  probe.trt.levels <- list()
+  ## now check to see what else we have in the model
+  ## intercept??
+  
+  mt.intercept <- attr(model.terms,"intercept")
+  if (mt.intercept){
+    which.parameter.types[1] <- 1
+  }
+  
+  mt.variables <- as.list(mt.variables)[3:length(mt.variables)]  
+
+  ## check to see if probe.type is in the model when PMMM is not response
+
+  if (response.variable != 0 & any(is.element(as.character(mt.variables),"probe.type"))){
+    stop("Cannot have 'probe.type' without PMMM response variable.")
+  }
+
+  has.nonspecialvariables <- TRUE
+
+  if (has.nonspecialvariables){
+    ## check to see if the nonspecialvariables exist
+    for (variable in mt.variables){
+      variable <- as.character(variable)
+      if (is.element(variable,c("PM","pm","MM","mm","probes","probe.type","samples"))){
+        next
+      }  
+      ## check if variable is in phenoData
+      if (is.element(variable,  names(pData(object)))){
+        next;
+      }
+      ## check to see if variable exists elsewhere
+      if (exists(variable)){
+        # check it is of appropriate length
+        if (length(eval(as.name(variable))) !=dim(intensity(object))[2]){
+          stop("The variable ",variable," is of the wrong length.")
+        }
+        next;
+      }
+      stop("The variable ",variable," does not seem to exist.")
+    }
+
+    
+    mt.factors <- attr(model.terms,"factors")
+    mt.order <- attr(model.terms,"order")
+    if (mt.intercept){
+      the.formula <- "~"
+      firstfactor <- FALSE
+    } else {
+      the.formula <- "~ -1 +"
+      firstfactor <- TRUE
+    }
+    the.frame <- NULL
+    the.frame.names <- NULL
+    terms.names <- NULL
+    ## lets make the model matrix for chipcovariates and any other interaction with probes, probe.types
+    i <- 0
+    for (term in colnames(mt.factors)){
+      i <- i +1
+     # if (is.element(term ,c("PM","pm","MM","mm","probes","probe.type","samples"))){
+        ## special variable so do nothing
+    ##    next
+     # }
+      if (mt.order[i] ==1){
+
+        if (is.element(term,c("PM","pm","MM","mm","probes","probe.type","samples"))){
+          ## special variable so do nothing but set the correct flag
+          if (is.element(term,"samples")){
+            if (which.parameter.types[3]){
+              error("Can't have 'samples' appear in more than one term in model.")
+            }
+            which.parameter.types[3] <- 1
+            ct <- which.constraint("samples",constraint.type)
+            if (ct == "contr.sum"){
+              constraints[3] <- -1
+            } else {
+              constraints[3] <- 1
+            }
+          }
+          if (is.element(term,"probe.type")){
+            if (which.parameter.types[4]){
+               error("Can't have 'probe.type' appear in more than one term in model, except with probes")
+             }
+            which.parameter.types[4] <- 1
+            ct <- which.constraint("probe.type",constraint.type)
+            if (ct == "contr.sum"){
+              constraints[4] <- -1
+            } else {
+              constraints[4] <- 1
+            }
+
+            
+          }
+          if (is.element(term,"probes")){
+            if (which.parameter.types[5]){
+              error("Can't have 'probes' appear in more than one term in model.")
+            }
+            which.parameter.types[5] <- 1
+            ct <- which.constraint("probes",constraint.type)
+            if (ct == "contr.sum"){
+              constraints[5] <- -1
+            } else {
+              constraints[5] <- 1
+            }
+          }
+          next
+        }
+        if (is.element(term,  names(pData(object)))){
+          the.frame <- cbind(the.frame,pData(object)[,names(pData(object))==term])
+          trt.values <- pData(object)[,names(pData(object))==term]
+        } else {
+          the.frame <- cbind(the.frame,eval(as.name(term)))
+          trt.values <- eval(as.name(term))
+        }
+        
+        
+        if (which.variabletype(term,variable.type)=="covariate"){
+          # this variable is a covariate
+          the.formula <- paste(the.formula,term)
+          terms.names <- c(terms.names,term)
+        } else {
+          ##this variable is a factor variable
+          this.constraint <- which.constraint(term,constraint.type)
+          if (this.constraint == "contr.treatment"){
+            the.formula <- paste(the.formula,"+","C(as.factor(",term,"),","contr.treatment",")")
+            if (!firstfactor){
+              for (levs in levels(as.factor(trt.values))[-1]){
+                terms.names <- c(terms.names,paste(term,"_",levs,sep=""))
+              }
+            } else {
+              for (levs in levels(as.factor(trt.values))){
+                terms.names <- c(terms.names,paste(term,"_",levs,sep=""))
+              }
+              firstfactor <- FALSE
+            }           
+          } else {
+            the.formula <- paste(the.formula,"+", "C(as.factor(",term,"),","contr.sum",")")
+            if (!firstfactor){
+              for (levs in levels(as.factor(trt.values))[-length(levels(as.factor(trt.values)))]){
+                terms.names <- c(terms.names,paste(term,"_",levs,sep=""))
+              }
+            } else {
+              for (levs in levels(as.factor(trt.values))){
+                terms.names <- c(terms.names,paste(term,"_",levs,sep=""))
+              }
+              firstfactor <- FALSE
+            }
+          }
+        }
+        the.frame.names <- c(the.frame.names,term)
+      } else {
+        # a higher term 
+        in.term <- strsplit(term,":")[[1]]
+
+        if (any(is.element(in.term,c("probes","probe.type")))){
+          ## a so called special case need to handle appropriately
+          if (any(is.element(in.term,"probes"))){
+            # figure out if probes is within a treatment variable, probe.type or both.
+            if (which.parameter.types[5]){
+              stop("Can't have 'probes' appear in more than one term in model.")
+            }
+            which.parameter.types[5] <- 1
+            in.term <- in.term[!is.element(in.term,"probes")]
+            if (length(in.term) > 2){
+              stop("Can't estimate probe effect within more than two variables.")
+            }
+            if (length(in.term) ==2){
+              if (!any(is.element(in.term,"probe.type"))){
+                stop("Can't estimate probe effect within two variables without one being probe.type,") 
+              }
+              in.term <- in.term[!is.element(in.term,"probe.type")]
+              if (which.variabletype(in.term,variable.type) == "covariate"){
+                stop("Can't have interaction terms involving covariate variables.")
+              }
+              
+              if (is.element(in.term,  names(pData(object)))){
+                in.levels <- as.factor(pData(object)[,names(pData(object)) == in.term])
+              } else {
+                in.levels <- as.factor(eval(as.name(in.term)))
+              }
+              ## check that there is at least two arrays
+              if (any(tabulate(in.levels) < 2)){
+                stop("Need to have at least two arrays for each level of ",in.term, " when estimating probes within levels of this variable." )
+              }
+              
+              # now build what we need for the output
+              max.probe.trt.factor <- nlevels(in.levels)-1
+              probe.trt.factor <- NULL
+              for (level in in.levels){
+                probe.trt.factor <- c(probe.trt.factor,level-1)
+              }
+              probe.trt.levels <- list(in.term=levels(in.levels))
+              names(probe.trt.levels) <- in.term
+              strata[5] <- 4
+              ct <- which.constraint("probes",constraint.type)
+              if (ct == "contr.sum"){
+                constraints[5] <- -1
+              } else {
+                constraints[5] <- 1
+              }
+            } else if (length(in.term) ==1){
+              if (is.element(in.term,"probe.type")){
+                strata[5] <- 3
+                ct <- which.constraint("probes",constraint.type)
+                if (ct == "contr.sum"){
+                  constraints[5] <- -1
+                } else {
+                  constraints[5] <- 1
+                }
+              } else {
+                if (which.variabletype(in.term,variable.type) == "covariate"){
+                  stop("Can't have interaction terms involving covariate variables.")
+                }
+                
+                if (is.element(in.term,  names(pData(object)))){
+                  in.levels <- as.factor(pData(object)[,names(pData(object)) == in.term])
+                } else {
+                  in.levels <- as.factor(eval(as.name(in.term)))
+                }
+
+                if (any(tabulate(in.levels) < 2)){
+                  stop("Need to have at least two arrays for each level of ",in.term, " when estimating probes within levels of this variable." )
+                }
+                max.probe.trt.factor <- nlevels(in.levels)-1
+                probe.trt.factor <- NULL
+                for (level in in.levels){
+                  probe.trt.factor <- c(probe.trt.factor,level-1)
+                }
+                probe.trt.levels <- list(levels(in.levels))
+                names(probe.trt.levels) <- in.term
+                strata[5] <- 2
+                ct <- which.constraint("probes",constraint.type)
+                if (ct == "contr.sum"){
+                  constraints[5] <- -1
+                } else {
+                  constraints[5] <- 1
+                }
+              }
+            }
+          } else if (any(is.element(in.term,"probe.type"))){
+            if (which.parameter.types[4]){
+              stop("Can't have 'probe.type' appear in more than one term in model, except with probes")
+            }
+            which.parameter.types[4] <- 1
+            ## figure out if probe.type is in samples or a treatment factor
+            in.term <- in.term[!is.element(in.term,"probe.type")]
+            if (length(in.term) > 1){
+              stop("Can't estimate probe.type within more than one variable.")
+            }
+            if (is.element(in.term,"samples")){
+              strata[4] <- 1
+              ct <- which.constraint("probe.type",constraint.type)
+              if (ct == "contr.sum"){
+                constraints[4] <- -1
+              } else {
+                constraints[4] <- 1
+              }
+            } else{
+              strata[4] <- 2
+              ct <- which.constraint("probe.type",constraint.type)
+              if (ct == "contr.sum"){
+                constraints[4] <- -1
+              } else {
+                constraints[4] <- 1
+              }
+              if (which.variabletype(in.term,variable.type) == "covariate"){
+                stop("Can't have interaction terms involving covariate variables.")
+              }
+              if (is.element(in.term,  names(pData(object)))){
+                in.levels <- as.factor(pData(object)[,names(pData(object)) == in.term])
+              } else {
+                in.levels <- as.factor(eval(as.name(in.term)))
+              }
+              max.probe.type.trt.factor <- nlevels(in.levels)-1
+              probe.type.levels <- list(levels(in.levels))
+              names(probe.type.levels) <- in.term
+              probe.type.trt.factor <- NULL
+              for (level in in.levels){
+                probe.type.trt.factor <- c(probe.type.trt.factor,level-1)
+              }
+            }
+          } 
+        } else {
+          ## a more general interaction term
+          if (any(is.element(in.term,c("samples","PM","MM","pm","mm")))){
+            stop("Cannot have 'samples','PM' or 'MM' in an interaction term.")
+          }
+          for (current.term in in.term){
+            if (which.variabletype(term,variable.type)=="covariate")
+              stop("Can't have interaction terms involving covariate variables.")
+          }
+          for (current.term in in.term){
+            if (is.element(current.term,  names(pData(object)))){
+              the.frame <- cbind(the.frame,pData(object)[,names(pData(object))==current.term])
+            } else {
+              the.frame <- cbind(the.frame,eval(as.name(current.term)))
+            }
+            the.frame.names <- c(the.frame.names,current.term)
+          }
+          
+          ## now lets make the actual formula   
+          this.term <- "C("
+          for (current.term in in.term){
+            this.term <- paste(this.term,"as.factor(",current.term,")")
+            if (current.term != in.term[length(in.term)]){
+              this.term <- paste(this.term,":")
+            }
+          }
+
+          if (which.constraint(term,constraint.type) == "contr.treatment"){
+            this.term <- paste(this.term,",contr.treatment)")
+          } else {
+            this.term <- paste(this.term,",contr.sum)")
+          }
+          #terms.names <- c(terms.names,interaction.terms)
+          
+
+
+          firstterm <- TRUE
+          interaction.terms <- as.vector("")
+          for (current.term in in.term){
+            if (is.element(current.term,  names(pData(object)))){
+              trt.values <- pData(object)[,names(pData(object))==current.term]
+            } else {
+              trt.values <- eval(as.name(current.term))
+            }
+            
+            levs <- levels(as.factor(trt.values))
+            if (!firstterm){
+              interaction.terms <-  as.vector(t(outer(interaction.terms,paste(":",current.term,"_",levs,sep=""),paste,sep="")))
+            } else {
+              interaction.terms <-  as.vector(t(outer(interaction.terms,paste(current.term,"_",levs,sep=""),paste,sep="")))
+              firstterm <- FALSE
+            }
+          }
+          if (!firstfactor){
+            if (which.constraint(term,constraint.type) == "contr.treatment"){
+              interaction.terms <- interaction.terms[-1]
+            } else {
+              interaction.terms <- interaction.terms[-length(interaction.terms)]
+            }
+          } else {
+            firstfactor <- FALSE
+          }
+          
+          terms.names <- c(terms.names,interaction.terms)    
+                    
+          the.formula <- paste(the.formula,"+",this.term)
+        }
+      }
+    }
+
+    if (!is.null(the.frame)){ 
+      the.frame <- as.data.frame(the.frame)
+      colnames(the.frame) <- the.frame.names  
+      
+      ##print(the.formula)
+      ##print(the.frame)
+                                        #print(as.list(ct))
+                                        #print(model.matrix(as.formula(the.formula),the.frame))
+      chip.covariates <- model.matrix(as.formula(the.formula),the.frame)
+
+        
+      if (qr(chip.covariates)$rank < ncol(chip.covariates)){
+        stop("chip-level effects appear to be singular: singular fits are not implemented in fitPLM")
+      }
+  
+      if (mt.intercept){
+        chip.covariates <- as.matrix(chip.covariates[,-1])
+      }
+      colnames(chip.covariates) <- terms.names
+      
+      which.parameter.types[2] <- 1
+    } else {
+      chip.covariates <- matrix(0,0,0)
+    }
+  } else {
+    chip.covariates <- matrix(0,0,0)
+  }
+
+
+  if ((which.parameter.types[2] == 1) & (which.parameter.types[3] == 1)){
+    stop("Can't have 'samples' and chip-level variables in same model.")
+  }
+  
+  # final checks for constraints, unconstrain using the order intercept:chip-level:samples:probe.types:probes
+
+  if (all(which.parameter.types[1:2] == 0)){
+    constraints[3] <- 0
+  }
+
+  if (all(which.parameter.types[1:3] == 0)){
+    constraints[4] <- 0
+  }
+
+  if (all(which.parameter.types[1:4] == 0)){
+    constraints[5] <- 0
+  }
+
+  
+  list(mmorpm.covariate=mmorpm.covariate,response.variable=response.variable,which.parameter.types=as.integer(which.parameter.types),strata=as.integer(strata),constraints=as.integer(constraints),probe.type.trt.factor=as.integer(probe.type.trt.factor),max.probe.type.trt.factor=max.probe.type.trt.factor,probe.type.levels=probe.type.levels,probe.trt.factor=as.integer(probe.trt.factor),max.probe.trt.factor=max.probe.trt.factor,probe.trt.levels=probe.trt.levels,chipcovariates =chip.covariates)
+  
+
+
+}
+
+
+#PLM.designmatrix3(Dilution,model=MM ~ PM -1 + probes+ liver+scanner)
+#PLM.designmatrix3(Dilution,model=MM ~ PM -1 + probes+ probe.type:liver)
+
+verify.bg.param <- function(R.model, background.method,background.param = list()){
+
+  bg.code <- get.background.code(background.method)
+  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
+  LESN.param <-list(baseline=0.25,theta=4)
+  LESN.param <- convert.LESN.param(LESN.param)
+  
+  default.b.param <- list(type="separate",densfun =  body(bg.dens), rho = new.env(),lesnparam=LESN.param,ideal=NULL)
+
+  if (R.model$response.variable == 0){
+    response.variable <- "PMMM"
+  } else if (R.model$response.variable == 1){
+    response.variable <- "PM"
+    if (R.model$mmorpm.covariate == 0){
+      default.b.param["type"] <- "pmonly"
+    } 
+  } else if (R.model$response.variable == -1){
+    response.variable <- "MM"
+    if (R.model$mmorpm.covariate == 0){
+      default.b.param["type"] <- "mmonly"
+    }
+  }
+
+  if (is.element(as.character(response.variable),c("PMMM","pmmm"))){
+    if (length(names(background.param)) !=0){
+      if (is.element(names(background.param),"type")){
+        if (is.element(background.param["type"],c("pmonly","mmonly"))){
+          stop("You can not apply a background 'pmonly' or 'mmonly' with the 'PMMM' response.")
+        } else {
+          if (is.element(background.param["type"],c("separate","together"))){
+            default.b.param["type"] <- background.param["type"]
+          } else {
+            stop("type should be 'separate','together','pmonly' or 'mmonly'.")
+          }
+        }
+      }
+    }
+    if (is.element(background.method,c("IdealMM","MASIM"))){
+      stop("Can't use the Ideal Mismatch background corrections with the 'PMMM' response.") 
+    }
+  }
+
+  if (!all(is.element(names(background.param),c("type","lesnparam")))){
+    stop("Unknown parameters in background.param")
+  }
+
+  
+  if (is.element(background.param["type"],c("separate","pmonly","mmonly")) & is.element(background.method,c("MAS","MASIM","IdealMM"))){
+    warning("'together' type has been used in place of 'separate', 'pmonly' or 'mmonly' type for background method ",background.method)
+    default.b.param["type"] <- "together"
+    background.param["type"]  <- "together"
+  }
+
+  for (name in names(background.param)){
+    default.b.param[name] <- background.param[name]
+  }
+
+  
+  if (is.element(as.character(response.variable),c("mm","MM"))& is.element(background.method,c("IdealMM","MASIM"))){
+    if (R.model$mmorpm.covariate !=0){
+      stop("Can't use a covariate PM with an Ideal Mismatch background")
+    }
+    warning("Ideal Mismatch correction will treat PM as MM and MM as PM")
+    default.b.param["ideal"] <- "PM"
+  } else if (is.element(as.character(response.variable),c("pm","PM"))& is.element(background.method,c("IdealMM","MASIM"))){
+    if (R.model$mmorpm.covariate !=0){
+      stop("Can't use a covariate MM with an Ideal Mismatch background")
+    }
+    default.b.param["ideal"] <- "MM"
+  }
+  
+
+  
+  default.b.param
+
+}
+
+
+verify.norm.param <- function(R.model, normalize.method,normalize.param = list()){
+
+  default.n.param <- list(type="separate",scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
+  
+  
+  if (R.model$response.variable !=0){
+    if (R.model$mmorpm.covariate == 0){
+      if ( R.model$response.variable  == -1){
+        default.n.param["type"] <- "mmonly"
+      } else {
+        default.n.param["type"] <- "pmonly"
+      }
+    }
+  }
+
+  if (R.model$response.variable == 0){
+    if (is.element(default.n.param["type"],c("pmonly","mmonly"))){
+      error("Can't normalize 'pmonly' or 'mmonly' with PMMM response")
+    }
+  }
+
+  default.n.param[names(normalize.param)] <- normalize.param
+
+  if (is.element(normalize.param["type"],c("separate","together")) & R.model$response.variable !=0){
+    if (R.model$mmorpm.covariate == 0){
+      if ( R.model$response.variable  == -1){
+        warning("Changing type in normalization to 'mmonly'")
+        default.n.param["type"] <- "mmonly"
+      } else {
+        warning("Changing type in normalization to 'pmonly'")
+        default.n.param["type"] <- "pmonly"
+      }
+    }
+  }
+    
+  default.n.param
+}
+
+
+
+fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),subset=NULL,background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=verify.output.param(),model.param=verify.model.param(object,model)){
+
+
+  if (!is(object, "AffyBatch")) {
+    stop(paste("argument is",class(object),"fitPLM requires AffyBatch"))
+  }
+
+
+  b.param <- background.param
+  n.param <- normalize.param
+
+  
+  variable.type <- verify.variable.types (model,variable.type)
+  constraint.type <- verify.constraint.types(model,constraint.type)
+
+  output <- verify.output.param(output.param)
+  modelparam <- verify.model.param(object,model,model.param=model.param)
+  R.model <- PLM.designmatrix3(object,model,variable.type=variable.type,constraint.type=constraint.type)
+
+
+
+  background.param <- verify.bg.param(R.model, background.method,background.param = background.param)
+  normalize.param <- verify.norm.param(R.model, normalize.method,normalize.param=normalize.param)
+   
+  if (!is.null(subset)){
+    n.probesets <- length(subset)
+  } else {
+    n.probesets <- length(geneNames(object))
+  }
+
+                                        # to avoid having to pass location information to the c code, we will just call the R code method
+  if (is.element(background.method,c("MAS","MASIM")) & background){
+    cat("Background Correcting\n")
+    object <- bg.correct.mas(object)
+  }
+  if (is.element(background.method,c("gcrma","GCRMA")) & background){
+    cat("Background Correcting\n")
+    object <- bg.correct.gcrma(object)
+  }
+
+
+  #Fitresults <- .Call("rlm_PLMset",pm(object,subset),mm(object,subset),probeNames(object,subset),n.probesets,R.model,output,modelparam)
+
+  Fitresults <- .Call("R_rlm_PLMset_c",pm(object,subset),mm(object,subset),probeNames(object,subset),n.probesets,R.model,output,modelparam,background, background.method,background.param, normalize, normalize.method, normalize.param,PACKAGE="affyPLM")
+  
+  x <- new("PLMset")
+  x@chip.coefs=Fitresults[[1]]
+  x@probe.coefs= Fitresults[[2]]
+  x@weights=Fitresults[[3]]
+  x@se.chip.coefs=Fitresults[[4]]
+  x@se.probe.coefs=Fitresults[[5]]
+  x@exprs=Fitresults[[6]]
+  x@se.exprs=Fitresults[[7]]
+  x@residuals=Fitresults[[8]]
+  x@residualSE=Fitresults[[9]]
+  x@varcov = Fitresults[[10]]
+  x@cdfName = object@cdfName
+  x@phenoData = object@phenoData
+  x@annotation = object@annotation
+  x@description = object@description
+  x@notes = object@notes
+  x@nrow= object@nrow
+  x@ncol= object@ncol
+  x@model.description = list(which.function="fitPLM",preprocessing=list(bg.method=background.method,bg.param=background.param,background=background,norm.method=normalize.method,norm.param=normalize.param,normalize=normalize),modelsettings =list(constraint.type=constraint.type,variable.type=variable.type,model.param=modelparam),outputsettings=output)
+  x@model.description = c(x@model.description, list(R.model=R.model))
+  x
+
+
+}

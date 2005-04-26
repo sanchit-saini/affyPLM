@@ -14,6 +14,7 @@
  ** Oct 9, 2003 - Initial version
  ** Oct 10, 2003 - Introduce a general mechanism for threestep PLM
  ** Oct 12, 2003 - Fix declaration order problem
+ ** Mar 13, 2005 - change loop
  **
  *********************************************************************/
 
@@ -137,7 +138,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
   first = data->ProbeNames[0];
   first_ind = 0;
   i =0;
-  current->nprobes = 1;
+  /*current->nprobes = 1;
   for (j = 1; j < data->rows; j++){
     if ((strcmp(first,data->ProbeNames[j]) != 0) | (j == (data->rows -1))){
       if (j == (data->rows -1)){
@@ -159,7 +160,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
 	}
       }
 
-      /* Check last number of probes and only Realloc when needed */
+      // Check last number of probes and only Realloc when needed 
       if (old_nprobes != current->nprobes){
 	current->n = current->nprobes*(data->cols);
 	current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
@@ -185,7 +186,66 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
       current->nprobes = 0;
     }
     current->nprobes++;
+  } */
+
+  current->nprobes = 0;
+  i = 0;     /* indexes current probeset */
+  j = 0;    /* indexes current row in PM matrix */
+  k = 0;    /* indexes current probe in probeset */
+  while ( j < data->rows){
+    if (strcmp(first,data->ProbeNames[j]) == 0){
+      if (k >= max_nrows){
+	max_nrows = 2*max_nrows;
+	current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
+      }
+      current->cur_rows[k] = j;
+      k++;
+      j++;
+      current->nprobes++;
+      
+    } else{
+      if (old_nprobes != current->nprobes){
+	current->n = current->nprobes*(data->cols);
+	current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+	old_nprobes = current->nprobes;
+      }
+      
+      //current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+
+
+      
+
+      threestep_PLM_block(data, model, current);
+
+      copy_threestepPLM_results(current, output, data, model, store, j,i);
+      
+    
+      size = strlen(first);
+      output->outnames[i] = Calloc(size+1,char);
+      strcpy(output->outnames[i],first);  
+      i++;
+      first = data->ProbeNames[j];
+      first_ind = j;
+      current->nprobes = 0;
+      k = 0;
+    }
   }
+  j--;
+  if (old_nprobes != current->nprobes){
+    current->n = current->nprobes*(data->cols);
+    current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+    old_nprobes = current->nprobes;
+  }
+  
+  //current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+  
+  threestep_PLM_block(data, model, current);
+  copy_threestepPLM_results(current, output, data, model, store, j,i);
+  size = strlen(first);
+  output->outnames[i] = Calloc(size+1,char);
+  strcpy(output->outnames[i],first);  
+  
+
 
 
   //  Free(current->X);

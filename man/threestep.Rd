@@ -28,7 +28,8 @@ threestep(object,subset=NULL, verbose=TRUE, normalize=TRUE,background=TRUE,backg
 	    
 }
 \details{
-  This function computes the expression measure using threestep methods.
+  This function computes the expression measure using threestep
+  methods. Greater details can be found in a vignette.}
 }
 \value{
 An \code{\link[Biobase]{exprSet}}
@@ -36,8 +37,11 @@ An \code{\link[Biobase]{exprSet}}
 
 \author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
 
-\references{Irizarry et al. Biostatistics 2003}
-\seealso{\code{\link[affy]{express}},\code{\link[affy]{expresso}}, \code{\link[affy]{rma}}}
+\references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
+    Oligonucleotide Array Data: Background, Normalization and
+    Summarization}. PhD Dissertation. University of California, Berkeley.}
+
+\seealso{\code{\link[affy]{expresso}}, \code{\link[affy]{rma}}}
 
 \examples{
 data(affybatch.example)

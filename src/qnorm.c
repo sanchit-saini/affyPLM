@@ -4,12 +4,12 @@
  **
  ** aim: A c implementation of the quantile normalization method 
  **
- ** Copyright (C) 2002-2003    Ben Bolstad
+ ** Copyright (C) 2002-2005    Ben Bolstad
  **
  ** written by: B. M. Bolstad  <bolstad@stat.berkeley.edu>
  **
  ** written: Feb 2, 2002
- ** last modified: Apr 19, 2002
+ ** last modified: Mar 3, 2005
  ** 
  ** This c code implements the quantile normalization method
  ** for normalizing high density oligonucleotide data as discussed
@@ -34,6 +34,7 @@
  **                Fixed a bug where use_median was not being dereferenced in "robust method"
  ** Oct 7, 2003 - fix a bug with length is qnorm_robust
  ** Mar 6, 2004 - change malloc/free pairs to Calloc/Free
+ ** Mar 3, 2005 - port across the low memory quantile normalization from RMAExpress (and make it the new qnorm_c (previous version made qnorm_c_old)
  **
  ***********************************************************/
 
@@ -172,14 +173,16 @@ void get_ranks(double *rank, dataitem *x,int n){
 
 /*********************************************************
  **
- ** void qnorm_c(double *data, int *rows, int *cols)
+ ** void qnorm_c_old(double *data, int *rows, int *cols)
  **
  **  this is the function that actually implements the 
  ** quantile normalization algorithm. It is called from R
  **
+ ** Previous implementation, replaced with lower memory overhead version below
+ ** 
  ********************************************************/
 
-void qnorm_c(double *data, int *rows, int *cols){
+void qnorm_c_old(double *data, int *rows, int *cols){
   int i,j,ind;
   dataitem **dimat;
   double sum;
@@ -331,6 +334,81 @@ void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use
   Free(dimat);
   Free(row_mean); 
 }
+
+
+
+
+/*********************************************************
+ **
+ ** void qnorm_c(double *data, int *rows, int *cols)
+ **
+ **  this is the function that actually implements the
+ ** quantile normalization algorithm. It is called from R.
+ **
+ ** returns 1 if there is a problem, 0 otherwise
+ **
+ ********************************************************/
+
+int qnorm_c(double *data, int *rows, int *cols){
+  int i,j,ind;
+  dataitem **dimat;
+  /*  double sum; */
+  double *row_mean = (double *)Calloc((*rows),double);
+  double *datvec; // = (double *)Calloc(*cols,double);
+  double *ranks = (double *)Calloc((*rows),double);
+  
+  datvec = (double *)Calloc(*rows,double);
+  
+  for (i =0; i < *rows; i++){
+    row_mean[i] = 0.0;
+  }
+  
+  /* first find the normalizing distribution */
+  for (j = 0; j < *cols; j++){
+    for (i =0; i < *rows; i++){
+      datvec[i] = data[j*(*rows) + i];
+    }
+    qsort(datvec,*rows,sizeof(double),(int(*)(const void*, const void*))sort_double);
+    for (i =0; i < *rows; i++){
+      row_mean[i] += datvec[i]/((double)*cols);
+    }
+  }
+  
+  /* now assign back distribution */
+  dimat = (dataitem **)Calloc(1,dataitem *);
+  dimat[0] = (dataitem *)Calloc(*rows,dataitem);
+  
+  for (j = 0; j < *cols; j++){
+    for (i =0; i < *rows; i++){
+      dimat[0][i].data = data[j*(*rows) + i];
+      dimat[0][i].rank = i;
+    }
+    qsort(dimat[0],*rows,sizeof(dataitem),sort_fn);
+    get_ranks(ranks,dimat[0],*rows);
+    for (i =0; i < *rows; i++){
+      ind = dimat[0][i].rank;
+      data[j*(*rows) +ind] = row_mean[(int)floor(ranks[i])-1];
+      }
+  }
+  
+  Free(ranks);
+  Free(datvec);
+  Free(dimat[0]);
+  
+  Free(dimat);
+  Free(row_mean);
+  return 0;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 /*********************************************************

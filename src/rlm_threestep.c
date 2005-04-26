@@ -28,6 +28,7 @@
  **               tuning constant, and M estimation function
  ** Oct 10, 2003 - a PLM threestep version added.
  ** May 26, 2004 - changed the rlm fitting algorithm
+ ** Aug 05, 2004 - changed order in output to fit new version
  **
  ********************************************************************/
 
@@ -132,8 +133,8 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
   
 
   for (i=0; i< cols; i++){
-    results[i] = out_beta[i+ (nprobes-1)];
-    resultsSE[i] = out_se_estimates[i+ (nprobes-1)];
+    results[i] = out_beta[i];    //out_beta[i+ (nprobes-1)];
+    resultsSE[i] =  out_se_estimates[i];              // out_se_estimates[i+ (nprobes-1)];
   }
 
 
@@ -207,8 +208,8 @@ void rlm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *
   
 
   for (i=0; i< cols; i++){
-    results[i] = out_beta[i+ (nprobes-1)];
-    resultsSE[i] = out_se_estimates[i+ (nprobes-1)];
+    results[i] =  out_beta[i];                 // out_beta[i+ (nprobes-1)];
+    resultsSE[i] = out_se_estimates[i];      // out_se_estimates[i+ (nprobes-1)];
   }
 
 

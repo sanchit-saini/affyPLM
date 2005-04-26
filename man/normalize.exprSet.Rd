@@ -64,6 +64,12 @@ normalize(eset)
 
 \author{Ben Bolstad, \email{bolstad@stat.berkeley.edu}}
 
+\references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
+    Oligonucleotide Array Data: Background, Normalization and
+    Summarization}. PhD Dissertation. University of California,
+  Berkeley.}
+
+
 \seealso{\code{\link[affy]{normalize}}}
 
 \keyword{manip}

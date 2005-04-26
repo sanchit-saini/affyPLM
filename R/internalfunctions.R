@@ -18,12 +18,12 @@
 
  
 get.background.code <- function(name) {
-  background.names <- c("RMA.1", "RMA.2", "IdealMM","MAS","MASIM","LESN2","LESN1","LESN0")
+  background.names <- c("RMA.2", "IdealMM","MAS","MASIM","LESN2","LESN1","LESN0","GCRMA")
   if (!is.element(name, background.names)) {
     stop(paste(name, "is not a valid summary method. Please use one of:",
-               "RMA.1", "RMA.2", "IdealMM","LESN2","LESN1","LESN0"))
+               "RMA.2", "IdealMM","LESN2","LESN1","LESN0","MAS","MASIM","GCRMA"))
   }
-  code <- c(1, 2, 3, 4, 5, 6, 7, 8)[name == background.names]
+  code <- c(1, 2, 3, 4, 5, 6, 7, 8,9)[name == background.names]
   code
 }
 
@@ -48,7 +48,11 @@ get.psi.code <- function(name){
 }
 
 get.default.psi.k <- function(name){
-  psi.code <- get.psi.code(name)
+  if (!is.numeric(name)){
+    psi.code <- get.psi.code(name)
+  } else {
+    psi.code <- name
+  }
   ## ** Huber - k = 1.345
   ## ** Fair - k = 1.3998
   ## ** Cauchy - k=2.3849 

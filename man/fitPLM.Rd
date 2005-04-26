@@ -11,7 +11,9 @@ fitPLM(object,model=PM ~ -1 + probes +samples,
 variable.type=c(default="factor"),
 constraint.type=c(default="contr.treatment"),
 subset=NULL,
-background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=list(),model.param=list())
+background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param =
+                 verify.output.param(), model.param =
+                 verify.model.param(object, model))
 }
 
 \arguments{
@@ -50,7 +52,11 @@ background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = 
 
 \author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
 
-\references{Under Preparation}
+\references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
+    Oligonucleotide Array Data: Background, Normalization and
+    Summarization}. PhD Dissertation. University of California,
+  Berkeley.}
+
 \seealso{\code{\link[affy]{expresso}},
   \code{\link[affy]{rma}}, \code{\link{threestep}}}
 
@@ -64,7 +70,7 @@ se(Pset)[1:5,]
 data(Dilution)
 Pset <- fitPLM(Dilution,model=PM ~ -1 + probes + samples)
 image(Pset)
-boxplot(Pset) # NUSE
+NUSE(Pset) # NUSE
 
 #now lets try a wider class of models
 Pset <- fitPLM(Dilution,model=PM ~ -1 + probes +liver,normalize=FALSE,background=FALSE)

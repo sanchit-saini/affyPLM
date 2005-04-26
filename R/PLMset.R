@@ -73,6 +73,20 @@
 ## June 23, 2004 - boxplot has type argument. Also the NUSE procedure attempts
 ##                 to construct a reasonable boxplot even if the default model
 ##                 has not been used.
+## Aug 2, 2004 -  start making changes to the PLMset object.
+##                in particular:
+##                probe.coefs/se.probe.coefs are now lists
+##                weights - list
+##                residuals - list
+## Feb 18, 2005 - remove ma.plot (it is now in affy)
+## Mar 12, 2005 - Mbox() now includes a range arguement (with default value=0)
+##                NUSE boxplot is also this way.
+##                Added NUSE function (which gives either the NUSE boxplot or the values of NUSE)
+##                Added RLE function
+## Mar 14, 2005 - NUSE() and RLE() boxplots have default y-limits: ylim=c(0.92, 1.3) for NUSE, ylim=c(-0.75,0.75) for RLE
+##                NUSE,RLE plots have horizontal lines
+##                Speed up image() in certain situations
+## Apr 6, 2005  - ability to change color maps on image()
 ##
 ###########################################################
 
@@ -80,8 +94,8 @@
   #creating the PLMset object
 
 setClass("PLMset",
-           representation(probe.coefs="matrix",
-                          se.probe.coefs="matrix",
+           representation(probe.coefs="list",
+                          se.probe.coefs="list",
                           chip.coefs = "matrix",
                           se.chip.coefs = "matrix",
                           cdfName="character",
@@ -89,8 +103,8 @@ setClass("PLMset",
                           ncol="numeric",
                           model.description="list",
                           model.call = "call",
-                          weights="matrix",
-                          residuals="matrix",
+                          weights="list",
+                          residuals="list",
                           residualSE="matrix",
                           normVec="matrix", varcov="list"),
                          # phenoData="phenoData",
@@ -98,13 +112,13 @@ setClass("PLMset",
                          # annotation="character",
                          # notes="character"
            prototype=list(
-             probe.coefs=matrix(nr=0,nc=0),
-             se.probe.coefs=matrix(nr=0,nc=0),
+             probe.coefs=list(),                           #matrix(nr=0,nc=0),
+             se.probe.coefs=list(),                        #matrix(nr=0,nc=0),
              chip.coefs=matrix(nr=0,nc=0),
              se.chip.coefs=matrix(nr=0,nc=0),
              model.description=list(),
-             weights=matrix(nr=0,nc=0),
-             residuals =matrix(nr=0,nc=0),
+             weights=list(),                               #matrix(nr=0,nc=0),
+             residuals =list(),                            #matrix(nr=0,nc=0),
              residualSE=matrix(nr=0,nc=0),
              normVec=matrix(nr=0,nc=0),
              varcov=list(),
@@ -134,7 +148,13 @@ setMethod("weights",signature(object="PLMset"),
 		} else{
 		 which <-indexProbesProcessed(object)[genenames]
 		 which <- do.call("c",which)
-		 object@weights[which,]
+                 if (object@model.description$R.model$response.variable == 0){
+                   list(PM.weights=object@weights[[1]][which,],MM.weights=object@weights[[2]][which,])
+                 } else if (object@model.description$R.model$response.variable == -1){
+                   list(PM.weights=matrix(0,0,0),MM.weights=object@weights[[2]][which,])
+                 } else if (object@model.description$R.model$response.variable == 1){
+                   list(PM.weights=object@weights[[1]][which,],MM.weights=matrix(0,0,0))
+                 }
 		}	
 	})
 
@@ -300,7 +320,25 @@ setMethod("indexProbesProcessed", signature("PLMset"),
 
     
 setMethod("image",signature(x="PLMset"),
-          function(x,which=0,type=c("weights","resids","pos.resids","neg.resids","sign.resids"),use.log=TRUE,add.legend=FALSE,standardize=FALSE,...){
+          function(x,which=0,type=c("weights","resids","pos.resids","neg.resids","sign.resids"),use.log=TRUE,add.legend=FALSE,standardize=FALSE,col=NULL,...){
+
+
+            if (is.null(col)){
+              col.weights <- terrain.colors(25)
+              col.resids <- pseudoPalette(low="blue",high="red",mid="white")
+              col.pos.resids <- pseudoPalette(low="white",high="red")
+              col.neg.resids <- pseudoPalette(low="blue",high="white")
+            } else {
+              col.weights <- col
+              col.resids <- col
+              col.pos.resids <-  col
+              col.neg.resids <-  col
+            }
+
+
+       
+
+            
             
             type <- match.arg(type)
             
@@ -315,23 +353,43 @@ setMethod("image",signature(x="PLMset"),
             
             
             if (is.element(type,c("weights"))){
-              if (any(dim(x@weights) ==0)){
+              if (any(dim(x@weights[[1]]) ==0) & any(dim(x@weights[[2]]) ==0)){
                 stop("Sorry this PLMset does not appear to have weights\n");
               } 
               if (which == 0){
-                
-                which <- 1:dim(x@weights)[2]
-                
+                which <- 1:max(dim(x@weights[[1]])[2], dim(x@weights[[2]])[2])
               }
             }
             
-            if (is.element(type,c("resids","pos.resids","neg.resids"))){
-              if (any(dim(x@residuals) ==0)){
+            if (is.element(type,c("resids","pos.resids","neg.resids","sign.resids"))){
+              if (any(dim(x@residuals[[1]]) ==0) & any(dim(x@residuals[[2]]) ==0)){
                 stop("Sorry this PLMset does not appear to have residuals\n");
               }
               if (which == 0){
-                which <- 1:dim(x@residuals)[2]
+                which <- 1:max(dim(x@residuals[[1]])[2],dim(x@residuals[[2]])[2])
               }
+              if (standardize & type == "resids"){
+                if (x@model.description$R.model$response.variable == 0){
+                  resid.range <- c(-4,4)
+                } else if (x@model.description$R.model$response.variable == -1){
+                  resid.range <- range(resid(x,standardize)[[2]])
+                } else if (x@model.description$R.model$response.variable == 1){
+                  resid.range <- range(resid(x,standardize)[[1]])
+                }
+                
+              } else {
+                  if (x@model.description$R.model$response.variable == 0){
+                    resid.range1 <- range(x@residuals[[1]])
+                    resid.range2 <- range(x@residuals[[2]])
+                    resid.range <- resid.range1
+                    resid.range[1] <- min(resid.range1 , resid.range2)
+                    resid.range[2] <- max(resid.range1 , resid.range2)
+                  } else if (x@model.description$R.model$response.variable == -1){
+                    resid.range <- range(x@residuals[[2]])
+                  } else if (x@model.description$R.model$response.variable == 1){
+                    resid.range <- range(x@residuals[[1]])
+                  }
+                }
             }
             
             
@@ -339,20 +397,31 @@ setMethod("image",signature(x="PLMset"),
             for (i in which){
               if (type == "weights"){
                 weightmatrix <-matrix(nrow=rows,ncol=cols)
-                weightmatrix[xycoor]<- x@weights[,i]
-                weightmatrix[xycoor2]<- x@weights[,i]
+                if (x@model.description$R.model$response.variable == 0){
+                  weightmatrix[xycoor]<- x@weights[[1]][,i]
+                  weightmatrix[xycoor2]<- x@weights[[2]][,i]
+                } else if (x@model.description$R.model$response.variable == -1){
+                  weightmatrix[xycoor]<- x@weights[[2]][,i]
+                  weightmatrix[xycoor2]<- x@weights[[2]][,i]
+                } else if (x@model.description$R.model$response.variable == 1){
+                  weightmatrix[xycoor]<- x@weights[[1]][,i]
+                  weightmatrix[xycoor2]<- x@weights[[1]][,i]
+                }
+
+
+                
                                         #this line flips the matrix around so it is correct
                 weightmatrix <-as.matrix(rev(as.data.frame(weightmatrix)))
                 if (add.legend){
                   layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                   par(mar = c(4, 4, 5, 3))
                 }
-                image(weightmatrix,col=terrain.colors(25),xaxt='n',
+                image(weightmatrix,col=col.weights,xaxt='n',
                       yaxt='n',main=sampleNames(x)[i],zlim=c(0,1))
                 title(sampleNames(x)[i])
                 if (add.legend){
                   par(mar = c(4, 0, 5, 3))
-                  pseudoColorBar(seq(0,1,0.1), horizontal = FALSE, col = terrain.colors(25), main = "")
+                  pseudoColorBar(seq(0,1,0.1), horizontal = FALSE, col = col.weights, main = "")
                   layout(1)
                   par(mar = c(5, 4, 4, 2) + 0.1)
                 }
@@ -361,27 +430,65 @@ setMethod("image",signature(x="PLMset"),
               if (type == "resids"){
                 residsmatrix <- matrix(nrow=rows,ncol=cols)
                 if (standardize){
-                  residsmatrix[xycoor]<- resid(x,standardize)[,i]
-                  residsmatrix[xycoor2]<- resid(x,standardize)[,i]
+                  if (x@model.description$R.model$response.variable == 0){
+                    residsmatrix[xycoor]<- resid(x,standardize)[[1]][,i]
+                    residsmatrix[xycoor2]<- resid(x,standardize)[[2]][,i]
+                  } else if  (x@model.description$R.model$response.variable == -1){
+                    residsmatrix[xycoor]<- resid(x,standardize)[[2]][,i]
+                    residsmatrix[xycoor2]<- resid(x,standardize)[[2]][,i]
+                  } else if (x@model.description$R.model$response.variable == 1){
+                    residsmatrix[xycoor]<- resid(x,standardize)[[1]][,i]
+                    residsmatrix[xycoor2]<- resid(x,standardize)[[1]][,i]
+                  }
                 } else {
-                  residsmatrix[xycoor]<- x@residuals[,i]
-                  residsmatrix[xycoor2]<- x@residuals[,i]
+                  if (x@model.description$R.model$response.variable == 0){
+                    residsmatrix[xycoor]<- x@residuals[[1]][,i]
+                    residsmatrix[xycoor2]<- x@residuals[[2]][,i]
+                  } else if (x@model.description$R.model$response.variable == -1){
+                    residsmatrix[xycoor]<- x@residuals[[2]][,i]
+                    residsmatrix[xycoor2]<- x@residuals[[2]][,i]
+                  } else if (x@model.description$R.model$response.variable == 1){
+                    residsmatrix[xycoor]<- x@residuals[[1]][,i]
+                    residsmatrix[xycoor2]<- x@residuals[[1]][,i]
+                  }
+                    
                 }
                                         #this line
                                         #flips the matrix around so it is correct
                 residsmatrix<- as.matrix(rev(as.data.frame(residsmatrix)))
-                
+              ##  if (standardize){
+              ##    if (x@model.description$R.model$response.variable == 0){
+              ##      resid.range <- c(-4,4)
+              ##    } else if (x@model.description$R.model$response.variable == -1){
+              ##      resid.range <- range(resid(x,standardize)[[2]])
+              ##    } else if (x@model.description$R.model$response.variable == 1){
+              ##      resid.range <- range(resid(x,standardize)[[1]])
+              ##    }
+              ##      
+              ##  } else {
+              ##    if (x@model.description$R.model$response.variable == 0){
+              ##      resid.range1 <- range(x@residuals[[1]])
+              ##      resid.range2 <- range(x@residuals[[2]])
+              ##      resid.range <- resid.range1
+              ##      resid.range[1] <- min(resid.range1 , resid.range2)
+              ##      resid.range[2] <- max(resid.range1 , resid.range2)
+              ##    } else if (x@model.description$R.model$response.variable == -1){
+              ##      resid.range <- range(x@residuals[[2]])
+              ##    } else if (x@model.description$R.model$response.variable == 1){
+              ##      resid.range <- range(x@residuals[[1]])
+              ##    }
+              ##  }
                 if (use.log){
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix)+1)
-                  image(residsmatrix,col=pseudoPalette(low="blue",high="red",mid="white"),xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i],zlim=c(-max(log2(abs(x@residuals)+1)),max(log2(abs(x@residuals)+1))))
+                  image(residsmatrix,col=col.resids,xaxt='n',
+                        yaxt='n',main=sampleNames(x)[i],zlim=c(-max(log2(abs(resid.range)+1)),max(log2(abs(resid.range)+1))))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(-max(log2(abs(x@residuals)+1)),max(log2(abs(x@residuals)+1)),0.1), horizontal = FALSE, col = pseudoPalette(low="blue",high="red",mid="white"), main = "",log.ticks=TRUE)
+                    pseudoColorBar(seq(-max(log2(abs(resid.range)+1)),max(log2(abs(resid.range)+1)),0.1), horizontal = FALSE, col = col.resids, main = "",log.ticks=TRUE)
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
                   } 
@@ -395,11 +502,11 @@ setMethod("image",signature(x="PLMset"),
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
-                  image(residsmatrix,col=pseudoPalette(low="blue",high="red",mid="white"),xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i],zlim=c(-max(abs(x@residuals)),max(abs(x@residuals))))
+                  image(residsmatrix,col=col.resids,xaxt='n',
+                        yaxt='n',main=sampleNames(x)[i],zlim=c(-max(abs(resid.range)),max(abs(resid.range))))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(-max(abs(x@residuals)),max(abs(x@residuals)),0.1), horizontal = FALSE, col = pseudoPalette(low="blue",high="red",mid="white"), main = "")
+                    pseudoColorBar(seq(-max(abs(resid.range)),max(abs(resid.range)),0.1), horizontal = FALSE, col = col.resids, main = "")
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
                   } 
@@ -407,21 +514,48 @@ setMethod("image",signature(x="PLMset"),
               }
               if (type == "pos.resids"){
                 residsmatrix <- matrix(nrow=rows,ncol=cols)
-                residsmatrix[xycoor]<- pmax(x@residuals[,i],0)
-                residsmatrix[xycoor2]<- pmax(x@residuals[,i],0)
+
+                if (x@model.description$R.model$response.variable == 0){
+                  residsmatrix[xycoor]<- pmax(x@residuals[[1]][,i],0)
+                  residsmatrix[xycoor2]<- pmax(x@residuals[[2]][,i],0)
+                } else if (x@model.description$R.model$response.variable == -1){
+                  residsmatrix[xycoor]<- pmax(x@residuals[[2]][,i],0)
+                  residsmatrix[xycoor2]<- pmax(x@residuals[[2]][,i],0)
+                } else if (x@model.description$R.model$response.variable == 1){
+                  residsmatrix[xycoor]<- pmax(x@residuals[[1]][,i],0)
+                  residsmatrix[xycoor2]<- pmax(x@residuals[[1]][,i],0)
+                }
+
+
+
+                
                                         #this                 line flips the matrix around so it is correct
                 residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
+
+
+               ## if (x@model.description$R.model$response.variable == 0){
+               ##   resid.range1 <- range(x@residuals[[1]])
+               ##   resid.range2 <- range(x@residuals[[2]])
+               ##   resid.range <- resid.range1
+               ##   resid.range[1] <- min(resid.range1 , resid.range2)
+               ##   resid.range[2] <- max(resid.range1 , resid.range2)
+               ## } else if (x@model.description$R.model$response.variable == -1){
+               ##   resid.range <- range(x@residuals[[2]])
+               ## } else if (x@model.description$R.model$response.variable == 1){
+               ##   resid.range <- range(x@residuals[[1]])
+               ## }
+
                 if (use.log){
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix) +1)
-                  image(residsmatrix,col=pseudoPalette(low="white",high="red"),xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i])
+                  image(residsmatrix,col=col.pos.resids,xaxt='n',
+                        yaxt='n',main=sampleNames(x)[i],zlim=c(0,max(log2(pmax(resid.range,0)+1))))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(0,max(log2(pmax(x@residuals,0)+1)),0.1), horizontal = FALSE, col = pseudoPalette(low="white",high="red"), main = "",log.ticks=TRUE)
+                    pseudoColorBar(seq(0,max(log2(pmax(resid.range,0)+1)),0.1), horizontal = FALSE, col = col.pos.resids, main = "",log.ticks=TRUE)
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
                   } 
@@ -430,11 +564,11 @@ setMethod("image",signature(x="PLMset"),
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
-                  image(residsmatrix,col=pseudoPalette(low="white",high="red"),xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i])
+                  image(residsmatrix,col=col.pos.resids,xaxt='n',
+                        yaxt='n',main=sampleNames(x)[i],zlim=c(0,max(resid.range)))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(0,max(x@residuals),0.1), horizontal = FALSE, col = pseudoPalette(low="white",high="red"), main = "")
+                    pseudoColorBar(seq(0,max(resid.range),0.1), horizontal = FALSE, col = col.pos.resids, main = "")
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
                   } 
@@ -442,22 +576,45 @@ setMethod("image",signature(x="PLMset"),
               }
               if (type == "neg.resids"){
                 residsmatrix <- matrix(nrow=rows,ncol=cols)
-                residsmatrix[xycoor]<- pmin(x@residuals[,i],0)
-                residsmatrix[xycoor2]<- pmin(x@residuals[,i],0)
+                if (x@model.description$R.model$response.variable == 0){
+                  residsmatrix[xycoor]<- pmin(x@residuals[[1]][,i],0)
+                  residsmatrix[xycoor2]<- pmin(x@residuals[[2]][,i],0)
+                } else if (x@model.description$R.model$response.variable == -1){
+                  residsmatrix[xycoor]<- pmin(x@residuals[[2]][,i],0)
+                  residsmatrix[xycoor2]<- pmin(x@residuals[[2]][,i],0)
+                } else if (x@model.description$R.model$response.variable == 1){
+                  residsmatrix[xycoor]<- pmin(x@residuals[[1]][,i],0)
+                  residsmatrix[xycoor2]<- pmin(x@residuals[[1]][,i],0)
+                }
+
+
+                  
                                         #this line flips the matrix around so it is correct
-                residsmatrix <-
-                  as.matrix(rev(as.data.frame(residsmatrix)))
+                residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
+
+               ## if (x@model.description$R.model$response.variable == 0){
+               ##   resid.range1 <- range(x@residuals[[1]])
+               ##   resid.range2 <- range(x@residuals[[2]])
+               ##   resid.range <- resid.range1
+               ##   resid.range[1] <- min(resid.range1 , resid.range2)
+               ##   resid.range[2] <- max(resid.range1 , resid.range2)
+               ## } else if (x@model.description$R.model$response.variable == -1){
+               ##   resid.range <- range(x@residuals[[2]])
+               ## } else if (x@model.description$R.model$response.variable == 1){
+               ##   resid.range <- range(x@residuals[[1]])
+               ## }
+
                 if(use.log){
                   if (add.legend){
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix) +1)
-                  image(residsmatrix,col=pseudoPalette(low="blue",high="white"),xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i])
+                  image(residsmatrix,col=col.neg.resids,xaxt='n',
+                        yaxt='n',main=sampleNames(x)[i],zlim=c(-log2(abs(min(resid.range))+1),0))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(-max(log2(abs(pmin(x@residuals,0))+1)),0,0.1), horizontal = FALSE, col = pseudoPalette(low="blue",high="white"), main = "",log.ticks=TRUE)
+                    pseudoColorBar(seq(-max(log2(abs(pmin(resid.range,0))+1)),0,0.1), horizontal = FALSE, col = col.neg.resids, main = "",log.ticks=TRUE)
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
                   } 
@@ -467,21 +624,30 @@ setMethod("image",signature(x="PLMset"),
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
-                  image(residsmatrix,col=pseudoPalette(low="blue",high="white"),xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i])
+                  image(residsmatrix,col=col.neg.resids,xaxt='n',
+                        yaxt='n',main=sampleNames(x)[i],zlim=c(-abs(min(resid.range)),0))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
-                    pseudoColorBar(seq(min(x@residuals),0,0.1), horizontal = FALSE, col = pseudoPalette(low="blue",high="white"), main = "")
+                    pseudoColorBar(seq(min(resid.range),0,0.1), horizontal = FALSE, col = col.neg.resids, main = "")
                     layout(1)
                     par(mar = c(5, 4, 4, 2) + 0.1)
                   } 
                 }
+                
               }
               if (type == "sign.resids"){
 
                 residsmatrix <- matrix(nrow=rows,ncol=cols)
-                residsmatrix[xycoor]<- sign(x@residuals[,i])
-                residsmatrix[xycoor2]<- sign(x@residuals[,i])
+                if (x@model.description$R.model$response.variable == 0){
+                  residsmatrix[xycoor]<- sign(x@residuals[[1]][,i])
+                  residsmatrix[xycoor2]<- sign(x@residuals[[2]][,i])
+                } else if (x@model.description$R.model$response.variable == -1){
+                  residsmatrix[xycoor]<- sign(x@residuals[[2]][,i])
+                  residsmatrix[xycoor2]<- sign(x@residuals[[2]][,i])
+                } else if (x@model.description$R.model$response.variable == 1){
+                  residsmatrix[xycoor]<- sign(x@residuals[[1]][,i])
+                  residsmatrix[xycoor2]<- sign(x@residuals[[1]][,i])
+                }
 
                                         #this line flips the matrix around so it is correct
                 residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
@@ -490,16 +656,18 @@ setMethod("image",signature(x="PLMset"),
                   layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                   par(mar = c(4, 4, 5, 3))
                 }
-                image(residsmatrix,col=pseudoPalette(low="blue",high="red",mid="white"),xaxt='n',
+                image(residsmatrix,col=col.resids,xaxt='n',
                       yaxt='n',main=sampleNames(x)[i],zlim=c(-1,1))
                 if (add.legend){
                   par(mar = c(4, 0, 5, 3))
-                  pseudoColorBar(seq(-1,1,2), horizontal = FALSE, col = pseudoPalette(low="blue",high="red",mid="white"), main = "")
+                  pseudoColorBar(seq(-1,1,2), horizontal = FALSE, col = col.resids, main = "")
                   layout(1)
                   par(mar = c(5, 4, 4, 2) + 0.1)
                 } 
                 
-              } 
+              }
+              
+
               
             }
           })
@@ -508,7 +676,7 @@ setMethod("image",signature(x="PLMset"),
  
 
 setMethod("boxplot",signature(x="PLMset"),
-          function(x,type=c("NUSE","weights","residuals"),...){
+          function(x,type=c("NUSE","weights","residuals"),range=0,...){
            
 
             compute.nuse <- function(which){
@@ -520,27 +688,45 @@ setMethod("boxplot",signature(x="PLMset"),
             type <- match.arg(type)
             model <- x@model.description$modelsettings$model
             if (type == "NUSE"){
-              if ((model== (PM ~ -1 + probes + samples)) | (model== (PM ~ -1 + samples+probes))){
+              if (x@model.description$R.model$which.parameter.types[3] == 1 & x@model.description$R.model$which.parameter.types[1] == 0 ){
                 grp.rma.se1.median <- apply(se(x), 1,median)
                 grp.rma.rel.se1.mtx <- sweep(se(x),1,grp.rma.se1.median,FUN='/')
-                boxplot(data.frame(grp.rma.rel.se1.mtx),...)
+                boxplot(data.frame(grp.rma.rel.se1.mtx),range=range,...)
               } else {
                 # not the default model try constructing them using weights.
                 which <-indexProbesProcessed(x)
                 ses <- matrix(0,length(which) ,4)
-
+                
                 for (i in 1:length(which))
                   ses[i,] <- compute.nuse(which[[i]])
                 
                 
                 grp.rma.se1.median <- apply(ses, 1,median)
                 grp.rma.rel.se1.mtx <- sweep(ses,1,grp.rma.se1.median,FUN='/')
-                boxplot(data.frame(grp.rma.rel.se1.mtx),...)
+                boxplot(data.frame(grp.rma.rel.se1.mtx),range=range,...)
               }
             } else if (type == "weights"){
-              boxplot(data.frame(x@weights),...)
+              ow <- options("warn")
+              options(warn=-1)
+              if (x@model.description$R.model$response.variable == -1){
+                boxplot(data.frame(x@weights[[2]]),...)
+              } else if (x@model.description$R.model$response.variable == 1){
+                boxplot(data.frame(x@weights[[1]]),...)
+              } else {
+                boxplot(data.frame(rbind(x@weights[[1]],x@weights[[2]])),...)
+              }
+              options(ow)
             } else if (type == "residuals"){
-              boxplot(data.frame(x@residuals),...)
+              ow <- options("warn")
+              options(warn=-1)
+              if (x@model.description$R.model$response.variable == -1){
+                boxplot(data.frame(x@residuals[[2]]),...)
+              } else if (x@model.description$R.model$response.variable == 1){
+                boxplot(data.frame(x@wresiduals[[1]]),...)
+              } else {
+                boxplot(data.frame(rbind(x@residuals[[1]],x@residuals[[2]])),...)
+              }
+              options(ow)
             }
           })
 
@@ -666,10 +852,14 @@ if (!isGeneric("Mbox"))
 
   
 setMethod("Mbox",signature("PLMset"),
-          function(object,...){
-            medianchip <- apply(coefs(object), 1, median)
-            M <- sweep(coefs(object),1,medianchip,FUN='-')
-            boxplot(data.frame(M),...)
+          function(object,range=0,...){
+            if (object@model.description$R.model$which.parameter.types[3] == 1){
+              medianchip <- apply(coefs(object), 1, median)
+              M <- sweep(coefs(object),1,medianchip,FUN='-')
+              boxplot(data.frame(M),range=range,...)
+            } else {
+              stop("It doesn't appear that a model with sample effects was used.")
+            }
           })
 
 
@@ -696,18 +886,46 @@ setMethod("resid",signature("PLMset"),
               } else {
                 which <-indexProbesProcessed(object)[genenames]
                 which <- do.call("c",which)
-                object@residuals[which,]
+                if (object@model.description$R.model$response.variable == 0){
+                  list(PM.resid=object@residuals[[1]][which,],MM.resid=object@residuals[[2]][which,])
+                } else if (object@model.description$R.model$response.variable == -1){
+                  list(PM.resid=matrix(0,0,0),MM.resid=object@residuals[[2]][which,])
+                } else if (object@model.description$R.model$response.variable == 1){
+                  list(PM.resid=object@residuals[[1]][which,],MM.resid=matrix(0,0,0))
+                }
               }
 	    } else {
               which <-indexProbesProcessed(object)
               if (!is.null(genenames)){
                 which <- which[genenames]
               }
-              results <- lapply(which,function(rowindex, x){
-                x[rowindex,]/sd(as.vector(x[rowindex,]))
-              },object@residuals)
-              do.call("rbind",results)
-	    }
+              if (object@model.description$R.model$response.variable == 0){
+                results1 <- lapply(which,function(rowindex, x){
+                  x[rowindex,]   
+                },object@residuals[[1]])
+                results2 <- lapply(which,function(rowindex, x){
+                  x[rowindex,] 
+                },object@residuals[[2]])
+                for (i in 1:length(results1)){
+                  cur.sd <- sd(c(as.vector(results1[[i]]),as.vector(results2[[i]])))
+                  cur.mean <- mean(c(as.vector(results1[[i]]),as.vector(results2[[i]])))
+                  results1[[i]] <- (results1[[i]]-cur.mean)/cur.sd
+                  results2[[i]] <- (results2[[i]]-cur.mean)/cur.sd
+                }
+                return(list(PM.resid=do.call("rbind",results1),MM.resid=do.call("rbind",results2)))
+              } else if (object@model.description$R.model$response.variable == -1){
+                results <- lapply(which,function(rowindex, x){
+                  (x[rowindex,]- mean(as.vector(x[rowindex,])))/sd(as.vector(x[rowindex,]))
+                },object@residuals[[2]])
+                return(list(PM.resid=matrix(0,0,0),MM.resid=do.call("rbind",results)))
+              } else if (object@model.description$R.model$response.variable == 1){
+                results <- lapply(which,function(rowindex, x){
+                  (x[rowindex,]- mean(as.vector(x[rowindex,])))/sd(as.vector(x[rowindex,]))
+                },object@residuals[[1]])
+                return(list(PM.resid=do.call("rbind",results),MM.resid=matrix(0,0,0)))
+
+              }
+            }
           })
 
 
@@ -762,6 +980,10 @@ setMethod("residSE",signature("PLMset"),
           })
 
 
+
+setMethod("sampleNames",signature("PLMset"),function(object){
+  rownames(pData(object))
+})
 
 
 
@@ -909,36 +1131,6 @@ pseudoColorBar <- function (x, horizontal = TRUE, col = heat.colors(50), scale =
 }
 
 
-###
-### delete ma.plot when move to R-1.9.0
-###
-###
-
-###ma.plot <- function(A,M,subset=sample(1:length(M),min(c(10000, length(M)))),show.statistics=TRUE,span=2/3,family.loess="gaussian",cex=2,...){
-###  sigma <- IQR(M)
-###  mean <- median(M)
-###  xloc <- max(A) - 1
-###  yloc <- max(M)*0.75
-###  aux <- loess(M[subset]~A[subset],degree=1,span=span,family=family.loess)$fitted
-###  
-###  plot(A,M,...)
-###  o <- order(A[subset])
-###  A <- A[subset][o]
-### M <- aux[o]
-### o <-which(!duplicated(A))
-###  lines(approx(A[o],M[o]),col="red")
-###  abline(0,0,col="blue")
-
-###  # write IQR and Median on to plot
-###  if (show.statistics){
-###    txt <- format(sigma,digits=3)
-###    txt2 <- format(mean,digits=3)
-###    text(xloc ,yloc,paste(paste("Median:",txt2),paste("IQR:",txt),sep="\n"),cex=cex)
-###  } 
-###}
-
-
-
 
 if (!isGeneric("MAplot"))
   setGeneric("MAplot",function(object,...)
@@ -946,27 +1138,66 @@ if (!isGeneric("MAplot"))
 
 
 setMethod("MAplot",signature("PLMset"),
-          function(object,ref=NULL,...){
+          function(object,ref=NULL,subset=NULL,which=NULL,...){
             x <- coefs(object)
-            if (is.null(ref)){
-              medianchip <- apply(x, 1, median)
-            } else {
-              medianchip <- x[,ref]
+            if (is.null(which)){
+              which <- 1:dim(x)[2]
             }
-            M <- sweep(x,1,medianchip,FUN='-')
-            A <- 1/2*sweep(x,1,medianchip,FUN='+')
-            if (is.null(ref)){
-              for (i in 1:dim(x)[2]){
-                title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
-                ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+            
+
+            if (is.null(subset)){
+              if (is.null(ref)){
+                medianchip <- apply(x, 1, median)
+              } else {
+                medianchip <- x[,ref]
+              }
+            
+              M <- sweep(x,1,medianchip,FUN='-')
+              A <- 1/2*sweep(x,1,medianchip,FUN='+')
+              if (is.null(ref)){
+                for (i in which){
+                  title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
+                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                }
+              } else {
+                for (i in which){
+                  if (i != ref){
+                    title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                  }
+                }
               }
             } else {
-              for (i in (1:dim(x)[2])[-ref]){
-                title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
-                ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+              if (is.null(ref)){
+                medianchip <- apply(x[,subset], 1, median)
+              } else {
+                if (is.element(ref,subset)){
+                  medianchip <- x[,ref]
+                } else {
+                  stop("Ref ",ref, "is not part of the subset")
+                }
               }
-            }  
+              if (!all(is.element(which,subset))){
+                stop("Specified arrays not part of subset")
+              }
+              M <- sweep(x,1,medianchip,FUN='-')
+              A <- 1/2*sweep(x,1,medianchip,FUN='+')
+              if (is.null(ref)){
+                for (i in which){
+                  title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
+                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                }
+              } else {
+                for (i in which){
+                  if (i != ref){
+                    title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                  }
+                }
+              }
+            }
           })
+
 
 
 if (!isGeneric("nuse"))
@@ -976,36 +1207,102 @@ if (!isGeneric("nuse"))
 
 
 setMethod("nuse",signature(x="PLMset"),
-          function(x,type=c("plot","values"),...){
-           
+          function(x,type=c("plot","values","stats"),...){
+
 
             compute.nuse <- function(which){
               nuse <- apply(x@weights[which,],2,sum)
               1/sqrt(nuse)
             }
-            
-            
+
             type <- match.arg(type)
             model <- x@model.description$modelsettings$model
-            if (type == "values"){
-              if ((model== (PM ~ -1 + probes + samples)) | (model== (PM ~ -1 + samples+probes))){
+            if (type == "values" || type == "stats" ){
+              
+              if (x@model.description$R.model$which.parameter.types[3] == 1 & x@model.description$R.model$which.parameter.types[1] == 0 ){
                 grp.rma.se1.median <- apply(se(x), 1,median)
                 grp.rma.rel.se1.mtx <- sweep(se(x),1,grp.rma.se1.median,FUN='/')
-                data.frame(grp.rma.rel.se1.mtx)
               } else {
-                # not the default model try constructing them using weights.
+                                        # not the default model try constructing them using weights.
                 which <-indexProbesProcessed(x)
                 ses <- matrix(0,length(which) ,4)
-
+                
                 for (i in 1:length(which))
                   ses[i,] <- compute.nuse(which[[i]])
                 
                 
                 grp.rma.se1.median <- apply(ses, 1,median)
                 grp.rma.rel.se1.mtx <- sweep(ses,1,grp.rma.se1.median,FUN='/')
-                data.frame(grp.rma.rel.se1.mtx)
+              }
+              if (type == "values"){
+                grp.rma.rel.se1.mtx
+              } else {
+                Medians <- apply(grp.rma.rel.se1.mtx,2,median)
+                Quantiles <- apply(grp.rma.rel.se1.mtx,2,quantile,prob=c(0.25,0.75))
+                nuse.stats <- rbind(Medians,Quantiles[2,] - Quantiles[1,])
+                rownames(nuse.stats) <- c("median","IQR")
+                nuse.stats
               }
             } else {
-              boxplot(x)
+               boxplot(x,...)
             }
           })
+
+if (!isGeneric("NUSE"))
+  setGeneric("NUSE",function(x,...)
+             standardGeneric("NUSE"))
+
+
+
+setMethod("NUSE",signature(x="PLMset"),
+          function(x,type=c("plot","values","stats"),ylim=c(0.9,1.2),add.line=TRUE,...){
+            x <- nuse(x,type=type,ylim=ylim,...)
+            if (add.line & type == "plot"){
+              abline(1,0)
+            }
+            x
+          })
+
+
+
+
+
+
+
+            
+if (!isGeneric("RLE"))
+  setGeneric("RLE",function(x,...)
+             standardGeneric("RLE"))
+
+
+
+
+setMethod("RLE",signature(x="PLMset"),
+            function(x,type=c("plot","values","stats"),ylim=c(-0.75,0.75),add.line=TRUE,...){
+
+
+              type <- match.arg(type)
+              model <- x@model.description$modelsettings$model
+              if (type == "values" || type=="stats"){
+                if (x@model.description$R.model$which.parameter.types[3] == 1){
+                  medianchip <- apply(coefs(x), 1, median)
+                  if (type == "values"){
+                    sweep(coefs(x),1,medianchip,FUN='-')
+                  } else {
+                    RLE <- sweep(coefs(x),1,medianchip,FUN='-')
+                    Medians <- apply(RLE,2,median)
+                    Quantiles <- apply(RLE,2,quantile,prob=c(0.25,0.75))
+                    RLE.stats <- rbind(Medians,Quantiles[2,] - Quantiles[1,])
+                    rownames(RLE.stats) <- c("median","IQR")
+                    RLE.stats
+                  }
+                } else {
+                  stop("It doesn't appear that a model with sample effects was used.")
+                }
+              } else {
+                Mbox(x,ylim=ylim,...)
+                if (add.line){
+                  abline(0,0)
+                }
+              }
+            })

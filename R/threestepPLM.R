@@ -14,8 +14,9 @@
 ## History
 ## Oct 9, 2003 - Initial verison
 ## Dec 14, 2003 - added model.description
-## Jan 18, 2003 - remove internal functions
-## Feb 24, 2003 - Add subset as a parameter (and make it active)
+## Jan 18, 2004 - remove internal functions
+## Feb 24, 2004 - Add subset as a parameter (and make it active)
+## Aug 5, 2004 - changes to handle new preprocessing and PLMset
 ##
 #############################################################
 
@@ -32,31 +33,26 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
   } else {
     ngenes <- length(unique(subset))
   }
-  
-  
-  # background correction for RMA type backgrounds
-  bg.dens <- function(x){density(x,kernel="epanechnikov",n=2^14)}
 
+  op.param <- list(weights=FALSE,residuals=TRUE, pseudo.SE=FALSE,resid.SE=FALSE)
+  op.param[names(output.param)] <- output.param
+  #output <- verify.output.param(output.param)
+  modelparam <- verify.model.param(object,PM ~ -1 + probes + samples, model.param=model.param)
+  R.model <- PLM.designmatrix3(object,PM ~ -1 + probes + samples, variable.type=list(default="factor"),constraint.type=list(default="contr.sum"))
+
+  b.param <- verify.bg.param(R.model, background.method,background.param = background.param)
+  n.param <- verify.norm.param(R.model, normalize.method,normalize.param=normalize.param)
+  
 
   # to avoid having to pass location information to the c code, we will just call the R code method
   if (is.element(background.method,c("MAS","MASIM")) & background){
     cat("Background Correcting\n")
     object <- bg.correct.mas(object)
   }
-    
-  LESN.param <-list(baseline=0.25,theta=4)
-  LESN.param <- convert.LESN.param(LESN.param)
-
-  b.param <- list(densfun =  body(bg.dens), rho = new.env(),lesnparam=LESN.param)
-  b.param[names(background.param)] <- background.param
-  
-  n.param <- list(scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
-  n.param[names(normalize.param)] <- normalize.param
-  
-  
-  op.param <- list(weights=FALSE,residuals=TRUE, pseudo.SE=FALSE,resid.SE=FALSE)
-  op.param[names(output.param)] <- output.param
-
+  if (is.element(background.method,c("gcrma","GCRMA")) & background){
+    cat("Background Correcting\n")
+    object <- bg.correct.gcrma(object)
+  }  
   md.param <- list(psi.type = "Huber",psi.k=NULL,summary.code=get.summary.code(summary.method))
   md.param[names(model.param)] <- model.param
   
@@ -65,7 +61,7 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
   }
   md.param$psi.type <- get.psi.code(md.param$psi.type)
   
-  fit.results <- .Call("R_threestepPLMset_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, get.background.code(background.method), get.normalization.code(normalize.method),b.param,n.param,op.param,md.param, PACKAGE="affyPLM") 
+  fit.results <- .Call("R_threestepPLMset_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, background.method, normalize.method,b.param,n.param,op.param,md.param, PACKAGE="affyPLM") 
   probenames <- rownames(pm(object,subset))
   colnames(fit.results[[1]]) <- sampleNames(object)
   colnames(fit.results[[4]]) <- sampleNames(object)
@@ -96,13 +92,13 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
   
   x <- new("PLMset")
   x@chip.coefs=fit.results[[1]]
-  x@probe.coefs= fit.results[[2]]
-  x@weights=fit.results[[3]]
+  #x@probe.coefs= fit.results[[2]]
+  x@weights=list(PM.weights=fit.results[[3]],MM.weights=matrix(0,0,0))
   x@se.chip.coefs=fit.results[[4]]
-  x@se.probe.coefs=fit.results[[5]]
+  #x@se.probe.coefs=fit.results[[5]]
   x@exprs=fit.results[[6]]
   x@se.exprs=fit.results[[7]]
-  x@residuals=fit.results[[8]]
+  x@residuals=list(PM.resid=fit.results[[8]],MM.resid=matrix(0,0,0))
   x@residualSE=fit.results[[9]]
   x@varcov = fit.results[[10]]
   x@phenoData = phenodata
@@ -115,6 +111,7 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
 
   
   x@model.description = list(which.function="rmaPLM",preprocessing=list(bg.method=background.method,bg.param=b.param,background=background,norm.method=normalize.method,norm.param=n.param,normalize=normalize),modelsettings =list(model.param=md.param,summary.method=summary.method,model=NULL,constraint.type=NULL,variable.type=NULL),outputsettings=op.param)
+  x@model.description = c(x@model.description, list(R.model=R.model))
   
 
   

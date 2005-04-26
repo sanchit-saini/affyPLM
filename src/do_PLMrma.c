@@ -4,7 +4,7 @@
  **
  ** Aim: fit rma model as a PLMset object.
  **
- ** Copyright (C) 2003 Ben Bolstad
+ ** Copyright (C) 2003-2005 Ben Bolstad
  **
  ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
  ** 
@@ -15,6 +15,7 @@
  ** Oct 5, 2003 - add missing #include
  ** Oct 12, 2003 - fix declaration order error
  ** May 11, 2004 - fix a memory leak
+ ** Mar 13, 2005 - change the main loop
  **
  *********************************************************************/
 
@@ -229,7 +230,7 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
   first_ind = 0;
   i =0;
   current->nprobes = 1;
-  for (j = 1; j < data->rows; j++){
+  /*  for (j = 1; j < data->rows; j++){
     if ((strcmp(first,data->ProbeNames[j]) != 0) | (j == (data->rows -1))){
       if (j == (data->rows -1)){
         current->nprobes++;
@@ -249,8 +250,6 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
           current->cur_rows[k] = (j - current->nprobes)+k;
 	}
       }
-
-      /* Check last number of probes and only Realloc when needed */
       if (old_nprobes != current->nprobes){
 	current->n = current->nprobes*(data->cols);
 	current->p = current->nprobes + (data->cols) + 1;
@@ -279,7 +278,79 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
       current->nprobes = 0;
     }
     current->nprobes++;
-  }
+  } */
+
+ current->nprobes = 0;
+  i = 0;     /* indexes current probeset */
+  j = 0;    /* indexes current row in PM matrix */
+  k = 0;    /* indexes current probe in probeset */
+   while ( j < data->rows){
+    if (strcmp(first,data->ProbeNames[j]) == 0){
+      if (k >= max_nrows){
+	max_nrows = 2*max_nrows;
+	current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
+      }
+      current->cur_rows[k] = j;
+      k++;
+      j++;
+      current->nprobes++;
+      
+    } else {
+      if (old_nprobes != current->nprobes){
+	current->n = current->nprobes*(data->cols);
+	current->p = current->nprobes + (data->cols) + 1;
+	current->cur_weights = Realloc(current->cur_weights,current->n,double);
+	current->cur_resids = Realloc(current->cur_resids,current->n,double);
+	current->cur_params  = Realloc(current->cur_params,current->p,double);
+	current->cur_se_estimates  = Realloc(current->cur_se_estimates,current->p,double);
+	//current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
+	//current->X = Realloc(current->X,current->n*current->p,double);
+	//rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+	old_nprobes = current->nprobes;
+      }
+      rma_PLM_block(data, model, current);
+      
+      copy_rmaPLM_results(current, output, data, model, store, j,i);
+      
+      
+      size = strlen(first);
+      output->outnames[i] = Calloc(size+1,char);
+      strcpy(output->outnames[i],first);  
+      i++;
+      first = data->ProbeNames[j];
+      first_ind = j;
+      current->nprobes = 0;
+      k = 0;
+    }
+   }
+   j--;
+   
+   if (old_nprobes != current->nprobes){
+     current->n = current->nprobes*(data->cols);
+     current->p = current->nprobes + (data->cols) + 1;
+     current->cur_weights = Realloc(current->cur_weights,current->n,double);
+     current->cur_resids = Realloc(current->cur_resids,current->n,double);
+     current->cur_params  = Realloc(current->cur_params,current->p,double);
+     current->cur_se_estimates  = Realloc(current->cur_se_estimates,current->p,double);
+     //current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
+     //current->X = Realloc(current->X,current->n*current->p,double);
+     //rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+     old_nprobes = current->nprobes;
+   } 
+   rma_PLM_block(data, model, current);
+   
+   copy_rmaPLM_results(current, output, data, model, store, j,i); 
+   
+   size = strlen(first);
+   output->outnames[i] = Calloc(size+1,char);
+   strcpy(output->outnames[i],first);  
+   i++;
+   //first = data->ProbeNames[j]; 
+   
+
+
+
+
 
 
   //  Free(current->X);

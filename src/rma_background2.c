@@ -34,6 +34,7 @@
  ** Feb 25, 2003 - Fixes to remove some compiler warnings (show up when using -Wall with gcc)
  ** Apr 22, 2003 - fix error in bg_parameters2 so that can more closely duplicate the results in R
  ** Mar 06, 2004 - Changed last remaining malloc to a Calloc
+ ** Aug 04, 2004 - Remove "Background correcting" message
  **
  *****************************************************************************/
 
@@ -408,7 +409,7 @@ SEXP bg_correct_c(SEXP PMmat, SEXP MMmat, SEXP densfunc, SEXP rho, SEXP bgtype){
   PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
   MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
   /* printf("Background correcting\n"); */
-  Rprintf("Background correcting\n");
+  /* Rprintf("Background correcting\n"); */
   for (j=0; j < cols; j++){
     if (asInteger(bgtype) == 2){
       bg_parameters2(PM,MM,param,rows,cols,j,densfunc,rho);
@@ -461,7 +462,7 @@ SEXP bg_correct_c_copy(SEXP PMmat, SEXP MMmat, SEXP densfunc, SEXP rho, SEXP bgt
   PM = NUMERIC_POINTER(AS_NUMERIC(PMcopy));
   MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
   /* printf("Background correcting\n"); */
-  Rprintf("Background correcting\n");
+  /* Rprintf("Background correcting\n"); */
   /* printf("%d \n", INTEGER(bgtype)[0]); */
   for (j=0; j < cols; j++){
     if (asInteger(bgtype)==2){

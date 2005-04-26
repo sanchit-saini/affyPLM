@@ -15,7 +15,7 @@
 ## Aug 23, 2003 - make sure to make scaling available via normalize
 ## Sep 11, 2003 - Added a boxplot function for exprSets
 ## Oct 29, 2003 - Port to R-1.8.0
-## Mar 14, 2004 - added Mbox and MAplot functions for exprSets
+## Mar 14, 2004 - added Mbox and MAplot functions for exprSet
 ##
 ############################################################
 
@@ -74,33 +74,117 @@
   
   
   setMethod("MAplot",signature("exprSet"),
-            function(object,log=FALSE,ref=NULL,...){
+            function(object,log=FALSE,ref=NULL,subset=NULL,which=NULL,...){
               if(log){
                 x <- log2(exprs(object))
               } else {
                 x <- exprs(object)
               }
-              if (is.null(ref)){
-                medianchip <- apply(x, 1, median)
-              } else {
-                medianchip <- x[,ref]
+              if (is.null(which)){
+                which <-1:dim(x)[2]
               }
-              M <- sweep(x,1,medianchip,FUN='-')
-              A <- 1/2*sweep(x,1,medianchip,FUN='+')
-              if (is.null(ref)){
-                for (i in 1:dim(x)[2]){
-                  title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
-                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+
+              if (is.null(subset)){
+                if (is.null(ref)){
+                  medianchip <- apply(x, 1, median)
+                } else {
+                  medianchip <- x[,ref]
+                }
+                M <- sweep(x,1,medianchip,FUN='-')
+                A <- 1/2*sweep(x,1,medianchip,FUN='+')
+                if (is.null(ref)){
+                  for (i in which){
+                    title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                  }
+                } else {
+                  for (i in which){
+                    if (i != ref){
+                      title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
+                      ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                    }
+                  }
                 }
               } else {
-                for (i in (1:dim(x)[2])[-ref]){
-                  title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
-                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                if (is.null(ref)){
+                  medianchip <- apply(x[,subset], 1, median)
+                } else {
+                  if (is.element(ref,subset)){
+                    medianchip <- x[,ref]
+                  } else {
+                    stop("Ref ",ref, "is not part of the subset")
+                  }
                 }
-              }  
+                if (!all(is.element(which,subset))){
+                  stop("Specified arrays not part of subset")
+                }
+                M <- sweep(x,1,medianchip,FUN='-')
+                A <- 1/2*sweep(x,1,medianchip,FUN='+')
+                if (is.null(ref)){
+                  for (i in which){
+                    title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                  }
+                } else {
+                  for (i in which){
+                    if (i != ref){
+                      title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
+                      ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                    }
+                  }
+                }
+                
+              }
+              
             })
   
 }
+
+
+
+
+.initAffyBatchFunctions <- function(where){
+
+
+##  if( is.null(getGeneric("image.raw")))
+##    setGeneric("image.raw",function(object,...)
+##               standardGeneric("image.raw"))
+
+
+###
+### This is here because it is not worth fighting with
+### affy authors about the correct orientation of these plots
+### Note that artful use of axis() would allow tick marks
+### to be drawn onto the image in such a way that the
+### reversal would not be a problem.
+###
+  
+###  setMethod("image.raw",signature("AffyBatch"),
+###            function(object, which=0,transfo=log2, col=gray(c(0:256)/256),xlab="",ylab="", ...){
+###             if (which == 0){
+###               which <- 1:length(sampleNames(object))
+###              }
+###              for(i in which){
+###                m <- object@exprs[,i]
+###                if (is.function(transfo)) {
+###                  m <- transfo(m)
+###               }
+###               m <-  matrix(m, nrow=nrow(object), ncol=ncol(object))
+### m <- as.matrix(rev(as.data.frame(m)))
+######               image(1:nrow(object), 1:ncol(object), m,
+###                     col=col, main=sampleNames(object)[i],
+###                     xlab=xlab, ylab=ylab, xaxt="n",yaxt="n", ...)
+###             }
+###           })
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -109,14 +193,15 @@
   
   require(affy,quietly = FALSE, warn.conflicts = FALSE)
   require(affydata,quietly = FALSE, warn.conflicts = FALSE)
-
+  require(gcrma,quietly = FALSE, warn.conflicts = FALSE)
   
   .initNormfunctions(match(paste("package:",pkgname,sep=""),search()))
   .initExprSetFunctions(match(paste("package:",pkgname,sep=""),search()))
+  .initAffyBatchFunctions(match(paste("package:",pkgname,sep=""),search()))
   
   #if (length(search()) > length(s)) {
-  #  detach("package:AffyExtensions")
-  #  library(AffyExtensions,warn.conflicts=FALSE,verbose=FALSE)
+  #  detach("package:affyPLM")
+  #  library(affyPLM,warn.conflicts=FALSE,verbose=FALSE)
   #} 	
 
   
