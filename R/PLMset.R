@@ -1256,11 +1256,13 @@ if (!isGeneric("NUSE"))
 
 setMethod("NUSE",signature(x="PLMset"),
           function(x,type=c("plot","values","stats"),ylim=c(0.9,1.2),add.line=TRUE,...){
+           type <- match.arg(type)
             x <- nuse(x,type=type,ylim=ylim,...)
-            if (add.line & type == "plot"){
+            if (add.line & (type == "plot")){
               abline(1,0)
+            } else{
+              x
             }
-            x
           })
 
 
