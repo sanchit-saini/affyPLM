@@ -1,3 +1,4 @@
+if (.Platform$OS.type != "windows"){
 library(affyPLM)
 
 # test threestep and threestepPLM to see if they agree
@@ -66,4 +67,5 @@ if (any(coefs(Pset) != coefs(Pset2))){
 
 if (any(resid(Pset)[[1]] != resid(Pset2)[[1]])){
    stop("No agreement between threestepPLM and rmaPLM in residuals")
+}
 }
