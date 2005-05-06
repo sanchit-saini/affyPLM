@@ -43,6 +43,7 @@
  ** Mar 21, 2003 - Rename this file to LESN.c. Add function LESN_correct to be called from outside
  ** Mar 22, 2003 - a few documentation touch ups
  ** Apr 5,  2004 - All malloc/free are now Calloc/Free
+ ** May 6,  2005 - changed log2 to affyPLMlog2
  **
  *************************************************************************/
 
@@ -180,14 +181,14 @@ static double bw_gaussian(double x, double pmin, double pmax, double theta){
 
 /*******************************************************************************
  **
- **  static double log2(double x)
+ **  static double affyPLMlog2(double x)
  **
  ** internal function for computing log base 2
  **
  **
  *******************************************************************************/
 
-static double log2(double x){
+static double affyPLMlog2(double x){
 
   return log(x)/log(2.0);
 
@@ -236,7 +237,7 @@ void stretch_down(double *data, double baseline, int rows, int cols, double thet
 	}
       } else {
 	for (i=0; i < rows; i++){
-	  data[j*rows + i] = pow(2.0,log2(data[j*rows + i]) -  BackWeighting(log2(data[j*rows + i]),log2(Pmin),log2(Pmax),theta)*(log2(Pmin) - log2(baseline)));
+	  data[j*rows + i] = pow(2.0,affyPLMlog2(data[j*rows + i]) -  BackWeighting(affyPLMlog2(data[j*rows + i]),affyPLMlog2(Pmin),affyPLMlog2(Pmax),theta)*(affyPLMlog2(Pmin) - affyPLMlog2(baseline)));
 	}
       }
     } else {
@@ -355,7 +356,7 @@ void shift_down_log(double *data, double baseline, int rows, int cols){
       }
     } else {
       for (i=0; i < rows; i++){
-	data[j*rows + i] = pow(2.0,(log2(data[j*rows + i]) - (log2(Pmin) - log2(baseline))));
+	data[j*rows + i] = pow(2.0,(affyPLMlog2(data[j*rows + i]) - (affyPLMlog2(Pmin) - affyPLMlog2(baseline))));
       }
     }
   }
