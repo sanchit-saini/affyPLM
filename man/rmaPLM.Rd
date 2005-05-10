@@ -56,8 +56,8 @@ rmaPLM(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.
 \examples{
 # A larger example testing weight image function
 data(Dilution)
-Pset <- rmaPLM(Dilution,output.param=list(weights=TRUE))
-image(Pset)
+\dontrun{Pset <- rmaPLM(Dilution,output.param=list(weights=TRUE))}
+\dontrun{image(Pset)}
 }
 
 \keyword{manip}

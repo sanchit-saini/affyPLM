@@ -51,7 +51,7 @@ An \code{\link{PLMset}}
 data(affybatch.example)
 
 # should be equivalent to rma()
-eset <- threestepPLM(affybatch.example)
+\dontrun{eset <- threestepPLM(affybatch.example)}
 }
 \keyword{manip}
 

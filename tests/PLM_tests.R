@@ -1,3 +1,6 @@
+do.all.tests <- FALSE
+if (do.all.tests){
+
 # this file tests fitPLM and the PLMset object
 
 library(affyPLM)
@@ -112,4 +115,5 @@ if (any(abs(coefs(Pset) - exprs(eset)) > 1e-14)){
 
 if (any(abs(coefs(Pset) - coefs(Pset2)) > 1e-14)){
   stop("no agreement between fitPLM and threestep")
+}
 }
