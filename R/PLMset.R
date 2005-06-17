@@ -689,7 +689,7 @@ setMethod("boxplot",signature(x="PLMset"),
             model <- x@model.description$modelsettings$model
             if (type == "NUSE"){
               if (x@model.description$R.model$which.parameter.types[3] == 1 & x@model.description$R.model$which.parameter.types[1] == 0 ){
-                grp.rma.se1.median <- apply(se(x), 1,median)
+                grp.rma.se1.median <- apply(se(x), 1,median,na.rm=TRUE)
                 grp.rma.rel.se1.mtx <- sweep(se(x),1,grp.rma.se1.median,FUN='/')
                 boxplot(data.frame(grp.rma.rel.se1.mtx),range=range,...)
               } else {
@@ -1220,7 +1220,7 @@ setMethod("nuse",signature(x="PLMset"),
             if (type == "values" || type == "stats" ){
               
               if (x@model.description$R.model$which.parameter.types[3] == 1 & x@model.description$R.model$which.parameter.types[1] == 0 ){
-                grp.rma.se1.median <- apply(se(x), 1,median)
+                grp.rma.se1.median <- apply(se(x), 1,median,na.rm=TRUE)
                 grp.rma.rel.se1.mtx <- sweep(se(x),1,grp.rma.se1.median,FUN='/')
               } else {
                                         # not the default model try constructing them using weights.
