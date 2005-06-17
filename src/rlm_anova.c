@@ -850,8 +850,13 @@ void rlm_compute_se_anova(double *Y, int y_rows,int y_cols, double *beta, double
 
 
     XTWX(y_rows,y_cols,weights,XTX);
-    XTWXinv(y_rows, y_cols,XTX);
-    
+    if (y_rows > 1){
+      XTWXinv(y_rows, y_cols,XTX);
+    } else {
+      for (i=0; i < p; i++){
+	XTX[i*p + i] = 1.0/XTX[i*p + i];
+      }
+    }
     /* make sure in right order 
        
     for (i =0; i < y_rows-1; i++){

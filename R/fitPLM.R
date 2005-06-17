@@ -1270,14 +1270,14 @@ verify.output.param <- function(output.param=list()){
 
   if (length(output.param) == 0){
     ### this is the default output
-    return(list(weights = TRUE, residuals = TRUE, varcov ="all", resid.SE = TRUE))
+    return(list(weights = TRUE, residuals = TRUE, varcov ="none", resid.SE = TRUE))
   }
 
   if (any(!is.element(names(output.param),c("weights","residuals","varcov","resid.SE")))){
     stop("Only items named 'weights', 'residuals', 'varcov' or 'resid.SE' should be in output.param")
   }
 
-  out.list <- list(weights = TRUE, residuals = TRUE, varcov ="all", resid.SE = TRUE)
+  out.list <- list(weights = TRUE, residuals = TRUE, varcov ="none", resid.SE = TRUE)
 
   for (item in names(output.param)){
     if (item == "weights"){
