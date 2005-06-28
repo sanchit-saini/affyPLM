@@ -47,8 +47,8 @@
     setGeneric("boxplot")
   
   setMethod("boxplot", signature(x="exprSet"),
-            function(x,...){
-              boxplot(data.frame(exprs(x)),...)
+            function(x,range=0,...){
+              boxplot(data.frame(exprs(x)),range=range,...)
             })
 
   if (!isGeneric("Mbox"))
