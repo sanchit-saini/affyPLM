@@ -12,4 +12,4 @@ Description: A package that extends and improves the functionality of
         models. PLM based quality assessment tools.
 License: GPL version 2 or newer
 URL: http://www.stat.berkeley.edu/users/bolstad/AffyExtensions
-
+biocViews: Microarray, OneChannel, Preprocessing, QualityControl
