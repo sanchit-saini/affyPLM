@@ -5,7 +5,7 @@
  ** aim: provide the general framework for threestep analysis
  **      and provide interface to R code
  **
- ** Copyright (C) 2003-2004 Ben Bolstad
+ ** Copyright (C) 2003-2005 Ben Bolstad
  **
  ** created by: B. M. Bolstad   <bolstad@stat.berkeley.edu>
  ** created on: Jan 7, 2003 (rma.c dates to June 26, 2002)
@@ -30,6 +30,7 @@
  **                required under the current setup.
  ** Oct 5, 2003 - SEXP summary_parameters added
  ** Apr 5, 2004 - all malloc/free should now be Calloc/Free
+ ** Sep 13, 2005 - fix a possible gc() situation
  **
  ************************************************************************/
 
@@ -130,7 +131,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
 
   Rprintf("Calculating Expression\n");
   do_3summary(PM, ProbeNames, &rows, &cols,outexpr,outnames,nprobesets,SummaryMethod(Method),outSE,summary_param);
-  UNPROTECT(3);
+  
 
   /* now lets put names on the matrix */
 
@@ -145,7 +146,8 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   PROTECT(output_list = allocVector(VECSXP,2));
 
   SET_VECTOR_ELT(output_list,0,outvec);
-  SET_VECTOR_ELT(output_list,1,outSEvec);
+  SET_VECTOR_ELT(output_list,1,outSEvec); 
+  UNPROTECT(3);
   UNPROTECT(1);
   
   for (i =0; i < nprobesets; i++)

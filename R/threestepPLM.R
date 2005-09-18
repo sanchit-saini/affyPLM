@@ -5,7 +5,7 @@
 ## Aim: Implement threestep expression summaries in PLM framework
 ##   
 ##
-## Copyright (C) 2003-2004     B. M. Bolstad 
+## Copyright (C) 2003-2005     B. M. Bolstad 
 ##
 ## Created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
 ##
@@ -19,6 +19,7 @@
 ## Aug 5, 2004 - changes to handle new preprocessing and PLMset
 ## May 3, 2005 - added conditional to stop processing if windows
 ##               cause of segfault on windows still unknown
+## Sep 18, 2005 - removed check for windows
 ##
 #############################################################
 
@@ -26,9 +27,9 @@
 
 
 threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),output.param=list(),model.param=list()){
-  if (.Platform$OS.type == "windows"){
-    cat("Sorry threestepPLM not currently available on Windows operating systems.\n")
-  } else {
+ # if (.Platform$OS.type == "windows"){
+ #   cat("Sorry threestepPLM not currently available on Windows operating systems.\n")
+ # } else {
     rows <- length(probeNames(object,subset))
     cols <- length(object)
     
@@ -120,6 +121,6 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
 
   
     x
+    
+    
   }
-
-}

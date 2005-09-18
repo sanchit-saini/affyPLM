@@ -16,6 +16,7 @@
 ## Sep 11, 2003 - Added a boxplot function for exprSets
 ## Oct 29, 2003 - Port to R-1.8.0
 ## Mar 14, 2004 - added Mbox and MAplot functions for exprSet
+## Sep 13, 2005 - add vignettes to windows menu
 ##
 ############################################################
 
@@ -215,5 +216,11 @@
 
   # load the Lapack library needed for some parts of fitPLM
   .C("Lapack_Init",PACKAGE="affyPLM")
+
+  if(interactive() && .Platform$OS.type == "windows" &&
+                  .Platform$GUI == "Rgui"){
+             addVigs2WinMenu("affyPLM")
+           }
+
   
 }

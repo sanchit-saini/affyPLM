@@ -4,7 +4,7 @@
  **
  ** Aim: do a threestep summary as a PLMset object.
  **
- ** Copyright (C) 2003 Ben Bolstad
+ ** Copyright (C) 2003-2005 Ben Bolstad
  **
  ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
  ** 
@@ -15,6 +15,7 @@
  ** Oct 10, 2003 - Introduce a general mechanism for threestep PLM
  ** Oct 12, 2003 - Fix declaration order problem
  ** Mar 13, 2005 - change loop
+ ** Sep 18, 2005 - fix a malloc/Free pair that was causing seg faults on windows
  **
  *********************************************************************/
 
@@ -119,7 +120,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
   
   /* buffers of size 200 should be enough. */
 
-  modelfit *current = malloc(sizeof(modelfit));
+  modelfit *current = Calloc(1,modelfit);
 
   current->cur_rows=Calloc(max_nrows,int);
   current->cur_weights = 0; /* weights are not returned by threestep routines */
