@@ -30,7 +30,7 @@
 
 
 
-\author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad \email{bmb@bmbolstad.com}}
 
 \seealso{\code{\link[affy:AffyBatch-class]{AffyBatch}}, \code{\link[affy:read.affybatch]{read.affybatch}}}
 

@@ -35,7 +35,7 @@ rmaPLM(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.
   An \code{\link{PLMset}}
 }
 
-\author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad \email{bmb@bmbolstad.com}}
 
 \references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
     Oligonucleotide Array Data: Background, Normalization and

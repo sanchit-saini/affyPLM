@@ -23,7 +23,7 @@
 \newcommand{\scscst}{\scriptscriptstyle}
 \newcommand{\scst}{\scriptstyle}
 \title{affyPLM: Model Based QC Assessment of Affymetrix GeneChips}
-\author{Ben Bolstad \\ {\tt bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad \\ {\tt bmb@bmbolstad.com}\\ \url{http://bmbolstad.com}}
 \begin{document}
 
 \maketitle
@@ -242,7 +242,7 @@ the median and IQR of the NUSE values for each array is returned. Note that call
 
 \section{Final Comments}
 
-The tools discussed here are most useful for assessing relative quality within a dataset. A typical use of these tools would be to decide whether or not any arrays should be excluded from down-stream data analysis.
+The tools discussed here are most useful for assessing relative quality within a dataset. A typical use of these tools would be to decide whether or not any arrays should be excluded from down-stream data analysis. Some users might find it useful to see the results of these quality assessment procedures on other datasets. Such information can be found on the PLM Image Gallery website \url{http://plmimagegallery.bmbolstad.com}.
 
 
 \end{document}

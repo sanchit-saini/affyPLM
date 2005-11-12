@@ -36,7 +36,7 @@
    Bioinformatics 19(2) ,pp 185-193. \url{http://www.stat.berkeley.edu/~bolstad/normalize/normalize.html}
   }
 
-\author{Ben Bolstad, \email{bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad, \email{bmb@bmbolstad.com}}
 
 \seealso{\code{\link[affy]{normalize}}, \code{\link[affy:normalize.quantiles]{normalize.quantiles}}}
 

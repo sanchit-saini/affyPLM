@@ -26,7 +26,7 @@ pset2eset(pset)
 
 
 
-\author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad \email{bmb@bmbolstad.com}}
 
 \seealso{\code{\link[Biobase]{exprSet}}}
 

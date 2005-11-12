@@ -23,7 +23,7 @@
 
 \newcommand{\scscst}{\scriptscriptstyle}
 \newcommand{\scst}{\scriptstyle}
-\author{Ben Bolstad \\ {\tt bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad \\ {\tt bmb@bmbolstad.com} \\ \url{http://bmbolstad.com}}
 \begin{document}
 \title{affyPLM: Fitting Probe Level Models}
 \maketitle
@@ -574,7 +574,7 @@ and $\Psi'$ is a diagonal matrix of $\psi'$ values. When using \Rfunction{fitPLM
 \begin{equation}
 \frac{\sum w(r_i) r_i^2}{n-p} \left(X^T W  X\right)^{-1}
 \end{equation}
-as the estimator for variance covariance matrix, where $W$ is a diagonal matrix of weight values.. This option is selected by using \Rfunarg{se.type=4}.
+as the estimator for variance covariance matrix, where $W$ is a diagonal matrix of weight values. This option is selected by using \Rfunarg{se.type=4}.
 
 
 \nocite{*}

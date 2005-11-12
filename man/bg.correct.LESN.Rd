@@ -35,7 +35,7 @@ An \code{\link[affy]{AffyBatch}}
     Summarization}. PhD Dissertation. University of California, Berkeley.}
 
 
-\author{Ben Bolstad \email{bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad \email{bmb@bmbolstad.com}}
 
 \examples{
 data(affybatch.example)

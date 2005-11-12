@@ -23,7 +23,7 @@
 
 \newcommand{\scscst}{\scriptscriptstyle}
 \newcommand{\scst}{\scriptstyle}
-\author{Ben Bolstad \\ {\tt bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad \\ {\tt bmb@bmbolstad.com} \\ \url{http://bmbolstad.com}}
 \begin{document}
 \title{affyPLM: the \Rfunction{threestep} function}
 \maketitle

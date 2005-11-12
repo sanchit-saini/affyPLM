@@ -149,7 +149,7 @@ Class \code{"exprSet"}, directly.
 }
 \note{This class is better described in the vignette.}
 
-\author{B. M. Bolstad \email{bolstad@stat.berkeley.edu}}
+\author{B. M. Bolstad \email{bmb@bmbolstad.com}}
 
 
 \references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density

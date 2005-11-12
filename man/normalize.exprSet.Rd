@@ -62,7 +62,7 @@ normalize(eset)
 }
 
 
-\author{Ben Bolstad, \email{bolstad@stat.berkeley.edu}}
+\author{Ben Bolstad, \email{bmb@bmbolstad.com}}
 
 \references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
     Oligonucleotide Array Data: Background, Normalization and

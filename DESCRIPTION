@@ -1,9 +1,9 @@
 Package: affyPLM
-Version: 1.7.0
-Date: 2005-9-18
+Version: 1.7.1
+Date: 2005-11-11
 Title: Methods for fitting probe-level models
-Author: Ben Bolstad <bolstad@stat.berkeley.edu>
-Maintainer: Ben Bolstad <bolstad@stat.berkeley.edu>
+Author: Ben Bolstad <bmb@bmbolstad.com>
+Maintainer: Ben Bolstad <bmb@bmbolstad.com>
 Depends: R (>= 2.0.0), affy (>= 1.5.0), affydata, Biobase, methods, gcrma
 Description: A package that extends and improves the functionality of
         the base affy package. Routines that make heavy use of
@@ -11,6 +11,6 @@ Description: A package that extends and improves the functionality of
         methods for fitting probe-level models and tools using these
         models. PLM based quality assessment tools.
 License: GPL version 2 or newer
-URL: http://www.stat.berkeley.edu/users/bolstad/AffyExtensions
+URL: http://bmbolstad.com
 biocViews: Microarray, OneChannel, Preprocessing, QualityControl
 SaveImage: yes
