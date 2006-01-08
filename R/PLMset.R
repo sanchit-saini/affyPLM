@@ -320,9 +320,10 @@ setMethod("indexProbesProcessed", signature("PLMset"),
 
     
 setMethod("image",signature(x="PLMset"),
-          function(x,which=0,type=c("weights","resids","pos.resids","neg.resids","sign.resids"),use.log=TRUE,add.legend=FALSE,standardize=FALSE,col=NULL,...){
-
-
+          function(x, which=0, type=c("weights","resids",
+             "pos.resids","neg.resids","sign.resids"), use.log=TRUE,
+             add.legend=FALSE, standardize=FALSE, col=NULL, main, ...)
+          {
             if (is.null(col)){
               col.weights <- terrain.colors(25)
               col.resids <- pseudoPalette(low="blue",high="red",mid="white")
@@ -416,8 +417,10 @@ setMethod("image",signature(x="PLMset"),
                   layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                   par(mar = c(4, 4, 5, 3))
                 }
+                if( missing(main) )
+			main=sampleNames(x)[i]
                 image(weightmatrix,col=col.weights,xaxt='n',
-                      yaxt='n',main=sampleNames(x)[i],zlim=c(0,1))
+                      yaxt='n',main=main,zlim=c(0,1))
                 title(sampleNames(x)[i])
                 if (add.legend){
                   par(mar = c(4, 0, 5, 3))
