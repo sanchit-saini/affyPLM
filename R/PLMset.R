@@ -417,11 +417,14 @@ setMethod("image",signature(x="PLMset"),
                   layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                   par(mar = c(4, 4, 5, 3))
                 }
-                if( missing(main) )
-			main=sampleNames(x)[i]
+                if( missing(main) ){
+                  main.cur=sampleNames(x)[i]
+                } else {
+                  main.cur <- main
+                }
                 image(weightmatrix,col=col.weights,xaxt='n',
-                      yaxt='n',main=main,zlim=c(0,1))
-                title(sampleNames(x)[i])
+                      yaxt='n',main=main.cur,zlim=c(0,1))
+                ##title(sampleNames(x)[i])
                 if (add.legend){
                   par(mar = c(4, 0, 5, 3))
                   pseudoColorBar(seq(0,1,0.1), horizontal = FALSE, col = col.weights, main = "")
@@ -487,8 +490,13 @@ setMethod("image",signature(x="PLMset"),
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix)+1)
+                  if(missing(main)){
+                    main.cur=sampleNames(x)[i]
+                  } else {
+                    main.cur <- main
+                  }
                   image(residsmatrix,col=col.resids,xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i],zlim=c(-max(log2(abs(resid.range)+1)),max(log2(abs(resid.range)+1))))
+                        yaxt='n',main=main.cur,zlim=c(-max(log2(abs(resid.range)+1)),max(log2(abs(resid.range)+1))))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
                     pseudoColorBar(seq(-max(log2(abs(resid.range)+1)),max(log2(abs(resid.range)+1)),0.1), horizontal = FALSE, col = col.resids, main = "",log.ticks=TRUE)
@@ -505,8 +513,13 @@ setMethod("image",signature(x="PLMset"),
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
+                  if(missing(main)){
+                    main.cur=sampleNames(x)[i]
+                  } else {
+                    main.cur <- main
+                  }
                   image(residsmatrix,col=col.resids,xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i],zlim=c(-max(abs(resid.range)),max(abs(resid.range))))
+                        yaxt='n',main=main.cur,zlim=c(-max(abs(resid.range)),max(abs(resid.range))))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
                     pseudoColorBar(seq(-max(abs(resid.range)),max(abs(resid.range)),0.1), horizontal = FALSE, col = col.resids, main = "")
@@ -554,8 +567,13 @@ setMethod("image",signature(x="PLMset"),
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix) +1)
+                  if(missing(main)){
+                    main.cur=sampleNames(x)[i]
+                  } else {
+                    main.cur <- main
+                  } 
                   image(residsmatrix,col=col.pos.resids,xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i],zlim=c(0,max(log2(pmax(resid.range,0)+1))))
+                        yaxt='n',main=main.cur,zlim=c(0,max(log2(pmax(resid.range,0)+1))))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
                     pseudoColorBar(seq(0,max(log2(pmax(resid.range,0)+1)),0.1), horizontal = FALSE, col = col.pos.resids, main = "",log.ticks=TRUE)
@@ -567,8 +585,14 @@ setMethod("image",signature(x="PLMset"),
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
+                  if (missing(main)){
+                    main.cur <- sampleNames(x)[i]
+                  } else {
+                    main.cur <- main
+                  }
+                  
                   image(residsmatrix,col=col.pos.resids,xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i],zlim=c(0,max(resid.range)))
+                        yaxt='n',main=main.cur,zlim=c(0,max(resid.range)))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
                     pseudoColorBar(seq(0,max(resid.range),0.1), horizontal = FALSE, col = col.pos.resids, main = "")
@@ -613,8 +637,13 @@ setMethod("image",signature(x="PLMset"),
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix) +1)
+                  if(missing(main)){
+                    main.cur <- sampleNames(x)[i]
+                  } else {
+                    main.cur <- main
+                  }
                   image(residsmatrix,col=col.neg.resids,xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i],zlim=c(-log2(abs(min(resid.range))+1),0))
+                        yaxt='n',main=main.cur,zlim=c(-log2(abs(min(resid.range))+1),0))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
                     pseudoColorBar(seq(-max(log2(abs(pmin(resid.range,0))+1)),0,0.1), horizontal = FALSE, col = col.neg.resids, main = "",log.ticks=TRUE)
@@ -627,8 +656,13 @@ setMethod("image",signature(x="PLMset"),
                     layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
+                  if(missing(main)){
+                    main.cur <- sampleNames(x)[i]
+                  } else {
+                    main.cur <- main
+                  }
                   image(residsmatrix,col=col.neg.resids,xaxt='n',
-                        yaxt='n',main=sampleNames(x)[i],zlim=c(-abs(min(resid.range)),0))
+                        yaxt='n',main=main.cur,zlim=c(-abs(min(resid.range)),0))
                   if (add.legend){
                     par(mar = c(4, 0, 5, 3))
                     pseudoColorBar(seq(min(resid.range),0,0.1), horizontal = FALSE, col = col.neg.resids, main = "")
@@ -659,8 +693,10 @@ setMethod("image",signature(x="PLMset"),
                   layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                   par(mar = c(4, 4, 5, 3))
                 }
+                if(missing(main))
+                    main=sampleNames(x)[i]
                 image(residsmatrix,col=col.resids,xaxt='n',
-                      yaxt='n',main=sampleNames(x)[i],zlim=c(-1,1))
+                      yaxt='n',main=main,zlim=c(-1,1))
                 if (add.legend){
                   par(mar = c(4, 0, 5, 3))
                   pseudoColorBar(seq(-1,1,2), horizontal = FALSE, col = col.resids, main = "")
