@@ -693,10 +693,15 @@ setMethod("image",signature(x="PLMset"),
                   layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
                   par(mar = c(4, 4, 5, 3))
                 }
-                if(missing(main))
-                    main=sampleNames(x)[i]
+                if(missing(main)){
+                  main.cur=sampleNames(x)[i]
+                } else {
+                  main.cur <- main
+
+                }
+                
                 image(residsmatrix,col=col.resids,xaxt='n',
-                      yaxt='n',main=main,zlim=c(-1,1))
+                      yaxt='n',main=main.cur,zlim=c(-1,1))
                 if (add.legend){
                   par(mar = c(4, 0, 5, 3))
                   pseudoColorBar(seq(-1,1,2), horizontal = FALSE, col = col.resids, main = "")
