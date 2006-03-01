@@ -16,6 +16,7 @@
  ** Oct 12, 2003 - Fix declaration order problem
  ** Mar 13, 2005 - change loop
  ** Sep 18, 2005 - fix a malloc/Free pair that was causing seg faults on windows
+ ** Mar 1, 2006 - change all comments to ansi style
  **
  *********************************************************************/
 
@@ -130,8 +131,8 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
   current->p = 0;
   current->nprobes = 0;
   current->n = 0;
-  current->cur_residSE = 0; // Calloc(2,double);
-  current->cur_varcov = 0; // Calloc(4,double);
+  current->cur_residSE = 0; /* Calloc(2,double); */
+  current->cur_varcov = 0; /* Calloc(4,double); */
   current->X = 0;
   
 
@@ -161,7 +162,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
 	}
       }
 
-      // Check last number of probes and only Realloc when needed 
+      // Check last number of probes and only Realloc when needed  
       if (old_nprobes != current->nprobes){
 	current->n = current->nprobes*(data->cols);
 	current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
@@ -211,7 +212,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
 	old_nprobes = current->nprobes;
       }
       
-      //current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+      /* current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double); */
 
 
       
@@ -238,7 +239,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
     old_nprobes = current->nprobes;
   }
   
-  //current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+/* current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double); */
   
   threestep_PLM_block(data, model, current);
   copy_threestepPLM_results(current, output, data, model, store, j,i);
@@ -249,12 +250,12 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
 
 
 
-  //  Free(current->X);
-  //Free(current->cur_varcov);
+/*  Free(current->X);
+**  Free(current->cur_varcov); */
   Free(current->cur_resids);
   Free(current->cur_se_estimates);
   Free(current->cur_params);
-  //Free(current->cur_weights);
+/* Free(current->cur_weights); */
   Free(current->cur_rows);
   Free(current);
 }

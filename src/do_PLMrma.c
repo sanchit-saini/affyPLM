@@ -16,6 +16,7 @@
  ** Oct 12, 2003 - fix declaration order error
  ** May 11, 2004 - fix a memory leak
  ** Mar 13, 2005 - change the main loop
+ ** Mar 1, 2006 - change comments to ansi style comments
  **
  *********************************************************************/
 
@@ -165,10 +166,10 @@ void copy_rmaPLM_results(modelfit *current, PLMoutput *output, Datagroup *data,c
       for(k=0; k < data->cols; k++){
 	for (l=0; l < current->nprobes; l++){
 	  output->out_weights[k*(data->rows) + (j - (current->nprobes) + l)] = current->cur_weights[k*(current->nprobes) + l];
-	  //printf("%d ",(j - (current->nprobes) + l));
-	  //  printf("% f",current->cur_weights[k*(current->nprobes) + l]);
+	  /* printf("%d ",(j - (current->nprobes) + l));
+	  **  printf("% f",current->cur_weights[k*(current->nprobes) + l]); */
 	}
-	//printf("\n");
+	/* printf("\n"); */
       }
     }
     
@@ -221,8 +222,8 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
   current->p = 0;
   current->nprobes = 0;
   current->n = 0;
-  current->cur_residSE = 0; // Calloc(2,double);
-  current->cur_varcov = 0; // Calloc(4,double);
+  current->cur_residSE = 0; /* Calloc(2,double); */
+  current->cur_varcov = 0; /* Calloc(4,double); */
   current->X = 0;
   
 
@@ -257,9 +258,10 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
 	current->cur_resids = Realloc(current->cur_resids,current->n,double);
 	current->cur_params  = Realloc(current->cur_params,current->p,double);
 	current->cur_se_estimates  = Realloc(current->cur_se_estimates,current->p,double);
-	//current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
-	//current->X = Realloc(current->X,current->n*current->p,double);
-	//rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+	// current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
+	// current->X = Realloc(current->X,current->n*current->p,double);
+	// rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+	//
 	old_nprobes = current->nprobes;
       }
 
@@ -303,9 +305,10 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
 	current->cur_resids = Realloc(current->cur_resids,current->n,double);
 	current->cur_params  = Realloc(current->cur_params,current->p,double);
 	current->cur_se_estimates  = Realloc(current->cur_se_estimates,current->p,double);
-	//current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
-	//current->X = Realloc(current->X,current->n*current->p,double);
-	//rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+	/* current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
+	**current->X = Realloc(current->X,current->n*current->p,double);
+	**rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+	*/
 	old_nprobes = current->nprobes;
       }
       rma_PLM_block(data, model, current);
@@ -332,9 +335,10 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
      current->cur_resids = Realloc(current->cur_resids,current->n,double);
      current->cur_params  = Realloc(current->cur_params,current->p,double);
      current->cur_se_estimates  = Realloc(current->cur_se_estimates,current->p,double);
-     //current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
-     //current->X = Realloc(current->X,current->n*current->p,double);
-     //rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+     /*current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
+     **current->X = Realloc(current->X,current->n*current->p,double);
+     **rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
+     */
      old_nprobes = current->nprobes;
    } 
    rma_PLM_block(data, model, current);
@@ -345,7 +349,7 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
    output->outnames[i] = Calloc(size+1,char);
    strcpy(output->outnames[i],first);  
    i++;
-   //first = data->ProbeNames[j]; 
+   /*first = data->ProbeNames[j]; */
    
 
 
@@ -353,8 +357,8 @@ void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, output
 
 
 
-  //  Free(current->X);
-  //Free(current->cur_varcov);
+/*  Free(current->X); */
+/* Free(current->cur_varcov); */
   Free(current->cur_resids);
   Free(current->cur_se_estimates);
   Free(current->cur_params);

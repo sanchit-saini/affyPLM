@@ -29,6 +29,7 @@
  ** Oct 10, 2003 - a PLM threestep version added.
  ** May 26, 2004 - changed the rlm fitting algorithm
  ** Aug 05, 2004 - changed order in output to fit new version
+ ** March 1, 2006 - changes all comments to ansi c standard
  **
  ********************************************************************/
 
@@ -117,7 +118,7 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
  /* now do chip effects */
 
   for (row =0; row < nprobes*cols; row++){
-    curcol = row/nprobes;         //integer divison
+    curcol = row/nprobes;         /* integer division */
     
     X[(curcol+(nprobes-1))*n + row] = 1.0;
     
@@ -133,8 +134,8 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
   
 
   for (i=0; i< cols; i++){
-    results[i] = out_beta[i];    //out_beta[i+ (nprobes-1)];
-    resultsSE[i] =  out_se_estimates[i];              // out_se_estimates[i+ (nprobes-1)];
+    results[i] = out_beta[i];    
+    resultsSE[i] =  out_se_estimates[i];            
   }
 
 
@@ -160,7 +161,7 @@ void rlm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *
   double *X = Calloc(n*p,double);
   double *out_beta=Calloc(p,double);
   double *out_se_estimates=Calloc(p,double);
-  //  double *out_resids=Calloc(n,double);
+
   double *out_weights=Calloc(n,double);
   double *residSE = Calloc(2,double);
 
@@ -208,15 +209,14 @@ void rlm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *
   
 
   for (i=0; i< cols; i++){
-    results[i] =  out_beta[i];                 // out_beta[i+ (nprobes-1)];
-    resultsSE[i] = out_se_estimates[i];      // out_se_estimates[i+ (nprobes-1)];
+    results[i] =  out_beta[i];               
+    resultsSE[i] = out_se_estimates[i];      
   }
 
 
 
   Free(out_se_estimates);
   Free(out_beta);
-  //  Free(out_resids);
   Free(out_weights);
   Free(residSE);
   Free(X);

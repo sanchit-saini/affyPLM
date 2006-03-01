@@ -59,11 +59,8 @@ static void threestepPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outp
 
   
   /* Weights are not  returned by threestep function */
-  //if (store->weights){
-  //  PROTECT(Routput->weights = allocMatrix(REALSXP, data->rows, data->cols));
-  //} else {
   PROTECT(Routput->weights = allocMatrix(REALSXP, 0, 0));
-  //}
+
   Routput->nprotected++;
   output->out_weights = NUMERIC_POINTER(Routput->weights);
 
@@ -106,12 +103,8 @@ static void threestepPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outp
   output->out_resids = NUMERIC_POINTER(Routput->residuals); 
   
   /* Not returned for RMA */
-  //if (store->residSE){
-  //  PROTECT(Routput->residSE = allocMatrix(REALSXP,data->nprobesets, 2));
-  //} else {
-  
   PROTECT(Routput->residSE = allocMatrix(REALSXP,0,0));
-    //}
+  
   Routput->nprotected++;
   output->out_residSE = NUMERIC_POINTER(Routput->residSE);
 
@@ -156,7 +149,7 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
   data->rows = INTEGER(dim1)[0];
   data->cols = INTEGER(dim1)[1];
   
-  //  PROTECT(dim2 = getAttrib(chipcovariates,R_DimSymbol));
+
 
   data->PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
   data->MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
@@ -174,18 +167,19 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
 
   param = GetParameter(modelparam,"psi.type");
   model->psi_code = asInteger(param);
-  //model->psi_code = 0;
-  //  model->method = asInteger(rlm_model_type);
+  /*  //model->psi_code = 0;
+  ** //  model->method = asInteger(rlm_model_type);
+  */
   model->method = 0;
-  //param = GetParameter(modelparam,"se.type");
+  /* param = GetParameter(modelparam,"se.type"); */
   model->se_method = asInteger(param);
   model->se_method = 0;
   param = GetParameter(modelparam,"psi.k");
   model->psi_k = asReal(param);
-  //model->psi_k =0;
-  //  model->input_chipcovariates = NUMERIC_POINTER(chipcovariates);
+  /* model->psi_k =0; */
+  /*  model->input_chipcovariates = NUMERIC_POINTER(chipcovariates); */
   model->input_chipcovariates = 0;
-  //  model->nchipparams = INTEGER(dim2)[1];
+  /*  model->nchipparams = INTEGER(dim2)[1]; */
 
   model->nchipparams = data->cols;
 
@@ -196,16 +190,17 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
 
 
 
-  //param = GetParameter(modelparam,"max.its");
-  //model->n_rlm_iterations = asInteger(param);
-  //param = GetParameter(modelparam,"init.method");
-  //if (strcmp(CHAR(VECTOR_ELT(param,0)),"ls") == 0){
-  //  model->init_method = 0;
-  //} else if (strcmp(CHAR(VECTOR_ELT(param,0)),"median.polish") == 0){
-  //  model->init_method = 1;
-  //} else if (strcmp(CHAR(VECTOR_ELT(param,0)),"Huber") == 0){
-  // model->init_method = 2;
-    //}
+  /* //param = GetParameter(modelparam,"max.its");
+     //model->n_rlm_iterations = asInteger(param);
+     //param = GetParameter(modelparam,"init.method");
+     //if (strcmp(CHAR(VECTOR_ELT(param,0)),"ls") == 0){
+     //  model->init_method = 0;
+     //} else if (strcmp(CHAR(VECTOR_ELT(param,0)),"median.polish") == 0){
+     //  model->init_method = 1;
+     //} else if (strcmp(CHAR(VECTOR_ELT(param,0)),"Huber") == 0){
+     // model->init_method = 2;
+     //}
+  */
   model->init_method = 0;
 
 
@@ -217,7 +212,7 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
   param = GetParameter(outputparam,"pseudo.SE");
   store->pseudoSE = asInteger(param);
   store->residSE = 0;
-  // param = GetParameter(outputparam,"varcov");
+  /* param = GetParameter(outputparam,"varcov"); */
   store->varcov = 0;
   
 
@@ -244,8 +239,8 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
 
   
   /* Now the probe coef matrix */
-  // setAttrib(probe_coef, R_DimNamesSymbol, dimnames);
-  // setAttrib(probe_SE, R_DimNamesSymbol, dimnames);
+  /* setAttrib(probe_coef, R_DimNamesSymbol, dimnames); */
+  /* setAttrib(probe_SE, R_DimNamesSymbol, dimnames); */
    
   /*Now lets create the output_list */
 

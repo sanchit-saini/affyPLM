@@ -14,6 +14,8 @@
  **      1. Observations are stacked in probes by array by probetype order
  **      2. the trt_cov variables take on values between 0 and max_trt_cov -1
  **
+ ** History
+ ** March 1, 2006 - change all comments to ansi style
  **
  *********************************************************************/
 
@@ -738,17 +740,17 @@ void PLM_build_model_matrix(const PLM_model_parameters *model, const PLM_Datagro
     if (model->which_parameter_types[0]){
       /* intercept so second column contains the covariate */
       if (model->response_variable > 0){
-	// PM response MM covariate
+	/* PM response MM covariate */
 	for (i=0; i< data->n_arrays; i++){
 	  for (j=0; j < new_nprobes; j++)
-	    current->X[n + i*new_nprobes + j] = transfn(data->MM[i*data->n_probes + current_rows[j]]);         //log(data->MM[i*data->n_probes + current_rows[j]])/log(2.0);
+	    current->X[n + i*new_nprobes + j] = transfn(data->MM[i*data->n_probes + current_rows[j]]);         /* log(data->MM[i*data->n_probes + current_rows[j]])/log(2.0); */
 	}
       } else {
 
-	//MM response PM covariate
+	/* MM response PM covariate */
 	for (i=0; i< data->n_arrays; i++){
 	  for (j=0; j < new_nprobes; j++)
-	    current->X[n + i*new_nprobes + j] = transfn(data->PM[i*data->n_probes + current_rows[j]]);            // log(data->PM[i*data->n_probes + current_rows[j]])/log(2.0);
+	    current->X[n + i*new_nprobes + j] = transfn(data->PM[i*data->n_probes + current_rows[j]]);            /* log(data->PM[i*data->n_probes + current_rows[j]])/log(2.0); */
 	}
       }
     } else {
@@ -756,12 +758,12 @@ void PLM_build_model_matrix(const PLM_model_parameters *model, const PLM_Datagro
      if (model->response_variable > 0){
 	for (i=0; i< data->n_arrays; i++){
 	  for (j=0; j < new_nprobes; j++)
-	    current->X[i*new_nprobes + j] = transfn(data->MM[i*data->n_probes + current_rows[j]]); //log(data->MM[i*data->n_probes + current_rows[j]])/log(2.0);;
+	    current->X[i*new_nprobes + j] = transfn(data->MM[i*data->n_probes + current_rows[j]]); /* log(data->MM[i*data->n_probes + current_rows[j]])/log(2.0);; */
 	}
       } else {
 	for (i=0; i< data->n_arrays; i++){
 	  for (j=0; j < new_nprobes; j++)
-	    current->X[i*new_nprobes + j] = transfn(data->PM[i*data->n_probes + current_rows[j]]);  //  log(data->PM[i*data->n_probes + current_rows[j]])/log(2.0);;
+	    current->X[i*new_nprobes + j] = transfn(data->PM[i*data->n_probes + current_rows[j]]);  /*  log(data->PM[i*data->n_probes + current_rows[j]])/log(2.0);; */
 	}
       }
 
@@ -789,13 +791,13 @@ void PLM_build_model_matrix(const PLM_model_parameters *model, const PLM_Datagro
   if (model->mmorpm_covariate !=0){
     MMcovariates = Calloc(n,double);
     if (model->response_variable < 0){
-      //MM response PM covariate
+      /* MM response PM covariate */
       for (i=0; i< data->n_arrays; i++){
 	for (j=0; j < new_nprobes; j++)
 	  MMcovariates[i*new_nprobes + j] = log(data->PM[i*data->n_probes + current_rows[j]])/log(2.0);
       }
     } else {
-      //PM response MMcovariate
+      /* PM response MMcovariate */
       for (i=0; i< data->n_arrays; i++){
 	for (j=0; j < new_nprobes; j++)
 	  MMcovariates[i*new_nprobes + j] = log(data->MM[i*data->n_probes + current_rows[j]])/log(2.0);

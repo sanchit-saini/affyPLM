@@ -40,6 +40,7 @@
  ** June 21, 2004 - fixed up specialization for default anova model.
  ** June 23, 2004 - move specialization to its own file
  ** July 26, 2004 - rlm_wfit added
+ ** Mar 1, 2006 - change all comments to ansi style
  **
  ********************************************************************/
 
@@ -216,14 +217,14 @@ void rlm_fit(double *x, double *y, int rows, int cols, double *out_beta, double 
   double acc = 1e-4;
   double scale =0.0;
   double conv;
-  //int max_iter=20;
+  /* int max_iter=20; */
   int iter;
   
 
 
-  double *wts = out_weights; //Calloc(rows,double);
-  double *beta = out_beta; // Calloc(cols,double);
-  double *resids = out_resids; //Calloc(rows,double);
+  double *wts = out_weights; 
+  double *beta = out_beta; 
+  double *resids = out_resids; 
   double *old_resids = Calloc(rows,double);
   
 
@@ -297,9 +298,6 @@ void rlm_fit(double *x, double *y, int rows, int cols, double *out_beta, double 
 
 
   Free(old_resids);
-  //  Free(wts);
-  // Free(beta);
-  // Free(resids);
 }
 
 
@@ -362,14 +360,14 @@ void rlm_wfit(double *x, double *y, double *w, int rows, int cols, double *out_b
   double acc = 1e-4;
   double scale =0.0;
   double conv;
-  //int max_iter=20;
+  /* int max_iter=20; */
   int iter;
   
 
 
-  double *wts = out_weights; //Calloc(rows,double);
-  double *beta = out_beta; // Calloc(cols,double);
-  double *resids = out_resids; //Calloc(rows,double);
+  double *wts = out_weights;
+  double *beta = out_beta; 
+  double *resids = out_resids; 
   double *old_resids = Calloc(rows,double);
   
 
@@ -443,9 +441,6 @@ void rlm_wfit(double *x, double *y, double *w, int rows, int cols, double *out_b
 
 
   Free(old_resids);
-  //  Free(wts);
-  // Free(beta);
-  // Free(resids);
 }
 
 

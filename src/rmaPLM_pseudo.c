@@ -23,6 +23,7 @@
  ** Sept 16, 2003 - estimate residual SE better
  ** Oct  9, 2003 - adjust Pseudo variance matrix a little.
  **                slightly more documentation
+ ** March 1, 2006 - change comments to ansi c style
  **
  *********************************************************************/
 
@@ -104,7 +105,7 @@ void compute_pseudoSE(double *resids, double *pseudoSE,int rows, int cols, int p
   for (i = 0; i < rows; i++){
     sum_weights = 0.0;
     for (j = 0; j < cols; j++){
-      sum_weights +=  PsiFn(resids[j*rows + i]/MAD, psi_k, 0); //*PsiFn(resids[j*rows + i]/MAD, psi_k, 0);
+      sum_weights +=  PsiFn(resids[j*rows + i]/MAD, psi_k, 0); /*   *PsiFn(resids[j*rows + i]/MAD, psi_k, 0); */
     }
     pseudoSE[i] = residSE/sqrt(sum_weights);
   }
@@ -112,7 +113,7 @@ void compute_pseudoSE(double *resids, double *pseudoSE,int rows, int cols, int p
   for (j = 0; j < cols; j++){
     sum_weights = 0.0;
     for (i = 0; i < rows; i++){
-      sum_weights +=  PsiFn(resids[j*rows + i]/MAD, psi_k, 0); //*PsiFn(resids[j*rows + i]/MAD, psi_k, 0);
+      sum_weights +=  PsiFn(resids[j*rows + i]/MAD, psi_k, 0); /*    *PsiFn(resids[j*rows + i]/MAD, psi_k, 0); */
     }
     pseudoSE[j + rows] = residSE/sqrt(sum_weights);
   }

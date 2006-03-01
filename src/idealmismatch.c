@@ -93,12 +93,12 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, char** Prob
         nprobes++;
         for (k = 0; k < nprobes; k++){
           cur_rows[k] = (j+1 - nprobes)+k;
-          //printf("%d ", (j+1 - nprobes)+k);
+          /* printf("%d ", (j+1 - nprobes)+k); */
         }
       } else {
         for (k = 0; k < nprobes; k++){
           cur_rows[k] = (j - nprobes)+k;
-          //printf("%d ", (j - nprobes)+k);
+          /* printf("%d ", (j - nprobes)+k); */
         }
       }
 
@@ -106,7 +106,7 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, char** Prob
 	buffer[i] = log(PM[cur_rows[i]])/log(2.0) - log(MM[cur_rows[i]])/log(2.0);
       }
       SB = Tukey_Biweight(buffer,nprobes);
-      //printf("%f \n ", SB);
+      /* printf("%f \n ", SB); */
       for (i=0; i < nprobes; i++){
 	if (PM[cur_rows[i]] > MM[cur_rows[i]]){
 	  IM = MM[cur_rows[i]];
@@ -115,9 +115,9 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, char** Prob
 	} else {
 	  IM = PM[cur_rows[i]]/pow(2.0,contrast_tau/(1.0 + (contrast_tau - SB)/scale_tau));
 	}
-	//printf("%f ",PM[cur_rows[i]]);
+	/* printf("%f ",PM[cur_rows[i]]); */
 	PM[cur_rows[i]] = PM[cur_rows[i]] - IM;
-	//printf("%f %f\n",PM[cur_rows[i]],IM);
+	/* printf("%f %f\n",PM[cur_rows[i]],IM); */
       }
       first = ProbeNames[j];
       first_ind = j;
@@ -174,7 +174,7 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, cha
   /*  double contrast_tau = 0.03; */
   /*double scale_tau = 10.0; */
   int current_buf_size=200;
-  char *curname =Calloc(200,char);
+  /* char *curname =Calloc(200,char); */
   int *cur_rows =Calloc(200,int); 
   double *buffer = Calloc(200,double);
   int k = 0;
@@ -204,12 +204,12 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, cha
         nprobes++;
         for (k = 0; k < nprobes; k++){
           cur_rows[k] = (j+1 - nprobes)+k;
-          //printf("%d ", (j+1 - nprobes)+k);
+          /* printf("%d ", (j+1 - nprobes)+k); */
         }
       } else {
         for (k = 0; k < nprobes; k++){
           cur_rows[k] = (j - nprobes)+k;
-          //printf("%d ", (j - nprobes)+k);
+          /* printf("%d ", (j - nprobes)+k); */
         }
       }
 
@@ -217,16 +217,17 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, cha
 	buffer[i] = log(PM[cur_rows[i]])/log(2.0) - log(MM[cur_rows[i]])/log(2.0);
       }
       SB = Tukey_Biweight(buffer,nprobes);
-      //printf("%f \n ", SB);
+      /* printf("%f \n ", SB); */
       for (i=0; i < nprobes; i++){
-	//if (SB > contrast_tau){
+	/* if (SB > contrast_tau){ */
 	  IM = PM[cur_rows[i]]/pow(2.0,SB);
-	  //} else {
-	  //IM = PM[cur_rows[i]]/pow(2.0,contrast_tau/(1.0 + (contrast_tau - SB)/scale_tau));
-	  //}
-	//printf("%f ",PM[cur_rows[i]]);
+	  /* } else {
+	  ** IM = PM[cur_rows[i]]/pow(2.0,contrast_tau/(1.0 + (contrast_tau - SB)/scale_tau));
+	  ** } 
+	  */
+      /* printf("%f ",PM[cur_rows[i]]); */
 	PM[cur_rows[i]] = PM[cur_rows[i]] - IM;
-	//printf("%f %f\n",PM[cur_rows[i]],IM);
+	/* printf("%f %f\n",PM[cur_rows[i]],IM); */
       }
       first = ProbeNames[j];
       first_ind = j;
@@ -236,7 +237,7 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, cha
   }
     
   Free(buffer);
-  Free(curname);
+/*  Free(curname); */
   Free(cur_rows);
 
 }

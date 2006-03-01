@@ -21,6 +21,7 @@
  ** Jul 23, 2003 - Add a parameter for storing SE (which is computed)
  ** Sep 13, 2003 - altered call to rlm_compute_se to reflect new structure
  ** Oct 5, 2003 - added summary_param
+ ** Mar 1, 2006 - change all comments to ansi style
  **
  ********************************************************************/
 
@@ -116,7 +117,7 @@ void lm_threestep(double *data, int rows, int cols, int *cur_rows, double *resul
     
   }
 
-  //  rlm_fit(X,Y, n, p, out_beta, out_resids, out_weights);
+  /*  rlm_fit(X,Y, n, p, out_beta, out_resids, out_weights); */
   
   lm_wfit(X,Y, w, n, p, 1e-7, out_beta, out_resids);
   rlm_compute_se(X,Y, n, p, out_beta, out_resids, w, out_se_estimates,NULL, residSE, 4, PsiFunc(0),1.345);
@@ -150,7 +151,7 @@ void lm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *r
   double *X = Calloc(n*p,double);
   double *out_beta=Calloc(p,double);  
   double *out_se_estimates=Calloc(p,double);
-  //  double *out_resids=Calloc(n,double);
+  /*  double *out_resids=Calloc(n,double); */
   double *w = Calloc(n,double);
   double *residSE = Calloc(2,double);
   
@@ -192,7 +193,7 @@ void lm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *r
     
   }
 
-  //  rlm_fit(X,Y, n, p, out_beta, out_resids, out_weights);
+  /*  rlm_fit(X,Y, n, p, out_beta, out_resids, out_weights); */
   
   lm_wfit(X,Y, w, n, p, 1e-7, out_beta, residuals);
   rlm_compute_se(X,Y, n, p, out_beta, residuals, w, out_se_estimates,NULL, residSE, 4, PsiFunc(0),1.345);
@@ -207,7 +208,7 @@ void lm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *r
   Free(out_se_estimates);
   Free(residSE);
   Free(out_beta);
-  //  Free(out_resids);
+  /*  Free(out_resids); */
   Free(w);
   Free(X);
   Free(Y);

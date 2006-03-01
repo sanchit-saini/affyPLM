@@ -15,6 +15,7 @@
  ** History:
  ** July 29, 2004 - change routines so output order is the same as 
  **                 in new structure.
+ ** Mar 1, 2006 - change comment style to ansi
  **
  *********************************************************************/
 
@@ -176,7 +177,6 @@ static void XTWXinv(int y_rows, int y_cols,double *xtwx){
   
   for (i=0; i < y_rows -1; i++){
     for (j=i;j <  y_rows -1; j++){
-      //for (i=0; i < y_rows -1; i++){
       for (k=0; k < y_cols;k++){
 	RPQ[j*(y_rows-1) + i] +=  RP[k*(y_rows-1) + j]*xtwx[k*Msize + (y_cols + i)];
       }
@@ -345,15 +345,15 @@ R%*%solve(P)
 void rlm_fit_anova(double *y, int y_rows, int y_cols,double *out_beta, double *out_resids, double *out_weights,double (* PsiFn)(double, double, int), double psi_k,int max_iter, int initialized){
 
   int i,j,iter;
-  // double tol = 1e-7;
+  /* double tol = 1e-7; */
   double acc = 1e-4;
   double scale =0.0;
   double conv;
   double endprobe;
 
-  double *wts = out_weights; //Calloc(rows,double);
-  //double *beta = out_beta; // Calloc(cols,double);
-  double *resids = out_resids; //Calloc(rows,double);
+  double *wts = out_weights; 
+
+  double *resids = out_resids; 
   double *old_resids = Calloc(y_rows*y_cols,double);
   
   double *rowmeans = Calloc(y_rows,double);
@@ -433,7 +433,7 @@ void rlm_fit_anova(double *y, int y_rows, int y_cols,double *out_beta, double *o
       wts[i] = PsiFn(resids[i]/scale,psi_k,0);  /*           psi_huber(resids[i]/scale,k,0); */
     }
    
-    //printf("%f\n",scale);
+    /* printf("%f\n",scale); */
 
 
     /* weighted least squares */
@@ -652,7 +652,7 @@ static void RLM_SE_Method_2_anova(double residvar, double *W, int y_rows,int y_c
       se_estimates[i+(y_rows -1)] = sqrt(residvar*Winv[i*p + i]);
       } */
   } else {
-    //printf("Using a G-inverse\n");
+    /* printf("Using a G-inverse\n"); */
     SVD_inverse(W, Winv,p);
     for (i =0; i < p; i++){
       se_estimates[i] = sqrt(residvar*Winv[i*p + i]);
@@ -773,7 +773,7 @@ static int RLM_SE_Method_3_anova(double residvar, double *XTX, double *W,  int y
    
    for (i =0; i < p; i++){
      se_estimates[i] = sqrt(residvar*W[i*p + i]);
-     // printf("%f ", se_estimates[i]);
+     /*  printf("%f ", se_estimates[i]); */
    }
 
    rv = 0;
@@ -915,7 +915,7 @@ void rlm_compute_se_anova(double *Y, int y_rows,int y_cols, double *beta, double
     }
     varderivpsi/=(double)(n);
 
-    //    Kappa = 1.0 + (double)p/(double)n * (1.0-m)/(m);
+    /*    Kappa = 1.0 + (double)p/(double)n * (1.0-m)/(m); */
 
 
     Kappa = 1.0 + ((double)p/(double)n) *varderivpsi/(m*m);

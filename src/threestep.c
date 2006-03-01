@@ -31,6 +31,7 @@
  ** Oct 5, 2003 - SEXP summary_parameters added
  ** Apr 5, 2004 - all malloc/free should now be Calloc/Free
  ** Sep 13, 2005 - fix a possible gc() situation
+ ** March 1, 2006 - change comments to ansi c style
  **
  ************************************************************************/
 
@@ -200,7 +201,7 @@ SEXP R_threestep_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
 
   /* If Background correction do it */
   if (INTEGER(bg_flag)[0]){
-    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type, background_parameters); //densfunc, rho, LESN_params);
+    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type, background_parameters); /* densfunc, rho, LESN_params); */
   }
 
   /* If Normalization do it */

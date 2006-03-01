@@ -24,6 +24,7 @@
  ** Jul 27, 2003 - better handling of cases where a parameter
  **                is not estimable (set it to NA)
  ** Sep 14, 2003 - fix a bug where k was where a j should be in a for loop
+ ** Mar 1, 2006 - change all comments to ansi style
  **
  ********************************************************************/
 
@@ -182,7 +183,7 @@ void lm_wfit(double *x, double *y, double *w, int rows, int cols, double tol, do
 	out_beta[j] = beta[jpvt[j]];
       }
       for(j =k; j < cols; j++){
-	out_beta[j] =  R_NaN;// out_beta[jpvt[j]] =  R_NaN;
+	out_beta[j] =  R_NaN; /* out_beta[jpvt[j]] =  R_NaN; */
       }
     } else {
     
@@ -193,7 +194,7 @@ void lm_wfit(double *x, double *y, double *w, int rows, int cols, double tol, do
     }
     for (i=0; i < rows; i++){
       out_resids[i] = resid[i]/wts[i];
-      //resid[i] = resid[i]/wts[i];
+      /* resid[i] = resid[i]/wts[i]; */
     }
   }
   

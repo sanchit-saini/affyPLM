@@ -68,6 +68,7 @@
  ** Jan 17, 2004 - tweak how kappa is estimated so it works better
  **                in with non - huber psis
  ** June 22, 2004 - moved some functions to matrix_functions.c
+ ** March 1, 2006 - change all comments to ansi style
  **                
  ********************************************************************/
 
@@ -161,7 +162,7 @@ static void RLM_SE_Method_2(double residvar, double *W, int p, double *se_estima
       /* printf("%f ", se_estimates[i]); */
     }
   } else {
-    //printf("Using a G-inverse\n");
+    /* printf("Using a G-inverse\n"); */
     SVD_inverse(W, Winv,p);
     for (i =0; i < p; i++){
       se_estimates[i] = sqrt(residvar*Winv[i*p + i]);
@@ -249,7 +250,7 @@ static int RLM_SE_Method_3(double residvar, double *XTX, double *W, int p, doubl
   
    for (i =0; i < p; i++){
      se_estimates[i] = sqrt(residvar*W[i*p + i]);
-     // printf("%f ", se_estimates[i]);
+     /* printf("%f ", se_estimates[i]); */
    }
    
    rv = 0;
@@ -325,7 +326,7 @@ void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *res
   double vs=0.0,m,varderivpsi=0.0; 
 
   /* Initialize Lapack library */
-  //if(!Lapack_initialized) Lapack_Init();
+  /* if(!Lapack_initialized) Lapack_Init(); */
 
   if (method == 4){
     for (i=0; i < n; i++){
@@ -379,7 +380,7 @@ void rlm_compute_se(double *X,double *Y, int n, int p, double *beta, double *res
     }
     varderivpsi/=(double)(n);
 
-    //    Kappa = 1.0 + (double)p/(double)n * (1.0-m)/(m);
+    /*    Kappa = 1.0 + (double)p/(double)n * (1.0-m)/(m); */
 
 
     Kappa = 1.0 + ((double)p/(double)n) *varderivpsi/(m*m);

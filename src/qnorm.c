@@ -354,7 +354,7 @@ int qnorm_c(double *data, int *rows, int *cols){
   dataitem **dimat;
   /*  double sum; */
   double *row_mean = (double *)Calloc((*rows),double);
-  double *datvec; // = (double *)Calloc(*cols,double);
+  double *datvec; /* = (double *)Calloc(*cols,double); */
   double *ranks = (double *)Calloc((*rows),double);
   
   datvec = (double *)Calloc(*rows,double);

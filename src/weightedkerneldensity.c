@@ -498,7 +498,7 @@ void KernelDensity(double *x, int *nxxx, double *weights, double *output, double
   
   low  = buffer[0];
   high = buffer[nx-1];
-  iqr =  IQR(buffer,nx);  //buffer[(int)(0.75*nx + 0.5)] - buffer[(int)(0.25*nx+0.5)];
+  iqr =  IQR(buffer,nx);  /* buffer[(int)(0.75*nx + 0.5)] - buffer[(int)(0.25*nx+0.5)]; */
   
 
   bw = bandwidth(x,nx,iqr);
@@ -514,9 +514,9 @@ void KernelDensity(double *x, int *nxxx, double *weights, double *output, double
     kords[i] = -kords[2*n - i];
   }
   
-  //bw = bandwidth(x,nx,iqr);
+  /* bw = bandwidth(x,nx,iqr); */
   
-  //printf("iqr: %f bw: %f\n",iqr,bw);
+  /* printf("iqr: %f bw: %f\n",iqr,bw); */
   
   kernelize(kords, 2*n,bw,2);
 
@@ -534,7 +534,7 @@ void KernelDensity(double *x, int *nxxx, double *weights, double *output, double
     kords[i] = kords[i]/n2;
   }
 
-  // to get results that agree with R really need to do linear interpolation
+  /* to get results that agree with R really need to do linear interpolation */
 
   linear_interpolate(xords, kords, output_x, output,n);
 

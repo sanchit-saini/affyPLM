@@ -12,6 +12,7 @@
  **
  ** History: 
  ** June 22, 2004 - Initial version
+ ** Mar 1, 2006 - change commenting style to ansi C style
  **
  ********************************************************************/
 
@@ -261,9 +262,9 @@ static int SVD_compute(double *X, int n, double *s, double *u, double *v,int lap
   int lwork = 7*n*n + 4*n;
   int job = 21;
   char jobz = 'A';
-  double *Xcopy= Calloc(n*n,double);              //Calloc(n*n,double);
-  double *e =    Calloc(n,double);              // Calloc(n,double);
-  double *work =  Calloc(n,double);             //Calloc(n,double);
+  double *Xcopy= Calloc(n*n,double);              /* Calloc(n*n,double); */
+  double *e =    Calloc(n,double);                /* Calloc(n,double); */
+  double *work =  Calloc(n,double);               /* Calloc(n,double); */
   double *work2 =  Calloc(lwork,double);
   int *iwork = Calloc(8*n,int);
 
@@ -307,7 +308,7 @@ static int SVD_compute(double *X, int n, double *s, double *u, double *v,int lap
  ***************************************************************/
 
 static int SVD_2_inverse(double *Xinv, int n, double *s, double *u, double *v,int lapack){
-  double tolerance = 1e-7; //1.490116e-08;
+  double tolerance = 1e-7; /* 1.490116e-08; */
   int i,j,k;
   int nonzero =n;
   
@@ -315,7 +316,7 @@ static int SVD_2_inverse(double *Xinv, int n, double *s, double *u, double *v,in
   for (i = 0; i < n; i++){
     if (s[i] < tolerance*s[0]){
       nonzero = i;
-      //printf("nonzero %d",i);
+      /* printf("nonzero %d",i); */
       break;
     }
   }

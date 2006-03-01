@@ -57,6 +57,7 @@
  ** May 3, 2004   - Fixed a subtle and small memory leak.
  ** May 27, 2004  - add a way to detect that default model is being fitted
  ** July 10, 2004 - Start integrating new structure
+ ** Mar 1, 2006 - change all comments to ansi style
  **
  *********************************************************************/
 
@@ -70,6 +71,7 @@
 #include <Rinternals.h>
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -332,9 +334,9 @@ SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rl
 
   
   /* Now the probe coef matrix */
-  // setAttrib(probe_coef, R_DimNamesSymbol, dimnames);
-  // setAttrib(probe_SE, R_DimNamesSymbol, dimnames);
-   
+  /* setAttrib(probe_coef, R_DimNamesSymbol, dimnames);
+  ** setAttrib(probe_SE, R_DimNamesSymbol, dimnames);
+  */
   /*Now lets create the output_list */
 
   PROTECT(output_list = allocVector(VECSXP,10));
@@ -841,11 +843,11 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
   
   SEXP chip_covariate_names;
 
-  SEXP dim;   // A place to temporarily store dimensions      
+  SEXP dim;   /* A place to temporarily store dimensions      */
 
 
   int i,j,k;
-  //char **chipnames;
+  
   int n_const_col;
   int curcol;
 
@@ -1239,7 +1241,7 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	    UNPROTECT(3);
 	  }
 	} else {
-	  //Only the intercept 
+	  /* Only the intercept */
 	  for (i=0; i < data->n_probesets;i++){
 	    PROTECT(varcov_dimnames = allocVector(VECSXP,2));
 	    PROTECT(varcov_colnames = allocVector(STRSXP,1));
@@ -1655,16 +1657,14 @@ SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R
 SEXP R_rlm_PLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R_model, SEXP outputparam, SEXP modelparam,  SEXP bg_flag, SEXP bg_type, SEXP background_parameters, SEXP norm_flag, SEXP norm_type,SEXP norm_parameters){
 
 
-  SEXP dim1,rlmPLMresults; // PMcopy
+  SEXP dim1,rlmPLMresults; 
   int rows,cols;
 
   /*Create a copy matrix to work on. Allows us to modify data in background and normalization steps without affecting original data */
   PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
   rows = INTEGER(dim1)[0];
   cols = INTEGER(dim1)[1];
-  //  PROTECT(PMcopy = allocMatrix(REALSXP,rows,cols));
-  //copyMatrix(PMcopy,PMmat,0);
-
+ 
   /* If Background correction do it */
   if (INTEGER(bg_flag)[0]){
     PMmat = pp_background(PMmat, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters);
