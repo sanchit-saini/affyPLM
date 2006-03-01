@@ -156,9 +156,9 @@ void rlm_design_matrix_realloc(double *X, int nprobes, int cols, int p, double *
 
   int i, j, row,curcol,currow;
   int n = (nprobes*cols);
-  //int p = (nchipparams + (nprobes-1));
+  /*int p = (nchipparams + (nprobes-1));
   
-  //printf("Reallocating %d %d matrix\n",n,p);
+   printf("Reallocating %d %d matrix\n",n,p); */
 
   
   /* Since we are reallocating the designmatrix we must also reintialize the entire matrix */
@@ -351,7 +351,7 @@ void rlm_design_matrix_realloc(double *X, int nprobes, int cols, int p, double *
 void rlm_PLM_block(const Datagroup *data, const PLMmodelparam *model, modelfit *current){
   
   int i, j;
-  //  int n = (current->nprobes*data->cols);
+  /*  int n = (current->nprobes*data->cols); */
 
   double *Y = Calloc(current->n,double);
   double lg2 = log(2.0); /* Cache hopefully for speed :) */
@@ -374,14 +374,15 @@ void rlm_PLM_block(const Datagroup *data, const PLMmodelparam *model, modelfit *
     probeparam = Calloc(current->nprobes,double);
     chipparam = Calloc(data->cols,double);
     median_polishPLM(data->PM,data->rows, data->cols, current->cur_rows, probeparam, chipparam, &constparam, current->nprobes, current->cur_resids); 
-    //   if (model->method == 0){
-    //  for (i =0; i < (current->nprobes-1); i++){
-    //	current->cur_params[i] = probeparam[i];
-    //  }
-    //  for (i = 0; i < data->cols; i++){
-    //	current->cur_params[i+(current->nprobes-1)] = constparam + chipparam[i];
-    //  }
-    // }
+    /*   if (model->method == 0){
+    **  for (i =0; i < (current->nprobes-1); i++){
+    **	current->cur_params[i] = probeparam[i];
+    **  }
+    **  for (i = 0; i < data->cols; i++){
+    **	current->cur_params[i+(current->nprobes-1)] = constparam + chipparam[i];
+    **  }
+    ** } 
+    */
     Free(probeparam);
     Free(chipparam);
   } else if (model->init_method ==2){
@@ -492,7 +493,7 @@ void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,cons
       output->out_probeparams[j+1-current->nprobes] = 0.0;
       for (l=1; l < current->nprobes; l++){
 	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l-1];
-	//out_probeparams[j]-=current->cur_params[l];
+	/* out_probeparams[j]-=current->cur_params[l]; */
 	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l-1];
       }
       output->out_probe_SE[j+1-current->nprobes] = 0.0;
@@ -500,7 +501,7 @@ void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,cons
       output->out_probeparams[j-current->nprobes] = 0.0;
       for (l=1; l < current->nprobes; l++){
 	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l-1];
-	//out_probeparams[j-1]-=current->cur_params[l];
+	/* out_probeparams[j-1]-=current->cur_params[l];*/
 	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l-1]; 
       }
       output->out_probe_SE[j-current->nprobes] = 0.0;
@@ -519,7 +520,7 @@ void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,cons
       output->out_probeparams[j+1-current->nprobes] = 0.0;
       for (l=1; l < current->nprobes; l++){
 	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l];
-	//out_probeparams[j]-=current->cur_params[l+1];
+	/*out_probeparams[j]-=current->cur_params[l+1]; */
 	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l];
       }
       output->out_probe_SE[j+1-current->nprobes] = 0.0;
@@ -527,7 +528,7 @@ void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,cons
       output->out_probeparams[j -current->nprobes] = 0.0;
       for (l=1; l < current->nprobes; l++){
 	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l];
-	//out_probeparams[j-1]-=current->cur_params[l+1];
+	/*out_probeparams[j-1]-=current->cur_params[l+1]; */
 	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l]; 
       }
       output->out_probe_SE[j-current->nprobes] = 0.0;
@@ -582,16 +583,16 @@ void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,cons
 	for (l=0; l < current->nprobes; l++){
 	  output->out_weights[k*(data->rows) + (j+1 - (current->nprobes) + l)] = current->cur_weights[k*(current->nprobes) + l];
 	}
-	//printf("\n");
+	/* printf("\n"); */
       }
     } else {
       for(k=0; k < data->cols; k++){
 	for (l=0; l < current->nprobes; l++){
 	  output->out_weights[k*(data->rows) + (j - (current->nprobes) + l)] = current->cur_weights[k*(current->nprobes) + l];
-	  //printf("%d ",(j - (current->nprobes) + l));
-	  //  printf("% f",current->cur_weights[k*(current->nprobes) + l]);
+	  /* printf("%d ",(j - (current->nprobes) + l));
+	  **  printf("% f",current->cur_weights[k*(current->nprobes) + l]); */
 	}
-	//printf("\n");
+	/* printf("\n"); */
       }
     }
     
@@ -821,7 +822,7 @@ static void  rlm_PLM_probeset(const PLM_model_parameters *model, const PLM_Datag
   int isDefaultModel = 0;
 
   double *Y = Calloc(current->n,double);
-  //  double lg2 = log(2.0); /* Cache hopefully for speed :) */
+  /*  double lg2 = log(2.0); */ /* Cache hopefully for speed :) */
   double *input_weights=NULL;
   pt2trans transfn = transFunc(model->trans_fn);
   
@@ -831,26 +832,26 @@ static void  rlm_PLM_probeset(const PLM_model_parameters *model, const PLM_Datag
     /* PM response variable */
     for (j = 0; j < data->n_arrays; j++){
       for (i =0; i < current->nprobes; i++){
-	Y[j*current->nprobes + i] = transfn(data->PM[j*data->n_probes + current_rows[i]]);                                //log(data->PM[j*data->n_probes + current_rows[i]])/lg2;
+	Y[j*current->nprobes + i] = transfn(data->PM[j*data->n_probes + current_rows[i]]);                                /* log(data->PM[j*data->n_probes + current_rows[i]])/lg2; */
       }
     }
   } else if (model->response_variable == -1){
     /* MM response variable */
     for (j = 0; j < data->n_arrays; j++){
       for (i =0; i < current->nprobes; i++){
-	Y[j*current->nprobes + i] = transfn(data->MM[j*data->n_probes + current_rows[i]]);                             // log(data->MM[j*data->n_probes + current_rows[i]])/lg2;
+	Y[j*current->nprobes + i] = transfn(data->MM[j*data->n_probes + current_rows[i]]);                             /* log(data->MM[j*data->n_probes + current_rows[i]])/lg2; */
       }
     }
   } else {
     /* Both PM and MM response variables - we stack them in Y */
     for (j = 0; j < data->n_arrays; j++){
       for (i =0; i < current->nprobes; i++){
-	Y[j*current->nprobes + i] = transfn(data->PM[j*data->n_probes + current_rows[i]]);       // log(data->PM[j*data->n_probes + current_rows[i]])/lg2;
+	Y[j*current->nprobes + i] = transfn(data->PM[j*data->n_probes + current_rows[i]]);       /* log(data->PM[j*data->n_probes + current_rows[i]])/lg2; */
       }
     }
     for (j = 0; j < data->n_arrays; j++){
       for (i =0; i < current->nprobes; i++){
-	Y[current->nprobes*data->n_arrays + j*current->nprobes + i] = transfn(data->MM[j*data->n_probes + current_rows[i]]);  //log(data->MM[j*data->n_probes + current_rows[i]])/lg2;
+	Y[current->nprobes*data->n_arrays + j*current->nprobes + i] = transfn(data->MM[j*data->n_probes + current_rows[i]]);  /* log(data->MM[j*data->n_probes + current_rows[i]])/lg2; */
       }
     }
   }
@@ -1111,7 +1112,7 @@ static void copy_PLM_estimates(PLM_modelfit *current, PLM_output *output,PLM_Dat
   if (store->weights){
     offset1 =0;
     if (model->response_variable ==0){
-      offset1 =  current->nprobes;//2*current->nprobes;
+      offset1 =  current->nprobes; /*  2*current->nprobes; */
       offset2 = data->n_arrays*current->nprobes;
     } else {
       offset1 = current->nprobes;
@@ -1137,7 +1138,7 @@ static void copy_PLM_estimates(PLM_modelfit *current, PLM_output *output,PLM_Dat
   if (store->residuals){
     offset1 =0; 
     if (model->response_variable ==0){
-      offset1 =   current->nprobes;//2*current->nprobes;
+      offset1 =   current->nprobes;  /* 2*current->nprobes; */
       offset2 = data->n_arrays*current->nprobes;
     } else {
       offset1 = current->nprobes;
@@ -1167,13 +1168,13 @@ static void copy_PLM_estimates(PLM_modelfit *current, PLM_output *output,PLM_Dat
 
   /* Covariance Matrix */
   if (store->varcov){
-    //  error("varcov option all not currently supported");
+    /*  error("varcov option all not currently supported"); */
     if (store->varcov == 1){
-      // chip-level (note that this includes the intercept)
+      /* chip-level (note that this includes the intercept) */
       if (model->which_parameter_types[2]){
 	/* sample effect model */
 	if (model->which_parameter_types[0]){
-	  //need to include the intercept parameter 
+	  /* need to include the intercept parameter */
 	  output->out_varcov[which_probeset][0] = current->cur_varcov[0];
 	  for (l=0; l < model->n_arrays-1; l++){
 	    output->out_varcov[which_probeset][0*model->n_arrays + (l+1)] = current->cur_varcov[(l+offset)*current->p + 0];
@@ -1197,7 +1198,7 @@ static void copy_PLM_estimates(PLM_modelfit *current, PLM_output *output,PLM_Dat
       } else {
 	/* treatment covariates model */
 	if (model->which_parameter_types[0]){
-	  //need to include the intercept parameter 
+	  /* need to include the intercept parameter */ 
 	  output->out_varcov[which_probeset][0] = current->cur_varcov[0];
 	  for (l=0; l < model->n_chiplevelcovariates; l++){
 	    output->out_varcov[which_probeset][0*(model->n_chiplevelcovariates+1) + (l+1)] =current->cur_varcov[(l+offset)*current->p + 0];
@@ -1312,7 +1313,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
       start = j - new_nprobes;
       PLM_build_model_matrix(model, data, current, cur_rows, new_nprobes);
       rlm_PLM_probeset(model,data,current,cur_rows);
-      copy_PLM_estimates(current, output, data, model, store, start, i);  // j-(new_nprobes),i);
+      copy_PLM_estimates(current, output, data, model, store, start, i);  /* j-(new_nprobes),i); */
 	
       size = strlen(first);
       output->outnames[i] = Calloc(size+1,char);
@@ -1328,7 +1329,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
   start = j - new_nprobes;
   PLM_build_model_matrix(model, data, current, cur_rows, new_nprobes);
   rlm_PLM_probeset(model,data,current,cur_rows);
-  copy_PLM_estimates(current, output, data, model, store, start, i);  // j-(new_nprobes),i);
+  copy_PLM_estimates(current, output, data, model, store, start, i);  /* j-(new_nprobes),i); */
   
   size = strlen(first);
   output->outnames[i] = Calloc(size+1,char);
