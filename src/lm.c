@@ -31,7 +31,7 @@
 #include <Rdefines.h>
 #include <Rmath.h>
 #include <Rinternals.h>
-#include "dqrls.P"
+#include "dqrls.h"
 #include "lm.h"
 
 /*************************************************************************
