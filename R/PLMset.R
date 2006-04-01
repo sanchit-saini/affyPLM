@@ -860,8 +860,11 @@ setMethod("summary","PLMset",
                 }
                 inds <- allindexs[probeset.names]
                 inds <- do.call("c",inds)
-                cur.probe.coef <- object@probe.coefs[inds,]
-                cur.se.probe.coef <- object@se.probe.coefs[inds,]
+                cur.probe.coef <- object@probe.coefs[probeset.names][[1]]
+                cur.se.probe.coef <- object@se.probe.coefs[probeset.names][[1]]
+                
+
+                  
                 cur.chip.coef <- object@chip.coefs[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs)),]
                 cur.chip.se <- object@se.chip.coefs[grep(paste("^",probeset.names,sep=""),rownames(object@se.chip.coefs)),]#
 
@@ -880,10 +883,10 @@ setMethod("summary","PLMset",
                 print(cbind(Coef=cur.probe.coef,SE=cur.se.probe.coef))
 
                 cat("\nResiduals\n")
-                print(object@residuals[inds,])
+                print(object@residuals[[1]][inds,])
                 
                  cat("\nWeights\n")
-                print(object@weights[inds,])
+                print(object@weights[[1]][inds,])
                 cat("\n\n")
               }
             })

@@ -1160,6 +1160,9 @@ verify.model.param <- function(object,model,subset=NULL,model.param=list()){
   }
 
   if (length(model.param)==0){
+    if (is.null(defaults["psi.k"][[1]])){
+      defaults["psi.k"] <- get.default.psi.k(defaults["psi.type"][[1]])
+    }
     return (defaults)
   }
 
@@ -1242,10 +1245,12 @@ verify.model.param <- function(object,model,subset=NULL,model.param=list()){
     }
   }
   
-  if (is.element("psi.k",names(model.param))){
-    if (is.null(model.param["psi.k"][[1]])){
+  if (!is.element("psi.k",names(model.param))){
+    if (is.null(defaults["psi.k"][[1]])){
       defaults["psi.k"] <- get.default.psi.k(defaults["psi.type"][[1]])
     }
+  } else {
+    defaults["psi.k"] <- model.param["psi.k"]
   }
   
   return(defaults)
