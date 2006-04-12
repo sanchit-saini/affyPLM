@@ -87,6 +87,7 @@
 ##                NUSE,RLE plots have horizontal lines
 ##                Speed up image() in certain situations
 ## Apr 6, 2005  - ability to change color maps on image()
+## Apr 12, 2006 - add densityplot options to NUSE and RLE
 ##
 ###########################################################
 
@@ -1254,7 +1255,7 @@ if (!isGeneric("nuse"))
 
 
 setMethod("nuse",signature(x="PLMset"),
-          function(x,type=c("plot","values","stats"),...){
+          function(x,type=c("plot","values","stats","density"),ylim=c(0.9,1.2),...){
 
 
             compute.nuse <- function(which){
@@ -1264,7 +1265,7 @@ setMethod("nuse",signature(x="PLMset"),
 
             type <- match.arg(type)
             model <- x@model.description$modelsettings$model
-            if (type == "values" || type == "stats" ){
+            if (type == "values" || type == "stats" || type == "density"){
               
               if (x@model.description$R.model$which.parameter.types[3] == 1 & x@model.description$R.model$which.parameter.types[1] == 0 ){
                 grp.rma.se1.median <- apply(se(x), 1,median,na.rm=TRUE)
@@ -1282,13 +1283,15 @@ setMethod("nuse",signature(x="PLMset"),
                 grp.rma.rel.se1.mtx <- sweep(ses,1,grp.rma.se1.median,FUN='/')
               }
               if (type == "values"){
-                grp.rma.rel.se1.mtx
+                return(grp.rma.rel.se1.mtx)
+              } else if (type == "density"){
+                plotDensity(grp.rma.rel.se1.mtx,xlim=ylim,...)
               } else {
                 Medians <- apply(grp.rma.rel.se1.mtx,2,median)
                 Quantiles <- apply(grp.rma.rel.se1.mtx,2,quantile,prob=c(0.25,0.75))
                 nuse.stats <- rbind(Medians,Quantiles[2,] - Quantiles[1,])
                 rownames(nuse.stats) <- c("median","IQR")
-                nuse.stats
+                return(nuse.stats)
               }
             } else {
                boxplot(x,...)
@@ -1302,13 +1305,13 @@ if (!isGeneric("NUSE"))
 
 
 setMethod("NUSE",signature(x="PLMset"),
-          function(x,type=c("plot","values","stats"),ylim=c(0.9,1.2),add.line=TRUE,...){
+          function(x,type=c("plot","values","stats","density"),ylim=c(0.9,1.2),add.line=TRUE,...){
            type <- match.arg(type)
             x <- nuse(x,type=type,ylim=ylim,...)
             if (add.line & (type == "plot")){
               abline(1,0)
-            } else{
-              x
+            } else if (type =="values" ||  type == "stats") {
+              return(x)
             }
           })
 
@@ -1327,23 +1330,25 @@ if (!isGeneric("RLE"))
 
 
 setMethod("RLE",signature(x="PLMset"),
-            function(x,type=c("plot","values","stats"),ylim=c(-0.75,0.75),add.line=TRUE,...){
+            function(x,type=c("plot","values","stats","density"),ylim=c(-0.75,0.75),add.line=TRUE,...){
 
 
               type <- match.arg(type)
               model <- x@model.description$modelsettings$model
-              if (type == "values" || type=="stats"){
+              if (type == "values" || type=="stats" || type =="density"){
                 if (x@model.description$R.model$which.parameter.types[3] == 1){
                   medianchip <- apply(coefs(x), 1, median)
                   if (type == "values"){
-                    sweep(coefs(x),1,medianchip,FUN='-')
-                  } else {
+                    return(sweep(coefs(x),1,medianchip,FUN='-'))
+                  } else if (type =="stats") {
                     RLE <- sweep(coefs(x),1,medianchip,FUN='-')
                     Medians <- apply(RLE,2,median)
                     Quantiles <- apply(RLE,2,quantile,prob=c(0.25,0.75))
                     RLE.stats <- rbind(Medians,Quantiles[2,] - Quantiles[1,])
                     rownames(RLE.stats) <- c("median","IQR")
-                    RLE.stats
+                    return(RLE.stats)
+                  } else if (type =="density"){
+                    plotDensity(sweep(coefs(x),1,medianchip,FUN='-'),xlim=ylim,....)
                   }
                 } else {
                   stop("It doesn't appear that a model with sample effects was used.")
