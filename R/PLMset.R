@@ -1348,7 +1348,7 @@ setMethod("RLE",signature(x="PLMset"),
                     rownames(RLE.stats) <- c("median","IQR")
                     return(RLE.stats)
                   } else if (type =="density"){
-                    plotDensity(sweep(coefs(x),1,medianchip,FUN='-'),xlim=ylim,....)
+                    plotDensity(sweep(coefs(x),1,medianchip,FUN='-'),xlim=ylim,...)
                   }
                 } else {
                   stop("It doesn't appear that a model with sample effects was used.")
