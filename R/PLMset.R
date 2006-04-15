@@ -1294,7 +1294,7 @@ setMethod("nuse",signature(x="PLMset"),
                 return(nuse.stats)
               }
             } else {
-               boxplot(x,...)
+               boxplot(x,ylim=ylim,...)
             }
           })
 
