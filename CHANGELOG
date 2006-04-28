@@ -1,0 +1,33 @@
+1.9.1   Apr 27-28, 2006
+-----
+
+Better checking of validity of normalization method and normalization parameteres supplied to fitPLM, threestep etc.
+quantiles.robust is now a supported normalization option (to match with normalize.quantiles.robust in the affy function)
+
+
+
+
+
+
+
+very OLD CHANGELOG is below:
+
+
+1.4.1
+-----
+
+Fix for bug in fitPLM when model is PM ~ -1 + samples + probes (ie default model) when there are probesets with only single probeset
+Changed default setting of varcov from "all" to "none" in output.param in fitPLM ) this reduces memory over head.
+
+
+1.4.2
+-----
+
+Boxplot on a exprSet by now uses range=0 by default
+
+
+1.4.3
+-----
+
+Fix a potential gc() problem in threestep
+Fix threestepPLM() so it works on Windows.

@@ -39,7 +39,8 @@
  ** Mar 13, 2006 - re-working of the "robust" quantile normalizer. The old function is
  **                still here with a _old added to the name. Also now
  **                have a .Call() interface for the robust method
- **
+ ** Apr 27-28, 2006 - Add C level functionality for determining which outliers
+ **                to exclude for the "robust" quantile normalizer.
  **
  ***********************************************************/
 
@@ -47,7 +48,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "rma_common.h"
-
+#include "qnorm.h"
 
 
 #include <R.h>
@@ -814,4 +815,346 @@ SEXP R_qnorm_robust_c(SEXP X, SEXP copy, SEXP R_weights, SEXP R_use_median, SEXP
     UNPROTECT(1);
   }
   return Xcopy;
+}
+
+
+
+/*****************************************************************
+ **
+ ** static double compute_sd(double *x, int length)
+ **
+ ** double *x - data vector
+ ** int length - length of x
+ **
+ ** compute the standard deviation of a data vector
+ **
+ *****************************************************************/
+
+static double compute_var(double *x, int length){
+
+  int i;
+  double sum=0.0,sum2=0.0;
+
+  for (i = 0; i < length; i++){
+    sum+=x[i];
+  }
+
+  sum = sum/(double)length;
+  for (i=0; i < length; i++){
+    sum2+=(x[i]-sum)*(x[i] - sum);
+  }
+
+  return(sum2/(double)(length-1));
+}
+
+
+static double compute_means(double *x, int length){
+
+  int i;
+  double sum=0.0,sum2=0.0;
+
+  for (i = 0; i < length; i++){
+    sum+=x[i];
+  }
+
+  sum = sum/(double)length;
+  
+  return(sum);
+}
+
+
+
+static void remove_order_variance(double *x, int rows, int cols, int n_remove, double *weights){
+
+  double *vars = Calloc(cols,double);
+  double *vars_row = Calloc(cols,double);
+  double *vars_col = Calloc(cols,double);
+
+  double *results = Calloc(cols*cols,double);
+  
+  int i,j;
+
+
+  for (j=0; j < cols; j++){
+    vars[j] = compute_var(&x[j*rows],rows);
+  }
+  
+  for (i = 0; i < cols -1; i++){
+    for (j = i+1; j < cols; j++){
+      results[j*cols + i] = vars[i]/vars[j];
+      results[i*cols + j] = vars[j]/vars[i];
+    }
+  }
+
+  for (i = 0; i < cols; i++){
+    vars_row[i] = 0.0;
+    for (j=0; j < cols; j++){
+      vars_row[i]+=results[j*cols + i];
+    }
+
+  }
+
+
+  for (j = 0; j < cols; j++){
+    vars_col[j] = 0.0;
+    for (i=0; i < cols; i++){
+      vars_col[j]+=results[j*cols + i];
+    }
+  }
+  
+
+  for (j=0; j < cols; j++){
+    vars_row[j] = vars[j] = vars_row[j] + vars_col[j];
+  }
+
+  qsort(vars_row,cols,sizeof(double),(int(*)(const void*, const void*))sort_double);
+  
+  for (i=cols-1; i >= cols - n_remove; i--){
+    for (j=0; j < cols; j++){
+
+      if (vars[j] == vars_row[i]){
+	weights[j] =0.0;
+	break;
+      }
+    }
+  }
+  
+  Free(results);
+  Free(vars);
+  Free(vars_row);
+  Free(vars_col);
+
+
+}
+
+
+static void remove_order_mean(double *x, int rows, int cols, int n_remove, double *weights){
+
+  
+  double *means = Calloc(cols,double);
+  double *means_row = Calloc(cols,double);
+  double *means_col = Calloc(cols,double);
+
+  double *results = Calloc(cols*cols,double);
+  
+  int i,j;
+
+  for (j=0; j < cols; j++){
+    means[j] = compute_means(&x[j*rows],rows);
+  }
+  
+  for (i = 0; i < cols -1; i++){
+    for (j = i+1; j < cols; j++){
+      results[j*cols + i] = means[i] - means[j];
+      results[i*cols + j] = means[j]- means[i];
+    }
+  }
+
+
+  for (j = 0; j < cols; j++){
+    means_col[j] = 0.0;
+    for (i=0; i < cols; i++){
+      means_col[j]+=results[j*cols + i];
+    }
+  }
+  
+
+  for (j=0; j < cols; j++){
+    means_row[j] = means[j] = fabs(means_col[j]);
+  }
+
+  qsort(means_row,cols,sizeof(double),(int(*)(const void*, const void*))sort_double);
+  
+  for (i=cols-1; i >= cols - n_remove; i--){
+    for (j=0; j < cols; j++){
+      if (means[j] == means_row[i]){
+	weights[j] =0.0;
+	break;
+      }
+    }
+  }
+  
+  Free(results);
+  Free(means);
+  Free(means_row);
+  Free(means_col);
+
+
+
+
+
+}
+
+
+
+static void remove_order_both(double *x, int rows, int cols, int n_remove, double *weights){
+
+  double *means = Calloc(cols,double);
+  double *means_row = Calloc(cols,double);
+  double *means_col = Calloc(cols,double);
+
+  double *vars = Calloc(cols,double);
+  double *vars_row = Calloc(cols,double);
+  double *vars_col = Calloc(cols,double);
+
+
+
+  double *results = Calloc(cols*cols,double);
+  
+  int i,j;
+
+  int n_remove_mean;
+  int n_remove_var;
+
+
+  if (n_remove % 2 ==0){
+    n_remove_var = n_remove/2;
+    n_remove_mean = n_remove/2;
+  } else {
+    n_remove_var = n_remove/2 + 1;
+    n_remove_mean = n_remove/2;
+  }
+
+
+  /* Work out all the stuff for excluding means */
+
+
+  for (j=0; j < cols; j++){
+    means[j] = compute_means(&x[j*rows],rows);
+  }
+  
+  for (i = 0; i < cols -1; i++){
+    for (j = i+1; j < cols; j++){
+      results[j*cols + i] = means[i] - means[j];
+      results[i*cols + j] = means[j]- means[i];
+    }
+  }
+
+
+  for (j = 0; j < cols; j++){
+    means_col[j] = 0.0;
+    for (i=0; i < cols; i++){
+      means_col[j]+=results[j*cols + i];
+    }
+  }
+  
+
+  for (j=0; j < cols; j++){
+    means_row[j] = means[j] = fabs(means_col[j]);
+  }
+
+  qsort(means_row,cols,sizeof(double),(int(*)(const void*, const void*))sort_double);
+
+
+
+  /* Work out all the stuff for excluding variances */
+
+
+ for (j=0; j < cols; j++){
+    vars[j] = compute_var(&x[j*rows],rows);
+  }
+  
+  for (i = 0; i < cols -1; i++){
+    for (j = i+1; j < cols; j++){
+      results[j*cols + i] = vars[i]/vars[j];
+      results[i*cols + j] = vars[j]/vars[i];
+    }
+  }
+
+  for (i = 0; i < cols; i++){
+    vars_row[i] = 0.0;
+    for (j=0; j < cols; j++){
+      vars_row[i]+=results[j*cols + i];
+    }
+
+  }
+
+
+  for (j = 0; j < cols; j++){
+    vars_col[j] = 0.0;
+    for (i=0; i < cols; i++){
+      vars_col[j]+=results[j*cols + i];
+    }
+  }
+  
+
+  for (j=0; j < cols; j++){
+    vars_row[j] = vars[j] = vars_row[j] + vars_col[j];
+  }
+
+  qsort(vars_row,cols,sizeof(double),(int(*)(const void*, const void*))sort_double);
+  
+  for (i=cols-1; i >= cols - n_remove_var; i--){
+    for (j=0; j < cols; j++){
+      if (vars[j] == vars_row[i]){
+	weights[j] =0.0;
+	break;
+      }
+    }
+  }
+
+  for (i=cols-1; i >= cols - n_remove_mean; i--){
+    for (j=0; j < cols; j++){
+      if (means[j] == means_row[i]){
+	if (weights[j] ==0.0){
+	  /* means it has already been excluded by variance rule. So need to look one more along */
+	  n_remove_mean+=1;
+	} else {
+	  weights[j] =0.0;
+	  break;
+	}
+      }
+    }
+  }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+SEXP R_qnorm_robust_weights(SEXP X, SEXP remove_extreme, SEXP n_remove){
+
+
+  SEXP weights,dim1;
+
+
+  int rows, cols;
+  int i,j;
+
+  PROTECT(dim1 = getAttrib(X,R_DimSymbol));
+  rows = INTEGER(dim1)[0];
+  cols = INTEGER(dim1)[1];
+
+  PROTECT(weights = allocVector(REALSXP,cols));
+
+  for (j=0; j < cols; j++){
+    REAL(weights)[j] = 1.0;
+  }
+
+  if (strcmp(CHAR(VECTOR_ELT(remove_extreme,0)),"variance") == 0){
+    remove_order_variance(REAL(X), rows, cols, INTEGER(n_remove)[0], REAL(weights));
+  }
+
+  if (strcmp(CHAR(VECTOR_ELT(remove_extreme,0)),"mean") == 0){
+    remove_order_mean(REAL(X), rows, cols, INTEGER(n_remove)[0], REAL(weights));
+  }
+
+  if (strcmp(CHAR(VECTOR_ELT(remove_extreme,0)),"both") == 0){
+    remove_order_both(REAL(X), rows, cols, INTEGER(n_remove)[0], REAL(weights));
+  }
+
+
+
+  
+  UNPROTECT(2);
+  return weights;
+
 }

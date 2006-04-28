@@ -13,6 +13,7 @@
 ## History
 ## Jan 18, 2004 - Initial version. Move functions out of
 ##                fitPLM, threestepPLM, threestep, rmaPLM
+## Apr 27, 2006 - fix typo in get.background.code
 ##
 ###########################################################
 
@@ -20,7 +21,7 @@
 get.background.code <- function(name) {
   background.names <- c("RMA.2", "IdealMM","MAS","MASIM","LESN2","LESN1","LESN0","GCRMA")
   if (!is.element(name, background.names)) {
-    stop(paste(name, "is not a valid summary method. Please use one of:",
+    stop(paste(name, "is not a valid background correction method. Please use one of:",
                "RMA.2", "IdealMM","LESN2","LESN1","LESN0","MAS","MASIM","GCRMA"))
   }
   code <- c(1, 2, 3, 4, 5, 6, 7, 8,9)[name == background.names]

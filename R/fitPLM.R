@@ -89,6 +89,7 @@
 ## Jul 14, 2004 - introduce PLM.designmatrix3 for dealing with new fitting algorithms
 ## Aug 3, 2004 -  a new fitPLM introduced along with various support functions.
 ## Feb 18, 2005 - gcrma background is also now an option
+## Apr 27-28, 2006 - clean up how normalization methods are check and normalization parameters are validated.
 ##
 ###########################################################
 
@@ -2004,8 +2005,92 @@ verify.bg.param <- function(R.model, background.method,background.param = list()
 
 verify.norm.param <- function(R.model, normalize.method,normalize.param = list()){
 
-  default.n.param <- list(type="separate",scaling.baseline=-4,scaling.trim=0.0,use.median=FALSE,use.log2=TRUE)
+
+  get.default.parameters <- function(normalize.method){
+
+    if (normalize.method == "quantile"){
+      default.n.param <- list(type="separate")
+    } else if (normalize.method == "quantile.probeset"){
+      default.n.param <- list(type="separate",use.median=FALSE,use.log2=TRUE)
+    } else if (normalize.method == "scaling"){
+      default.n.param <- list(type="separate",scaling.baseline=-4,scaling.trim=0.0)
+    } else if (normalize.method == "quantile.robust"){
+      default.n.param <- list(type="separate",use.median=FALSE,use.log2=FALSE,weights=NULL,remove.extreme = "variance", n.remove = as.integer(1))
+    }    
+  }
+
+
+  validate.supplied.parameters <- function(normalize.method,supplied.parameters,defaults){
+    if (!all(is.element(names(supplied.parameters),names(defaults)))){
+      stop("At least one of the supplied normalization parameters is not known for this normalization method")
+    }
+
+    defaults[names(supplied.parameters)] <- supplied.parameters
+    if (!is.element(defaults["type"],c("separate","pmonly","mmonly","together"))){
+      stop("Supplied option",defaults["type"]," for 'type' is not valid")
+    }
+
+
+      
+    if (normalize.method == "quantile.probeset"){
+      if (!is.logical(defaults[["use.median"]])){
+        stop("use.median should be TRUE or FALSE")
+      }
+      if (!is.logical(defaults[["use.log2"]])){
+        stop("use.log2 should be TRUE or FALSE")
+      }
+    } else if (normalize.method == "scaling"){
+      if (defaults[["scaling.trim"]] < 0 || defaults[["scaling.trim"]] >= 0.5){
+        stop("scaling.trim can't be less than 0 or above 0.5")
+      }
+      if (defaults[["scaling.baseline"]] < -4){
+        stop("scaling.baseline may be invalid")
+      }
+
+    } else if (normalize.method == "quantile.robust"){
+      if (!is.logical(defaults[["use.median"]])){
+        stop("use.median should be TRUE or FALSE")
+      }
+      if (!is.logical(defaults[["use.log2"]])){
+        stop("use.log2 should be TRUE or FALSE")
+      }
+      if (!is.element(defaults[["remove.extreme"]],c("both","variance","mean"))){
+        stop("remove.extreme ",defaults[["remove.extreme"]]," is not valid setting")
+      }
+      defaults["n.remove"] <- as.integer(defaults["n.remove"])
+
+      if (is.character(defaults[["weights"]])){
+        if (defaults[["weights"]] != "huber"){
+          stop("The supplied weights option ",defaults[["weights"]]," is not valid")
+        }
+      } else if (is.double(defaults[["weights"]])){
+        if (any(defaults[["weights"]] < 0)){
+          stop("Can't have negative normalization weights")
+
+        }
+        if (sum(defaults[["weights"]] > 0) < 1) {
+          stop("Need at least one non negative weights\n")
+        }
+      } else if (!is.null(defaults[["weights"]])){
+        stop("Problem with the supplied weights option. Doesn't look valid.")
+      }
+
+      
+    }
+    defaults
+  }
+
+
   
+  
+
+  affyPLM.norm.methods <- c("quantile","scaling","quantile.probeset","quantile.robust")
+  
+  if (!is.element(normalize.method,affyPLM.norm.methods)){
+    stop(paste("Don't know the normalization method",normalize.method,"Please use one of the known methods:","quantile","scaling","quantile.probeset","quantile.robust",sep=" "))
+  }
+
+  default.n.param <- get.default.parameters(normalize.method)
   
   if (R.model$response.variable !=0){
     if (R.model$mmorpm.covariate == 0){
@@ -2023,7 +2108,7 @@ verify.norm.param <- function(R.model, normalize.method,normalize.param = list()
     }
   }
 
-  default.n.param[names(normalize.param)] <- normalize.param
+  default.n.param <- validate.supplied.parameters(normalize.method, normalize.param,  default.n.param) ####[names(normalize.param)] <- normalize.param
 
   if (is.element(normalize.param["type"],c("separate","together")) & R.model$response.variable !=0){
     if (R.model$mmorpm.covariate == 0){

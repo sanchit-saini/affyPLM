@@ -41,6 +41,7 @@
  **                were all subsumed into bg_parameters
  ** Apr 5, 2004 - all malloc/free are now Calloc/Free
  ** Aug 4, 2004 - Change functions to deal with new structure and pmonly/mmonly/separate/together methodology.
+ ** Apr 27, 2006 - add "quantile.robust" to normalization methods
  **
  **
  *********************************************************************/
@@ -344,12 +345,23 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 
   int usemedian;
   int uselog2;
+  int weightscheme;
 
+  int generate_weights = 0;
+
+
+  double *weights;
 
   SEXP dim1;
   /* SEXP outvec,outnamesvec;
      SEXP dimnames,names;*/
   
+  SEXP remove_extreme, n_remove, R_weights;
+
+
+
+
+
   PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol)); 
   rows = INTEGER(dim1)[0];
   cols = INTEGER(dim1)[1]; 
@@ -426,7 +438,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       Rprintf("Normalizing PM\n");
       qnorm_probeset_c(PM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
     } 
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
       Rprintf("Normalizing MM\n");
       qnorm_probeset_c(MM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
     }
@@ -477,7 +489,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       Rprintf("Normalizing PM\n");
       scaling_norm(PM, rows, cols,trim, baseline);
     }
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
       Rprintf("Normalizing MM\n");
       scaling_norm(MM, rows, cols,trim, baseline);
     }
@@ -508,28 +520,91 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       }
       Free(allPMMM);
     }
-  }
+  } else if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"quantile.robust") == 0){      
+
+    param = GetParameter(norm_parameters,"use.median");
+    usemedian = asInteger(param);
+    param = GetParameter(norm_parameters,"use.log2");
+    uselog2 = asInteger(param);
+
+    remove_extreme = GetParameter(norm_parameters,"remove.extreme");
+    n_remove = GetParameter(norm_parameters,"n.remove");
+
+
+    param = GetParameter(norm_parameters,"weights");
+
+    weightscheme = 0;
+    if (isString(param)){
+      if (strcmp(CHAR(VECTOR_ELT(param,0)),"huber") == 0){
+	weightscheme = 1;
+      } else {
+	weightscheme = 0;
+      }
+    } else if (isNumeric(param)){
+      if (length(param) != cols){
+	error("Problem with weights for quantile.robust");
+      }
+      weights = REAL(param);
+    } else if (isNull(param)){
+      /* Need to generate weights or more correctly exclude some arrays */
+      generate_weights = 1;
+   
+    }
+
+    param = GetParameter(norm_parameters,"type");
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Normalizing PM\n");
       
-  /*** if (asInteger(norm_type) == 1){
-       qnorm_c(PM,&rows,&cols);
-       } else if (asInteger(norm_type) == 2) { 
-       ProbeNames = (char **)Calloc(rows,char *);
-       for (i =0; i < rows; i++)
-       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
-       
-       param = GetParameter(norm_parameters,"use.median");
-       usemedian = asInteger(param);
-       param = GetParameter(norm_parameters,"use.log2");
-       uselog2 = asInteger(param);
-       qnorm_probeset_c(PM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
-       Free(ProbeNames);
-       } else if (asInteger(norm_type) == 3) { 
-       param = GetParameter(norm_parameters,"scaling.trim");
-       trim = asReal(param);
-       param = GetParameter(norm_parameters, "scaling.baseline");
-       baseline = asInteger(param);
-       scaling_norm(PM, rows, cols,trim, baseline);
-       }       **/
+      
+      if (generate_weights){
+	R_weights = R_qnorm_robust_weights(PMmat, remove_extreme, n_remove);
+	weights = REAL(R_weights);
+      }
+      qnorm_robust_c(PM,weights, &rows, &cols, &usemedian, &uselog2, &weightscheme);
+    }
+    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+      Rprintf("Normalizing MM\n");
+      if (generate_weights){
+	R_weights = R_qnorm_robust_weights(MMmat, remove_extreme, n_remove);
+	weights = REAL(R_weights);
+      }
+      qnorm_robust_c(MM,weights, &rows, &cols, &usemedian, &uselog2, &weightscheme);
+    } 
+    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
+ 
+      Rprintf("Normalizing PM and MM together\n");     
+      if (generate_weights){
+	R_weights = R_qnorm_robust_weights(PMmat, remove_extreme, n_remove);
+	weights = REAL(R_weights);
+      }
+      allPMMM = (double *)Calloc(2*rows*cols,double);
+      allrows = 2*rows;
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  allPMMM[j*2*rows + i] = PM[j*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  allPMMM[j*2*rows + i + rows] = MM[j*rows + i];
+	}
+      } 
+      weights = Calloc(cols,double);
+      qnorm_robust_c(allPMMM,weights, &allrows, &cols, &usemedian, &uselog2, &weightscheme);
+      Free(weights);
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  PM[j*rows + i] = allPMMM[j*2*rows + i];
+	}
+      }
+      for (i=0; i < rows; i++){
+	for (j=0; j < cols; j++){
+	  MM[j*rows + i] = allPMMM[j*2*rows + i + rows];
+	}
+      }
+      Free(allPMMM);
+    }
+  } 
   UNPROTECT(1);
   return PMmat;
 }
