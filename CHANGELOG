@@ -1,3 +1,10 @@
+1.9.2   May 1, 2005
+-----
+
+ReadRMAExpress() can deal with gzipped files.
+
+
+
 1.9.1   Apr 27-28, 2006
 -----
 
