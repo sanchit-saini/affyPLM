@@ -477,7 +477,7 @@ static double med_abs(double *x, int length){
 
 /*********************************************************
  **
- ** void qnorm_robust_c_old(double *data,double *weights, int *rows, int *cols, int *use_median,int *use_log2,int *weight_scheme)
+ ** void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use_median,int *use_log2,int *weight_scheme)
  ** 
  ** 
  **
@@ -491,7 +491,7 @@ int qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use_
   int half,length;
   dataitem **dimat;
   double *row_mean = (double *)Calloc((*rows),double);
-  double *datvec; /* = (double *)Calloc(*cols,double); */
+  double *datvec=0; /* = (double *)Calloc(*cols,double); */
   double *ranks = (double *)Calloc((*rows),double);
   
   double sum_weights = 0.0;
@@ -851,7 +851,7 @@ static double compute_var(double *x, int length){
 static double compute_means(double *x, int length){
 
   int i;
-  double sum=0.0,sum2=0.0;
+  double sum=0.0; 
 
   for (i = 0; i < length; i++){
     sum+=x[i];
@@ -1127,7 +1127,7 @@ SEXP R_qnorm_robust_weights(SEXP X, SEXP remove_extreme, SEXP n_remove){
 
 
   int rows, cols;
-  int i,j;
+  int j;
 
   PROTECT(dim1 = getAttrib(X,R_DimSymbol));
   rows = INTEGER(dim1)[0];

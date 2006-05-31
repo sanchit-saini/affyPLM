@@ -350,7 +350,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
   int generate_weights = 0;
 
 
-  double *weights;
+  double *weights=0;
 
   SEXP dim1;
   /* SEXP outvec,outnamesvec;
