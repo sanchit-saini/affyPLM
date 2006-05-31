@@ -59,7 +59,7 @@ static size_t fread_int32(int *destination, int n, FILE *instream){
 }
 
 
-
+#ifdef WORDS_BIGENDIAN 
 static void swap_float_8(double *destination){
 
   unsigned char *cptr;
@@ -84,7 +84,7 @@ static void swap_float_8(double *destination){
 
 
 }
-
+#endif
 
 
 
@@ -113,7 +113,6 @@ static size_t fread_float64(double *destination, int n, FILE *instream){
 
 static size_t fread_char(char *destination, int n, FILE *instream){
 
-  int i=0;
   size_t result;
   
   result = fread(destination,sizeof(char),n,instream);
@@ -407,7 +406,6 @@ static size_t gzfread_float64(double *destination, int n, gzFile *instream){
 
 static size_t gzfread_char(char *destination, int n, gzFile *instream){
 
-  int i=0;
   size_t result;
   
   result =  gzread(instream,destination,sizeof(char)*n);
