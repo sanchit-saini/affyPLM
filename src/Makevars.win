@@ -1,2 +1,2 @@
 PKG_CPPFLAGS += -I$(RHOME)/src/extra/zlib -DHAVE_ZLIB
-PKG_LIBS +=  -L$(RHOME)/src/extra/zlib -lz
+PKG_LIBS += $(LAPACK_LIBS) $(BLAS_LIBS)  -L$(RHOME)/src/extra/zlib -lz
