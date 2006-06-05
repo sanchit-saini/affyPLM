@@ -9,7 +9,7 @@
  ** written by: B. M. Bolstad  <bmb@bmbolstad.com>
  **
  ** written: Feb 2, 2002
- ** last modified: Mar 12, 2006
+ ** last modified: Jun 4, 2006
  ** 
  ** This c code implements the quantile normalization method
  ** for normalizing high density oligonucleotide data as discussed
@@ -41,6 +41,11 @@
  **                have a .Call() interface for the robust method
  ** Apr 27-28, 2006 - Add C level functionality for determining which outliers
  **                to exclude for the "robust" quantile normalizer.
+ ** Jun 2, 2006  - Add a quantile normalization function that accepts a target
+ **                distribution. Improve/add a few comments
+ ** Jun 4, 2006 - Add a .Call interface for target based quantile normalization.
+ **               Add a function for determing target distribution.
+ ** Jun 5, 2006 - Re-organize code blocks
  **
  ***********************************************************/
 
@@ -56,7 +61,14 @@
 #include <Rmath.h>
 #include <Rinternals.h>
  
-
+/*****************************************************************************************************
+ *****************************************************************************************************
+ **
+ ** This section defines utility functions and data types
+ **
+ **
+ *****************************************************************************************************
+ *****************************************************************************************************/
 
 
 /*************************************************************
@@ -177,6 +189,103 @@ static void get_ranks(double *rank, dataitem *x,int n){
   /*return rank;*/
 }
 
+
+/*************************************************************************
+ **
+ ** static double weights_huber(double u, double k)
+ **
+ ** double u - standardized residuals
+ ** doubke k - tuning parameter
+ **
+ ** Used to get weights for M-estimation.
+ **
+ *************************************************************************/
+
+static double weights_huber(double u, double k){
+  
+  if ( 1 < k/fabs(u)){
+    return 1.0;
+  } else {
+    return  k/fabs(u);
+  }
+}
+
+
+/**************************************************************************
+ **
+ ** double median(double *x, int length)
+ **
+ ** double *x - vector
+ ** int length - length of *x
+ **
+ ** returns the median of *x
+ **
+ *************************************************************************/
+
+static double median(double *x, int length){
+  int i;
+  int half;
+  double med;
+  double *buffer = Calloc(length,double);
+  
+  for (i = 0; i < length; i++)
+    buffer[i] = x[i];
+  
+  qsort(buffer,length,sizeof(double), (int(*)(const void*, const void*))sort_double);
+  half = (length + 1)/2;
+  if (length % 2 == 1){
+    med = buffer[half - 1];
+  } else {
+    med = (buffer[half] + buffer[half-1])/2.0;
+  }
+  
+  Free(buffer);
+  return med;
+}
+
+
+
+/**************************************************************************
+ **
+ ** static double med_abs(double *x, int length)
+ **
+ ** double *x - a data vector
+ ** int length - length of x
+ **
+ ** Compute the median absolute value of a data vector
+ **
+ *************************************************************************/
+
+static double med_abs(double *x, int length){
+  int i;
+  double med_abs;
+  double *buffer = Calloc(length,double);
+
+  for (i = 0; i < length; i++)
+    buffer[i] = fabs(x[i]);
+
+  med_abs = median(buffer,length);
+
+  Free(buffer);
+  return(med_abs);
+}
+
+
+
+
+
+
+
+/*****************************************************************************************************
+ *****************************************************************************************************
+ **
+ ** THE FOLLOWING ARE DEFUNCT. HISTORICAL REMINDERS OF EARLIER IMPLEMENTATIONS
+ **
+ **
+ *****************************************************************************************************
+ *****************************************************************************************************/
+ 
+
 /*********************************************************
  **
  ** void qnorm_c_old(double *data, int *rows, int *cols)
@@ -185,6 +294,7 @@ static void get_ranks(double *rank, dataitem *x,int n){
  ** quantile normalization algorithm. It is called from R
  **
  ** Previous implementation, replaced with lower memory overhead version below
+ ** Remains here for historical interest only.
  ** 
  ********************************************************/
 
@@ -256,7 +366,8 @@ static void qnorm_c_old(double *data, int *rows, int *cols){
  **
  ** note that log scale with mean is equivalent to geometric mean.
  **
- ** SPECIAL NOTE. This is the old qnorm_robust_c function
+ ** SPECIAL NOTE. This is the old qnorm_robust_c function. 
+ ** Remains here for historical interest only.
  **
  **
  ********************************************************/
@@ -345,7 +456,14 @@ static void qnorm_robust_c_old(double *data,double *weights, int *rows, int *col
 }
 
 
-
+/*****************************************************************************************************
+ *****************************************************************************************************
+ **
+ ** The following block implements the standard quantile normalization function
+ **
+ **
+ *****************************************************************************************************
+ *****************************************************************************************************/
 
 /*********************************************************
  **
@@ -409,79 +527,78 @@ int qnorm_c(double *data, int *rows, int *cols){
   return 0;
 }
 
-static double weights_huber(double u, double k){
-  
-  if ( 1 < k/fabs(u)){
-    return 1.0;
-  } else {
-    return  k/fabs(u);
-  }
-}
-
-
-/**************************************************************************
- **
- ** double median(double *x, int length)
- **
- ** double *x - vector
- ** int length - length of *x
- **
- ** returns the median of *x
- **
- *************************************************************************/
-
-static double median(double *x, int length){
-  int i;
-  int half;
-  double med;
-  double *buffer = Calloc(length,double);
-  
-  for (i = 0; i < length; i++)
-    buffer[i] = x[i];
-  
-  qsort(buffer,length,sizeof(double), (int(*)(const void*, const void*))sort_double);
-  half = (length + 1)/2;
-  if (length % 2 == 1){
-    med = buffer[half - 1];
-  } else {
-    med = (buffer[half] + buffer[half-1])/2.0;
-  }
-  
-  Free(buffer);
-  return med;
-}
-
-
-
-static double med_abs(double *x, int length){
-  int i;
-  double med_abs;
-  double *buffer = Calloc(length,double);
-
-  for (i = 0; i < length; i++)
-    buffer[i] = fabs(x[i]);
-
-  med_abs = median(buffer,length);
-
-  Free(buffer);
-  return(med_abs);
-}
-
-
-
-
-
 
 
 
 
 /*********************************************************
  **
+ ** SEXP R_qnorm_c(SEXP X)
+ **
+ ** SEXP X      - a matrix
+ ** SEXP copy   - a flag if TRUE then make copy
+ **               before normalizing, if FALSE work in place
+ **               note that this can be dangerous since
+ **               it will change the original matrix.
+ **
+ ** returns a quantile normalized matrix.
+ **
+ ** This is a .Call() interface for quantile normalization
+ **
+ *********************************************************/
+
+SEXP R_qnorm_c(SEXP X, SEXP copy){
+
+  SEXP Xcopy,dim1;
+  double *Xptr;
+  int rows,cols;
+  
+  PROTECT(dim1 = getAttrib(X,R_DimSymbol));
+  rows = INTEGER(dim1)[0];
+  cols = INTEGER(dim1)[1];
+  if (asInteger(copy)){
+    PROTECT(Xcopy = allocMatrix(REALSXP,rows,cols));
+    copyMatrix(Xcopy,X,0);
+  } else {
+    Xcopy = X;
+  }
+  Xptr = NUMERIC_POINTER(AS_NUMERIC(Xcopy));
+  
+  qnorm_c(Xptr, &rows, &cols);
+  if (asInteger(copy)){
+    UNPROTECT(2);
+  } else {
+    UNPROTECT(1);
+  }
+  return Xcopy;
+}
+
+
+
+
+/*****************************************************************************************************
+ *****************************************************************************************************
+ **
+ ** The following block of code provides the "robust" quantile normalization. In addition it tries to 
+ ** give the equivalent to the R code functionality for selecting arrays to remove before determining
+ **
+ **
+ *****************************************************************************************************
+ *****************************************************************************************************/
+
+/*********************************************************
+ **
  ** void qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use_median,int *use_log2,int *weight_scheme)
  ** 
- ** 
+ ** double *data
+ ** double *weights
+ ** int *rows
+ ** int *cols
+ ** int *use_median
+ ** int *use_log2
+ ** int *weight_scheme
  **
- **
+ ** This function implements the "robust" quantile normalizer
  **
  ********************************************************/
 
@@ -708,58 +825,6 @@ int qnorm_robust_c(double *data,double *weights, int *rows, int *cols, int *use_
 
 
 
-
-
-
-/*********************************************************
- **
- ** SEXP R_qnorm_c(SEXP X)
- **
- ** SEXP X      - a matrix
- ** SEXP copy   - a flag if TRUE then make copy
- **               before normalizing, if FALSE work in place
- **               note that this can be dangerous since
- **               it will change the original matrix.
- **
- ** returns a quantile normalized matrix.
- **
- ** This is a .Call() interface for quantile normalization
- **
- *********************************************************/
-
-SEXP R_qnorm_c(SEXP X, SEXP copy){
-
-  SEXP Xcopy,dim1;
-  double *Xptr;
-  int rows,cols;
-  
-  PROTECT(dim1 = getAttrib(X,R_DimSymbol));
-  rows = INTEGER(dim1)[0];
-  cols = INTEGER(dim1)[1];
-  if (asInteger(copy)){
-    PROTECT(Xcopy = allocMatrix(REALSXP,rows,cols));
-    copyMatrix(Xcopy,X,0);
-  } else {
-    Xcopy = X;
-  }
-  Xptr = NUMERIC_POINTER(AS_NUMERIC(Xcopy));
-  
-  qnorm_c(Xptr, &rows, &cols);
-  if (asInteger(copy)){
-    UNPROTECT(2);
-  } else {
-    UNPROTECT(1);
-  }
-  return Xcopy;
-}
-
-
-
-
-
-
-
-
 /*********************************************************
  **
  ** SEXP R_qnorm_robust_c(SEXP X)
@@ -772,7 +837,7 @@ SEXP R_qnorm_c(SEXP X, SEXP copy){
  **
  ** returns a quantile normalized matrix.
  **
- ** This is a .Call() interface for quantile normalization
+ ** This is a .Call() interface for quantile normalization (of the robust variety)
  **
  *********************************************************/
 
@@ -821,12 +886,12 @@ SEXP R_qnorm_robust_c(SEXP X, SEXP copy, SEXP R_weights, SEXP R_use_median, SEXP
 
 /*****************************************************************
  **
- ** static double compute_sd(double *x, int length)
+ ** static double compute_var(double *x, int length)
  **
  ** double *x - data vector
  ** int length - length of x
  **
- ** compute the standard deviation of a data vector
+ ** compute the sample variance of a data vector
  **
  *****************************************************************/
 
@@ -847,6 +912,17 @@ static double compute_var(double *x, int length){
   return(sum2/(double)(length-1));
 }
 
+/*****************************************************************
+ **
+ ** static double compute_means(double *x, int length)
+ **
+ ** double *x - data vector
+ ** int length - length of x
+ **
+ ** compute the sample mean of a data vector
+ **
+ **
+ *****************************************************************/
 
 static double compute_means(double *x, int length){
 
@@ -862,7 +938,17 @@ static double compute_means(double *x, int length){
   return(sum);
 }
 
-
+/*****************************************************************
+ **
+ ** static void remove_order_variance(double *x, int rows, int cols, int n_remove, double *weights)
+ **
+ ** double *x 
+ ** int rows
+ ** int cols
+ ** int n_remove
+ ** double *weights
+ **
+ *****************************************************************/
 
 static void remove_order_variance(double *x, int rows, int cols, int n_remove, double *weights){
 
@@ -928,6 +1014,20 @@ static void remove_order_variance(double *x, int rows, int cols, int n_remove, d
 }
 
 
+/*****************************************************************
+ **
+ ** static void remove_order_mean(double *x, int rows, int cols, int n_remove, double *weights)
+ **
+ ** double *x 
+ ** int rows
+ ** int cols
+ ** int n_remove
+ ** double *weights
+ **
+ *****************************************************************/
+
+
+
 static void remove_order_mean(double *x, int rows, int cols, int n_remove, double *weights){
 
   
@@ -985,6 +1085,17 @@ static void remove_order_mean(double *x, int rows, int cols, int n_remove, doubl
 
 }
 
+/*****************************************************************
+ **
+ ** static void remove_order_both(double *x, int rows, int cols, int n_remove, double *weights)
+ **
+ ** double *x 
+ ** int rows
+ ** int cols
+ ** int n_remove
+ ** double *weights
+ **
+ *****************************************************************/
 
 
 static void remove_order_both(double *x, int rows, int cols, int n_remove, double *weights){
@@ -1156,5 +1267,323 @@ SEXP R_qnorm_robust_weights(SEXP X, SEXP remove_extreme, SEXP n_remove){
   
   UNPROTECT(2);
   return weights;
+
+}
+
+
+/*****************************************************************************************************
+ *****************************************************************************************************
+ **
+ ** The following block of code provides quantile normalization where a specified target vector is given.
+ ** In addition it deals with cases of un equal length by estimating the appropriate quantiles
+ **
+ *****************************************************************************************************
+ *****************************************************************************************************/
+
+
+
+/*****************************************************************
+ **
+ ** int qnorm_c_using_target(double *data, int *rows, int *cols, double *target, int *targetrows)
+ **
+ ** double *data - a matrix of data to be normalized
+ ** int *rows - dimensions of data
+ ** int *cols - dimensions of data
+ ** double *target - vector containing target distribution (ie distribution to be
+ **                  normalized to)
+ ** int *targetrows - length of target distribution vector
+ **
+ ** Note that it is assumed that there is no NA or Inf type values in the vectors. (ie no missing data)
+ **
+ ** if targetrows == rows then the standard methodology is used.
+ ** 
+ ** in other cases the appropriate quantiles to be normalized to are determined in a method
+ ** equivalent to what you get using "type 8" with the quantile function
+ **
+ ** Note sample percentiles are calculated using i/(n+1)  (ie if there is 
+ ** only 2 observations, the first sample percentile is 1/3 = 0.333,
+ ** the second sample percentile will be 2/3 = 0.6666
+ **
+ ** 
+ **
+ *****************************************************************/
+
+
+
+int qnorm_c_using_target(double *data, int *rows, int *cols, double *target, int *targetrows){
+
+
+  
+  int i,j,ind,target_ind;
+  dataitem **dimat;
+
+  double *row_mean; 
+  double *datvec;
+  double *ranks = (double *)Calloc((*rows),double);
+
+  double samplepercentile;
+  double target_ind_double,target_ind_double_floor;
+
+
+  
+  row_mean = (double *)Calloc(*targetrows,double);
+  
+  datvec = (double *)Calloc(*rows,double);
+  
+
+
+  /* first find the normalizing distribution */
+  for (i =0; i < *targetrows; i++){
+    row_mean[i] = target[i];
+  }
+
+  qsort(row_mean,*targetrows,sizeof(double),(int(*)(const void*, const void*))sort_double);
+
+  
+  if (*rows == *targetrows){
+    /* now assign back distribution */
+    /* this is basically the standard story */
+
+    dimat = (dataitem **)Calloc(1,dataitem *);
+    dimat[0] = (dataitem *)Calloc(*rows,dataitem);
+    
+    for (j = 0; j < *cols; j++){
+      for (i =0; i < *rows; i++){
+	dimat[0][i].data = data[j*(*rows) + i];
+	dimat[0][i].rank = i;
+      }
+      qsort(dimat[0],*rows,sizeof(dataitem),sort_fn);
+      get_ranks(ranks,dimat[0],*rows);
+      for (i =0; i < *rows; i++){
+	ind = dimat[0][i].rank;
+	data[j*(*rows) +ind] = row_mean[(int)floor(ranks[i])-1];
+      }
+    }
+  } else {
+    /** need to estimate quantiles **/
+    dimat = (dataitem **)Calloc(1,dataitem *);
+    dimat[0] = (dataitem *)Calloc(*rows,dataitem);
+    
+    for (j = 0; j < *cols; j++){
+      for (i =0; i < *rows; i++){
+	dimat[0][i].data = data[j*(*rows) + i];
+	dimat[0][i].rank = i;
+      }
+      qsort(dimat[0],*rows,sizeof(dataitem),sort_fn);
+      get_ranks(ranks,dimat[0],*rows);
+      for (i =0; i < *rows; i++){
+
+	samplepercentile = (double)ranks[i]/(double)(*rows +1);
+	target_ind_double = 1.0/3.0 + ((double)(*targetrows) + 1.0/3.0) * samplepercentile;
+	target_ind_double_floor = floor(target_ind_double + 4*DOUBLE_EPS);
+	
+	target_ind_double = target_ind_double - target_ind_double_floor;
+
+	if (fabs(target_ind_double) <=  4*DOUBLE_EPS){
+	  target_ind_double = 0.0;
+	}
+
+	
+	if (target_ind_double  == 0.0){
+	  target_ind = (int)nearbyint(target_ind_double_floor);	
+	  ind = dimat[0][i].rank;
+	  data[j*(*rows) +ind] = row_mean[target_ind-1];
+	} else if (target_ind_double == 1.0){
+	  target_ind = (int)nearbyint(target_ind_double_floor + 1.0); 
+	  ind = dimat[0][i].rank;
+	  data[j*(*rows) +ind] = row_mean[target_ind-1];
+	} else {
+	  target_ind = (int)nearbyint(target_ind_double_floor);
+	  ind = dimat[0][i].rank;
+	  if ((target_ind < *targetrows) && (target_ind > 0)){
+	    data[j*(*rows) +ind] = (1.0- target_ind_double)*row_mean[target_ind-1] + target_ind_double*row_mean[target_ind];
+	  } else if (target_ind >= *targetrows){
+	    data[j*(*rows) +ind] = row_mean[*rows-1];
+	  } else {
+	    data[j*(*rows) +ind] = row_mean[0];
+	  }
+	}
+	
+      }
+    }
+  }
+
+
+
+  Free(ranks);
+  Free(datvec);
+  Free(dimat[0]);
+  
+  Free(dimat);
+  Free(row_mean);
+  return 0;
+
+
+
+}
+
+
+
+
+
+int qnorm_c_determine_target(double *data, int *rows, int *cols, double *target, int *targetrows){
+
+
+  int i,j,ind,row_mean_ind;
+  dataitem **dimat;
+  /*  double sum; */
+  double *row_mean = (double *)Calloc((*rows),double);
+  double *datvec;
+  double *ranks = (double *)Calloc((*rows),double);  
+  
+  double row_mean_ind_double,row_mean_ind_double_floor;
+  double samplepercentile;
+
+
+  
+  datvec = (double *)Calloc(*rows,double);
+  
+  for (i =0; i < *rows; i++){
+    row_mean[i] = 0.0;
+  }
+  
+  /* first find the normalizing distribution */
+  for (j = 0; j < *cols; j++){
+    for (i =0; i < *rows; i++){
+      datvec[i] = data[j*(*rows) + i];
+    }
+    qsort(datvec,*rows,sizeof(double),(int(*)(const void*, const void*))sort_double);
+    for (i =0; i < *rows; i++){
+      row_mean[i] += datvec[i]/((double)*cols);
+    }
+  }
+  
+  if (*rows == *targetrows){
+    for (i =0; i < *rows; i++){
+      target[i] = row_mean[i];
+    }
+  } else {
+    /* need to estimate quantiles */
+    for (i =0; i < *targetrows; i++){
+      samplepercentile = (double)(i+1)/(double)(*targetrows +1);
+
+      row_mean_ind_double = 1.0/3.0 + ((double)(*rows) + 1.0/3.0) * samplepercentile;
+      row_mean_ind_double_floor = floor(row_mean_ind_double + 4*DOUBLE_EPS);
+	
+      row_mean_ind_double = row_mean_ind_double - row_mean_ind_double_floor;
+
+      if (fabs(row_mean_ind_double) <=  4*DOUBLE_EPS){
+	row_mean_ind_double = 0.0;
+      }
+
+
+      if (row_mean_ind_double  == 0.0){
+	row_mean_ind = (int)nearbyint(row_mean_ind_double_floor);	
+	target[i] = row_mean[row_mean_ind-1];
+      } else if (row_mean_ind_double == 1.0){
+	row_mean_ind = (int)nearbyint(row_mean_ind_double_floor + 1.0); 
+	target[i] = row_mean[row_mean_ind-1];
+      } else {
+	row_mean_ind = (int)nearbyint(row_mean_ind_double_floor);
+
+	if ((row_mean_ind < *rows) && (row_mean_ind > 0)){
+	  target[i] = (1.0- row_mean_ind_double)*row_mean[row_mean_ind-1] + row_mean_ind_double*row_mean[row_mean_ind];
+	} else if (row_mean_ind >= *rows){
+	  target[i] = row_mean[row_mean_ind-1];
+	} else {
+	  target[i] = row_mean[0];
+	}
+      }
+    } 
+
+
+
+
+
+
+  }
+}
+
+
+
+
+SEXP R_qnorm_using_target(SEXP X, SEXP target,SEXP copy){
+
+
+  SEXP Xcopy,dim1,dim2;
+  int rows, cols;
+  int target_rows, target_cols;
+  double *Xptr;
+  double *targetptr;
+
+
+  PROTECT(dim1 = getAttrib(X,R_DimSymbol));
+  rows = INTEGER(dim1)[0];
+  cols = INTEGER(dim1)[1];
+  UNPROTECT(1);
+  if (asInteger(copy)){
+    PROTECT(Xcopy = allocMatrix(REALSXP,rows,cols));
+    copyMatrix(Xcopy,X,0);
+  } else {
+    Xcopy = X;
+  }
+  Xptr = NUMERIC_POINTER(AS_NUMERIC(Xcopy));
+
+  if (isVector(target)){
+    target_rows = length(target);
+  } else if (isMatrix(target)){
+    PROTECT(dim1 = getAttrib(X,R_DimSymbol));
+    target_rows = INTEGER(dim1)[0];
+    target_cols = INTEGER(dim1)[1];
+    UNPROTECT(1);
+
+    target_rows = target_rows*target_cols;
+  } 
+
+  
+  targetptr = NUMERIC_POINTER(AS_NUMERIC(target));
+
+
+  qnorm_c_using_target(Xptr, &rows, &cols,targetptr,&target_rows);
+
+
+  UNPROTECT(1);
+  return Xcopy;
+}
+
+
+
+
+
+SEXP R_qnorm_determine_target(SEXP X, SEXP targetlength){
+
+
+  SEXP dim1,target;
+  int rows, cols;
+  int length;
+  double *Xptr;
+  double *targetptr;
+
+
+  PROTECT(dim1 = getAttrib(X,R_DimSymbol));
+  rows = INTEGER(dim1)[0];
+  cols = INTEGER(dim1)[1];
+  UNPROTECT(1);
+
+  length = asInteger(targetlength);
+
+  Rprintf("%d\n",length);
+
+  PROTECT(target=allocVector(REALSXP,length));
+
+
+  Xptr = NUMERIC_POINTER(AS_NUMERIC(X));
+  targetptr = NUMERIC_POINTER(target);
+    
+  qnorm_c_determine_target(Xptr,&rows,&cols,targetptr, &length);
+
+
+  UNPROTECT(1);
+  return target;
 
 }
