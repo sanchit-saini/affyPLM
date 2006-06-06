@@ -1723,9 +1723,9 @@ int qnorm_c_within_blocks(double *x, int *rows, int *cols, int *blocks){
       dimat_block[0][i].block = blocks[i];
     }
     qsort(dimat_block[0],*rows,sizeof(dataitem_block),sort_fn_blocks);
-    for (i=0; i < *rows; i++){
+    /*   for (i=0; i < *rows; i++){
       Rprintf("%f %d\n",dimat_block[0][i].data,dimat_block[0][i].block);
-    } 
+      } */
     
 
     for (i =0; i < *rows; i++){
