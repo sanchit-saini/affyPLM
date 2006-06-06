@@ -4,13 +4,13 @@
  **
  ** Aim: fit robust linear models for the PLMset object.
  **
- ** Copyright (C) 2003 Ben Bolstad
+ ** Copyright (C) 2003-2006 Ben Bolstad
  **
  ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
  ** 
  ** created on: Jan 17, 2003
  **
- ** Last modified: Feb 15, 2003
+ ** Last modified: Jun 6, 2006
  **
  ** the aim here will be to fit specified robust linear models
  ** to affy data. 
@@ -58,6 +58,8 @@
  ** May 27, 2004  - add a way to detect that default model is being fitted
  ** July 10, 2004 - Start integrating new structure
  ** Mar 1, 2006 - change all comments to ansi style
+ ** Jun 6, 2006 - fix problem with space allocation when only one probe in probeset and trying to estimate
+ **               probe-effects. (Example is Soybean chips).
  **
  *********************************************************************/
 
@@ -609,12 +611,23 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
       }
     }
     for (i=0; i < data->n_probesets; i++){
-      PROTECT(tmp = allocMatrix(REALSXP,  (n_probes_probeset[i]+modifier),probe_multiplier));
-      SET_VECTOR_ELT(Routput->probe_coef,i,tmp);
-      UNPROTECT(1);
-      PROTECT(tmp = allocMatrix(REALSXP, (n_probes_probeset[i]+modifier),probe_multiplier));
-      SET_VECTOR_ELT(Routput->probe_SE,i,tmp);
-      UNPROTECT(1);
+      if (n_probes_probeset[i]+modifier >= 0){
+	PROTECT(tmp = allocMatrix(REALSXP,  (n_probes_probeset[i]+modifier),probe_multiplier));
+	SET_VECTOR_ELT(Routput->probe_coef,i,tmp);
+	UNPROTECT(1);
+	PROTECT(tmp = allocMatrix(REALSXP, (n_probes_probeset[i]+modifier),probe_multiplier));
+	SET_VECTOR_ELT(Routput->probe_SE,i,tmp);
+	UNPROTECT(1);
+      } else {
+	PROTECT(tmp = allocMatrix(REALSXP,  0,probe_multiplier));
+	SET_VECTOR_ELT(Routput->probe_coef,i,tmp);
+	UNPROTECT(1);
+	PROTECT(tmp = allocMatrix(REALSXP,  0,probe_multiplier));
+	SET_VECTOR_ELT(Routput->probe_SE,i,tmp);
+	UNPROTECT(1);
+
+
+      }
     }
 
 

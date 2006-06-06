@@ -46,6 +46,7 @@
  ** Jun 4, 2006 - Add a .Call interface for target based quantile normalization.
  **               Add a function for determing target distribution.
  ** Jun 5, 2006 - Re-organize code blocks
+ **               Add normalization within blocks functions
  **
  ***********************************************************/
 
@@ -85,6 +86,22 @@ typedef struct{
 } dataitem;
   
 
+
+/*************************************************************
+ **
+ ** the dataitem_block record is used to keep track of data indicies 
+ ** along with data value when sorting and unsorting in the 
+ ** quantile algorithm in blocks
+ **
+ ************************************************************/
+
+typedef struct{
+  double data;
+  int rank;
+  int block;
+} dataitem_block;
+
+
 /***********************************************************
  **  
  ** int min(int x1, int x2)							    
@@ -120,6 +137,37 @@ static int sort_fn(const void *a1,const void *a2){
     return (1);
   return 0;
 }
+
+
+/**********************************************************
+ **
+ ** int sort_fn_blocks(const void *a1,const void *a2)
+ **
+ ** a comparison function for sorting objects of the dataitem_blocks type.
+ **
+ **
+ **********************************************************/
+
+static int sort_fn_blocks(const void *a1,const void *a2){
+  dataitem_block *s1, *s2;
+  s1 = (dataitem_block *)a1;
+  s2 = (dataitem_block *)a2;
+  
+  if (s1->block < s2->block){
+    return (-1);
+  } else if (s1->block > s2->block){
+    return (1);
+  } else {
+    if (s1->data < s2->data)
+      return (-1);
+    if (s1 ->data > s2->data)
+      return (1);
+    return 0;
+  }
+}
+
+
+
 
 
 /************************************************************
@@ -188,6 +236,43 @@ static void get_ranks(double *rank, dataitem *x,int n){
   }
   /*return rank;*/
 }
+
+
+/************************************************************
+ **
+ ** double *get_ranks_blocks(dataitem *x,int n)
+ **
+ ** get ranks in the same manner as R does. Assume that *x is
+ ** already sorted
+ **
+ *************************************************************/
+
+static void get_ranks_blocks(double *rank, dataitem_block *x,int n){
+  int i,j,k;
+   
+  i = 0;
+
+  while (i < n) {
+    j = i;
+    while ((j < n - 1) && (x[j].data  == x[j + 1].data) && (x[j].block  == x[j + 1].block))
+      j++;
+    if (i != j) {
+      for (k = i; k <= j; k++)
+	rank[k] = (i + j + 2) / 2.0;
+    }
+    else
+      rank[i] = i + 1;
+    i = j + 1;
+  }
+  /*return rank;*/
+}
+
+
+
+
+
+
+
 
 
 /*************************************************************************
@@ -1585,5 +1670,135 @@ SEXP R_qnorm_determine_target(SEXP X, SEXP targetlength){
 
   UNPROTECT(1);
   return target;
+
+}
+
+
+
+
+/*****************************************************************************************************
+ *****************************************************************************************************
+ **
+ ** The following block of code implements quantile normalization within blocks.
+ ** What this means is that the normalization is still carried out across arrrays (or columns)
+ ** but separate subsets of rows (these are blocks) each get there own normalization
+ **
+ *****************************************************************************************************
+ *****************************************************************************************************/
+
+
+/*****************************************************************
+ **
+ ** int qnorm_c_within_blocks(double *x, int *rows, int *cols, int *blocks)
+ ** 
+ ** double *x - matrix to be normalized
+ ** int *rows - dimensions of the matrix
+ ** int *cols -
+ ** int *blocks - labeling telling which block each row belongs to.
+ **
+ *****************************************************************/
+
+
+int qnorm_c_within_blocks(double *x, int *rows, int *cols, int *blocks){
+
+
+  int i,j,ind;
+  dataitem_block **dimat_block;
+  /*  double sum; */
+  double *row_mean = (double *)Calloc((*rows),double);
+  double *ranks = (double *)Calloc((*rows),double);
+  
+
+  dimat_block = (dataitem_block **)Calloc(1,dataitem_block *);
+  dimat_block[0] = (dataitem_block *)Calloc(*rows,dataitem_block);
+  
+  for (i =0; i < *rows; i++){
+    row_mean[i] = 0.0;
+  }
+  
+  /* first find the normalizing distribution */
+  for (j = 0; j < *cols; j++){
+    for (i =0; i < *rows; i++){
+      dimat_block[0][i].data = x[j*(*rows) + i];
+      dimat_block[0][i].block = blocks[i];
+    }
+    qsort(dimat_block[0],*rows,sizeof(dataitem_block),sort_fn_blocks);
+    for (i=0; i < *rows; i++){
+      Rprintf("%f %d\n",dimat_block[0][i].data,dimat_block[0][i].block);
+    } 
+    
+
+    for (i =0; i < *rows; i++){
+      row_mean[i] += dimat_block[0][i].data/((double)*cols);
+    }
+  }
+  
+  /* now assign back distribution */
+
+  
+  for (j = 0; j < *cols; j++){
+    for (i =0; i < *rows; i++){
+      dimat_block[0][i].data = x[j*(*rows) + i];
+      dimat_block[0][i].block = blocks[i];
+      dimat_block[0][i].rank = i;
+    }
+    qsort(dimat_block[0],*rows,sizeof(dataitem_block),sort_fn_blocks);
+    get_ranks_blocks(ranks,dimat_block[0],*rows);
+    for (i =0; i < *rows; i++){
+      ind = dimat_block[0][i].rank;
+      x[j*(*rows) +ind] = row_mean[(int)floor(ranks[i])-1];
+    }
+  }
+  
+  Free(ranks);
+  
+  Free(dimat_block[0]);
+  
+  Free(dimat_block);
+  Free(row_mean);
+  return 0;
+  
+
+
+}
+
+
+
+SEXP R_qnorm_within_blocks(SEXP X,SEXP blocks,SEXP copy){
+
+  SEXP Xcopy,dim1,blocksint;
+  double *Xptr;
+  int *blocksptr;
+  int rows,cols;
+  
+  PROTECT(dim1 = getAttrib(X,R_DimSymbol));
+  rows = INTEGER(dim1)[0];
+  cols = INTEGER(dim1)[1];
+  UNPROTECT(1);
+
+  if (asInteger(copy)){
+    PROTECT(Xcopy = allocMatrix(REALSXP,rows,cols));
+    copyMatrix(Xcopy,X,0);
+  } else {
+    Xcopy = X;
+  }
+
+  PROTECT(blocksint = coerceVector(blocks,INTSXP));
+    
+
+  Xptr = NUMERIC_POINTER(AS_NUMERIC(Xcopy));
+  blocksptr  = INTEGER_POINTER(blocksint);
+
+
+  
+  qnorm_c_within_blocks(Xptr, &rows, &cols,blocksptr);
+  if (asInteger(copy)){
+    UNPROTECT(2);
+  } else {
+    UNPROTECT(1);
+  }
+  return Xcopy;
+
+
 
 }
