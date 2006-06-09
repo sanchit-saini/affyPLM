@@ -107,4 +107,38 @@ normalize.quantiles.in.blocks <- function(x,blocks,copy=TRUE){
 
 
 
-###normalize.AffyBatch.quantiles.chromosome <- function(abatch)
+normalize.AffyBatch.quantiles.chromosome <- function(abatch,type=c("separate","pmonly","mmonly","together")){
+
+  type <- match.arg(type)
+  
+  
+  which.annot <- annotation(abatch)
+  require(which.annot, character.only=TRUE)
+  
+  chromo.name <- paste(which.annot,"CHR",sep="")
+  
+  chromos <- do.call("c",as.list(eval(as.name(chromo.name))))
+  
+  which.chromos <- as.factor(chromos[probeNames(abatch)])
+  
+  
+  if ((type == "pmonly")|(type == "separate")){
+    pms <- unlist(pmindex(abatch))
+    noNA <- apply(intensity(abatch)[pms,],1,function(x) all(!is.na(x)))
+    pms <- pms[noNA]
+    intensity(abatch)[pms,] <- normalize.quantiles.in.blocks(intensity(abatch)[pms, ],which.chromos,copy=FALSE)   
+  }
+  if ((type == "mmonly")|(type == "separate")){
+    mms <- unlist(mmindex(abatch))
+    noNA <- apply(intensity(abatch)[mms, , drop = FALSE],
+                  1, function(x) all(!is.na(x)))
+    mms <- mms[noNA]
+    intensity(abatch)[pms,] <- normalize.quantiles.in.blocks(intensity(abatch)[pms, ],which.chromos,copy=FALSE) 
+  }
+  if (type == "together") {
+    pms <- unlist(indexProbes(abatch, "both"))
+    intensity(abatch)[pms, ] <- normalize.quantiles(intensity(abatch)[pms,, drop = FALSE],rep(which.chromos,2),copy = FALSE)
+  }
+  return(abatch)
+}
+

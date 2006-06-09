@@ -33,6 +33,8 @@
  ** Mar 10, 2003 - Check indexing, see that it roams on x =1..ncol  and y=1..nrow. Note
  **                that affy cdf files are on x=0.. ncol-1  and y=0..nrow-1
  ** Mar 6, 2004 - All mallocs/free are now Calloc/Free
+ ** Jun 7, 2006 - change distance calculations to be computed using floating point
+ **               rather than integer arithmetic.
  **
  ***********************************************************************/
  
@@ -53,67 +55,42 @@
  **
  ** int rows
  ** int cols
- ** int grid_dim
+ ** int grid_dim_rows
+ ** int grid_dim_cols
  ** int *centroidx - place to store computed centroids
  ** int *centroidy - place to store computed centroids 
  **
  **************************************************************************/
 
-void static get_centroids(int rows, int cols, int grid_dim, int *centroidx, int *centroidy){
-  int i;
-  int *cuts_x = (int *)Calloc((int)sqrt(grid_dim),int);
-  int *cuts_y = (int *)Calloc((int)sqrt(grid_dim),int);
-  int grid_dim1d = (int)sqrt(grid_dim);
-
-  if ((grid_dim == 16) && (rows == 640) && (cols == 640) && (0 == 1)){
-    centroidy[0] = 80;
-    centroidy[1] = 240;
-    centroidy[2] = 400;
-    centroidy[3] = 560;
-    centroidy[4] = 80;
-    centroidy[5] = 240;
-    centroidy[6] = 400;
-    centroidy[7] = 560;
-    centroidy[8] = 80;
-    centroidy[9] = 240;
-    centroidy[10] = 400;
-    centroidy[11] = 560;
-    centroidy[12] = 80;
-    centroidy[13] = 240;
-    centroidy[14] = 400;
-    centroidy[15] = 560;
-    centroidx[0] = 80;
-    centroidx[1] = 80;
-    centroidx[2] = 80;
-    centroidx[3] = 80;
-    centroidx[4] = 240;
-    centroidx[5] = 240;
-    centroidx[6] = 240;
-    centroidx[7] = 240;
-    centroidx[8] = 400;
-    centroidx[9] = 400;
-    centroidx[10] = 400;
-    centroidx[11] = 400;
-    centroidx[12] = 560;
-    centroidx[13] = 560;
-    centroidx[14] = 560;
-    centroidx[15] = 560;
-  } else {
-    for (i = 0; i < grid_dim1d; i++)
-      cuts_x[i] = ((i+1)*rows)/grid_dim1d - rows/(2*grid_dim1d);
-    for (i = 0; i < grid_dim1d; i++)
-      cuts_y[i] = ((i+1)*cols)/grid_dim1d - cols/(2*grid_dim1d);
-    
-    for (i =0; i < grid_dim; i++){
-      centroidx[i] = cuts_x[ i / grid_dim1d];
-      centroidy[i] = cuts_y[ i % grid_dim1d];
-      /* printf("%d %d\n", centroidx[i],centroidy[i]); */
+void static get_centroids(int rows, int cols, int grid_dim_rows, int grid_dim_cols, double *centroidx, double *centroidy){
+  int i,j;
+  double *cuts_x = (double *)Calloc(grid_dim_rows,double);
+  double *cuts_y = (double *)Calloc(grid_dim_cols,double);
+  
+  for (i = 0; i < grid_dim_rows; i++)
+    cuts_x[i] = ((double)(i+1)*(double)rows)/(double)grid_dim_rows - (double)rows/(2.0*(double)grid_dim_rows);
+  for (j = 0; j < grid_dim_cols; j++)
+    cuts_y[j] = ((double)(j+1)*(double)cols)/(double)grid_dim_cols - (double)cols/(2.0*(double)grid_dim_cols);
+  
+  for (j = 0; j < grid_dim_cols; j++){
+    for (i = 0; i < grid_dim_rows; i++){
+      centroidx[j*grid_dim_rows + i] = cuts_x[(j*grid_dim_rows + i) / grid_dim_rows]+0.5;
+      centroidy[j*grid_dim_rows + i] = cuts_y[(j*grid_dim_rows + i) % grid_dim_rows]+0.5;
     }
   }
-
   Free(cuts_x);
   Free(cuts_y);
 }
+
+
+void R_get_centroids(int *rows, int *cols, int *grid_dim_rows, int *grid_dim_cols, double *centroidx, double *centroidy){
+
+  get_centroids(*rows,*cols, *grid_dim_rows,*grid_dim_cols, centroidx,centroidy);
+}
+
+
+
+
 
 /**********************************************************************
  **
@@ -174,7 +151,7 @@ void static get_gridpts(int rows, int cols, int grid_dim, int *gridpt_x, int *gr
  ** 
  ***********************************************************************/
 
-void static find_distances(int x, int y, int grid_dim,int *centroidx, int *centroidy, int *distance){
+void static find_distances(int x, int y, int grid_dim,double *centroidx, double *centroidy, double *distance){
   
   int i=0;
 
@@ -198,10 +175,10 @@ void static find_distances(int x, int y, int grid_dim,int *centroidx, int *centr
  **
  **********************************************************************************************/
 
-void static compute_weights_individual(int x, int y, int grid_dim, int *centroidx, int *centroidy, double *weights, double smooth){
+void static compute_weights_individual(int x, int y, int grid_dim, double *centroidx, double *centroidy, double *weights, double smooth){
 
   int i=0;
-  int *distance = (int *)Calloc(grid_dim,int);
+  double *distance = (double *)Calloc(grid_dim,double);
 
   find_distances(x, y, grid_dim, centroidx, centroidy, distance);
 
@@ -227,7 +204,7 @@ void static compute_weights_individual(int x, int y, int grid_dim, int *centroid
  **
  **********************************************************************************************/
 
-void static compute_weights(int *x, int *y, int nprobes, int grid_dim, int *centroidx, int *centroidy, double *weights){
+void static compute_weights(int *x, int *y, int nprobes, int grid_dim, double *centroidx, double *centroidy, double *weights){
 
   double smooth = 100.0;
   int i=0;
@@ -502,12 +479,12 @@ void static affy_background_adjust(double *probeintensity,int *x, int *y, int np
   double *bg_q = (double *)Calloc(grid_dim,double);
   double *noise_q = (double *)Calloc(grid_dim,double);
   double *weights = (double *)Calloc(grid_dim*nprobes,double);
-  int *centroidx = (int *)Calloc(grid_dim,int);
-  int *centroidy = (int *)Calloc(grid_dim,int);
+  double *centroidx = (double *)Calloc(grid_dim,double);
+  double *centroidy = (double *)Calloc(grid_dim,double);
   int *gridpt_x = (int *)Calloc(((int)(sqrt(grid_dim) -1.0)),int);
   int *gridpt_y = (int *)Calloc(((int)(sqrt(grid_dim) -1.0)),int);
   
-  get_centroids(rows, cols, grid_dim, centroidx, centroidy);
+  get_centroids(rows, cols, (int)sqrt(grid_dim),(int)sqrt(grid_dim), centroidx, centroidy);
   get_gridpts(rows, cols, grid_dim, gridpt_x, gridpt_y);
   compute_weights(x, y, nprobes, grid_dim, centroidx, centroidy, weights);
   Compute_grids(x, y, rows, cols, nprobes, grid_dim, gridpt_x,gridpt_y, whichgrid);

@@ -1,3 +1,12 @@
+1.9.3-1.9.5
+-----------
+
+Small fix to fitPLM for soybean arrays.
+A number of quantile normalization variants.
+
+
+
+
 1.9.2   May 1, 2005
 -----
 
