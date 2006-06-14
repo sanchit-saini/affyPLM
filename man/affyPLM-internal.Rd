@@ -20,6 +20,8 @@
 \alias{verify.output.param}
 \alias{verify.variable.types}
 
+\alias{normalize.AffyBatch.quantiles.chromosome}
+
 
 \title{Internal AffyExtensions functions}
 
