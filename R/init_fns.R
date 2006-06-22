@@ -2,7 +2,7 @@
 ##
 ## file: init_fns.R
 ##
-## Copyright (C) 2003   Ben Bolstad
+## Copyright (C) 2003-2006   Ben Bolstad
 ##
 ## aim: implemement initialization functions for AffyExtensions
 ##
@@ -17,6 +17,7 @@
 ## Oct 29, 2003 - Port to R-1.8.0
 ## Mar 14, 2004 - added Mbox and MAplot functions for exprSet
 ## Sep 13, 2005 - add vignettes to windows menu
+## Jun 22, 2006 - add pch to MAplot
 ##
 ############################################################
 
@@ -75,7 +76,7 @@
   
   
   setMethod("MAplot",signature("exprSet"),
-            function(object,log=FALSE,ref=NULL,subset=NULL,which=NULL,...){
+            function(object,log=FALSE,ref=NULL,subset=NULL,which=NULL,pch=".",...){
               if(log){
                 x <- log2(exprs(object))
               } else {
@@ -96,13 +97,13 @@
                 if (is.null(ref)){
                   for (i in which){
                     title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
-                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                   }
                 } else {
                   for (i in which){
                     if (i != ref){
                       title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
-                      ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                      ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                     }
                   }
                 }
@@ -124,13 +125,13 @@
                 if (is.null(ref)){
                   for (i in which){
                     title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
-                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                   }
                 } else {
                   for (i in which){
                     if (i != ref){
                       title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
-                      ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                      ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                     }
                   }
                 }

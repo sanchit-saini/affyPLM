@@ -88,6 +88,7 @@
 ##                Speed up image() in certain situations
 ## Apr 6, 2005  - ability to change color maps on image()
 ## Apr 12, 2006 - add densityplot options to NUSE and RLE
+## Jun 22, 2006 - add pch to MAplot
 ##
 ###########################################################
 
@@ -1186,7 +1187,7 @@ if (!isGeneric("MAplot"))
 
 
 setMethod("MAplot",signature("PLMset"),
-          function(object,ref=NULL,subset=NULL,which=NULL,...){
+          function(object,ref=NULL,subset=NULL,which=NULL,pch=".",...){
             x <- coefs(object)
             if (is.null(which)){
               which <- 1:dim(x)[2]
@@ -1205,13 +1206,13 @@ setMethod("MAplot",signature("PLMset"),
               if (is.null(ref)){
                 for (i in which){
                   title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
-                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                 }
               } else {
                 for (i in which){
                   if (i != ref){
                     title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
-                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                   }
                 }
               }
@@ -1233,13 +1234,13 @@ setMethod("MAplot",signature("PLMset"),
               if (is.null(ref)){
                 for (i in which){
                   title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
-                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                 }
               } else {
                 for (i in which){
                   if (i != ref){
                     title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
-                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch='.',...)
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                   }
                 }
               }

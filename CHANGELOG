@@ -1,3 +1,14 @@
+1.9.7
+-----
+Modify MAplot for exprSet, PLMset objects
+
+
+1.9.6
+-----
+Added normalize.AffyBatch.quantiles.chromosome
+
+
+
 1.9.3-1.9.5
 -----------
 
