@@ -42,6 +42,7 @@
  ** Apr 5, 2004 - all malloc/free are now Calloc/Free
  ** Aug 4, 2004 - Change functions to deal with new structure and pmonly/mmonly/separate/together methodology.
  ** Apr 27, 2006 - add "quantile.robust" to normalization methods
+ ** Jul 10, 2006 - add log.scalefactors support into scaling normalization.
  **
  **
  *********************************************************************/
@@ -342,6 +343,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
   
   double trim;
   int baseline;
+  int logscale;
 
   int usemedian;
   int uselog2;
@@ -483,15 +485,18 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
     trim = asReal(param);
     param = GetParameter(norm_parameters, "scaling.baseline");
     baseline = asInteger(param); 
+    
+    param = GetParameter(norm_parameters, "log.scalefactors");
+    logscale = asInteger(param); 
 
     param = GetParameter(norm_parameters,"type");
     if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
       Rprintf("Normalizing PM\n");
-      scaling_norm(PM, rows, cols,trim, baseline);
+      scaling_norm(PM, rows, cols,trim, baseline,logscale);
     }
     if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
       Rprintf("Normalizing MM\n");
-      scaling_norm(MM, rows, cols,trim, baseline);
+      scaling_norm(MM, rows, cols,trim, baseline,logscale);
     }
     if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
       Rprintf("Normalizing PM and MM together\n");
@@ -507,7 +512,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	  allPMMM[j*2*rows + i + rows] = MM[j*rows + i];
 	}
       }
-      scaling_norm(allPMMM, allrows, cols,trim, baseline);
+      scaling_norm(allPMMM, allrows, cols,trim, baseline,logscale);
       for (i=0; i < rows; i++){
 	for (j=0; j < cols; j++){
 	  PM[j*rows + i] = allPMMM[j*2*rows + i];

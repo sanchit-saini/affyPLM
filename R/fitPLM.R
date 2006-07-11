@@ -2013,7 +2013,7 @@ verify.norm.param <- function(R.model, normalize.method,normalize.param = list()
     } else if (normalize.method == "quantile.probeset"){
       default.n.param <- list(type="separate",use.median=FALSE,use.log2=TRUE)
     } else if (normalize.method == "scaling"){
-      default.n.param <- list(type="separate",scaling.baseline=-4,scaling.trim=0.0)
+      default.n.param <- list(type="separate",scaling.baseline=-4,scaling.trim=0.0,log.scalefactors=FALSE)
     } else if (normalize.method == "quantile.robust"){
       default.n.param <- list(type="separate",use.median=FALSE,use.log2=FALSE,weights=NULL,remove.extreme = "variance", n.remove = as.integer(1))
     }    

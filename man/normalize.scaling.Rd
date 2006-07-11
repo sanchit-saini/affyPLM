@@ -7,8 +7,8 @@
   Allows the user to apply scaling normalization.
 }
 \usage{
-normalize.scaling(X,trim=0.02,baseline=-1)
-normalize.AffyBatch.scaling(abatch,type=c("together","pmonly","mmonly","separate"),trim=0.02,baseline=-1)
+normalize.scaling(X,trim=0.02,baseline=-1,log.scalefactors=FALSE)
+normalize.AffyBatch.scaling(abatch,type=c("together","pmonly","mmonly","separate"),trim=0.02,baseline=-1,log.scalefactors=FALSE)
 }
 \arguments{
   \item{X}{A matrix. The columns of which are to be normalized}
@@ -19,6 +19,8 @@ normalize.AffyBatch.scaling(abatch,type=c("together","pmonly","mmonly","separate
     the mean when using the scaling normalization}
   \item{baseline}{Index of array to use as baseline, negative values
     (-1,-2,-3,-4) control different baseline selection methods}
+  \item{log.scalefactors}{Compute the scale factors based on log2
+    transformed data}
   
 }
 \details{

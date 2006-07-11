@@ -4,7 +4,7 @@
  **
  ** Aim: Implement the scaling normalization 
  **      
- ** Copyright (C) 2003 Ben Bolstad
+ ** Copyright (C) 2003-2006 Ben Bolstad
  **
  ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
  ** 
@@ -24,6 +24,11 @@
  **                Remove a pesky debug printf
  ** Apr 5, 2004 - all malloc/free should be Calloc/Free
  ** May 11, 2004 - fix a small memory leak.
+ ** Jul 10, 2006 - add in scaling factors computed on log2 scale. This is
+ **                a suggestion of
+ **                Lu, Chao (2004) Improving the scaling normalization for
+ **                high-density GeneChip expression microarrays.
+ **                BMC Bioinformatics 2004, 5:103
  **
  *********************************************************************/
 
@@ -92,17 +97,19 @@ static double mean_trim(double *x, int length, double trim){
  ** double trim  - fraction of data to trim from each tail
  ** int baseline - index of array to be used as baseline. 
  **                this will be 0..cols-1, if  it is 
- **                -1 pick array with median overall intensity as baseline
+ **                -1 pick array with median overall (total) intensity as baseline
  **                -2 pick array with median median as baseline
  **                -3 generate a probewise median array for baseline
  **                -4 generate a probewise mean array for baseline
+ ** int logscale - compute the scaling factors on log scale data if non-zero.
+ **                if zero compute on natural scale 
  **
  ** this function implements the baseline method of normalizing arrays
  **
  ********************************************************************/
 
 
-void scaling_norm(double *data, int rows, int cols, double trim, int baseline){
+void scaling_norm(double *data, int rows, int cols, double trim, int baseline, int logscale){
 
   int i,j;
 
@@ -114,8 +121,18 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline){
   double *buffer;
   double *row_buffer;
 
+  if (logscale){
+    for (j=0; j < cols; j++){
+      for(i=0; i < rows; i++){
+	data[j*rows + i] = log(data[j*rows + i])/log(2.0);
+      }
+    }
+  }
+
+
+
   if (baseline == -1){
-    /* pick the array with median overall intensity as baseline */
+    /* pick the array with median overall (total) intensity as baseline */
     buffer = Calloc(cols,double);
     for (j=0; j < cols; j++){
       for(i=0; i < rows; i++){
@@ -190,9 +207,22 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline){
   for (j =0; j < cols; j++){
     if (j !=baseline){
       mean_treatment = mean_trim(&data[j*rows],rows,trim);
-      beta = mean_baseline/mean_treatment;
-      for (i = 0; i < rows; i++){
-	data[j*rows + i]*=beta;
+      if (logscale){
+	beta = pow(2.0,mean_baseline - mean_treatment);
+	for (i = 0; i < rows; i++){
+	  data[j*rows + i] = beta*pow(2.0,data[j*rows + i]);
+	}
+      } else {  
+	beta = mean_baseline/mean_treatment;
+	for (i = 0; i < rows; i++){
+	  data[j*rows + i]*=beta;
+	}
+      }
+    } else {
+      if (logscale){
+	for (i = 0; i < rows; i++){
+	  data[j*rows + i] = pow(2.0,data[j*rows + i]);
+	}
       }
     }
   }
@@ -202,12 +232,12 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline){
 
 /*********************************************************************
  **
- ** SEXP R_normalize_scaling(SEXP X,SEXP trim,SEXP baseline)
+ ** SEXP R_normalize_scaling(SEXP X,SEXP trim,SEXP baseline, SEXP logscale)
  **
  ** SEXP X          - matrix to be scale normalized
  ** SEXP trim       - fraction to trim 
  ** SEXP baseline   - index of baseline array (0 .. n-1) or a number 
- **                -1 pick array with median overall intensity as baseline
+ **                -1 pick array with median overall (total) intensity as baseline
  **                -2 pick array with median median as baseline
  **                -3 generate a probewise median array for baseline
  **                -4 generate a probewise mean array for baseline
@@ -218,13 +248,14 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline){
  **
  *********************************************************************/
 
-SEXP R_normalize_scaling(SEXP X,SEXP trim,SEXP baseline){
+SEXP R_normalize_scaling(SEXP X,SEXP trim,SEXP baseline, SEXP logscalefactors){
 
   int rows, cols;
   SEXP Xcopy,dim1;
   double *Xptr;
   double trimvalue;
   int baselinearray;
+  int logscale;
 
 
   PROTECT(dim1 = getAttrib(X,R_DimSymbol));
@@ -237,9 +268,9 @@ SEXP R_normalize_scaling(SEXP X,SEXP trim,SEXP baseline){
   
   trimvalue = asReal(trim);
   baselinearray = asInteger(baseline);
-    
+  logscale = asInteger(logscalefactors);
 
-  scaling_norm(Xptr, rows, cols, trimvalue, baselinearray);
+  scaling_norm(Xptr, rows, cols, trimvalue, baselinearray,logscale);
   
     
   UNPROTECT(2);

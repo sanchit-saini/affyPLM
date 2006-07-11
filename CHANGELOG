@@ -1,3 +1,9 @@
+1.9.8
+-----
+add ability to calculate scaling factors for scaling normalizations on the log2 scale. This modification of the scaling
+normalization method was recommended by   Lu, Chao (2004) Improving the scaling normalization for high-density oligonucleotide GeneChip expression microarrays. BMC Bioinformatics 5:103
+
+
 1.9.7
 -----
 Modify MAplot for exprSet, PLMset objects
