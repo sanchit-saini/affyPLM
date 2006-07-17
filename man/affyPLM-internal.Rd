@@ -23,9 +23,9 @@
 \alias{normalize.AffyBatch.quantiles.chromosome}
 
 
-\title{Internal AffyExtensions functions}
+\title{Internal affyPLM functions}
 
-\description{Internal AffyExtensions functions}
+\description{Internal affyPLM functions}
 
 \details{These are not to be called by the user and/or are undergoing testing}
 
