@@ -1,3 +1,10 @@
+1.9.9
+-----
+Added an additional vignette explaining various ways to use the MAplot function.
+Removed the subset argument from MAplot (for exprSet, PLMset)
+Added groups argument to MAplot
+
+
 1.9.8
 -----
 add ability to calculate scaling factors for scaling normalizations on the log2 scale. This modification of the scaling
@@ -6,7 +13,7 @@ normalization method was recommended by   Lu, Chao (2004) Improving the scaling 
 
 1.9.7
 -----
-Modify MAplot for exprSet, PLMset objects
+Modify MAplot for exprSet, PLMset objects for changes in ma.plot from affy.
 
 
 1.9.6

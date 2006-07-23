@@ -88,7 +88,9 @@
 ##                Speed up image() in certain situations
 ## Apr 6, 2005  - ability to change color maps on image()
 ## Apr 12, 2006 - add densityplot options to NUSE and RLE
-## Jun 22, 2006 - add pch to MAplot
+## Jun 22, 2006 - add pch to MAplot,
+## Jul 21, 2006 - allow which, ref, subset arguments of MAplot to be sample names. removed subset. added pairs as arguments for MAplot
+## Jul 22, 2006 - add groups variable to MAplot
 ##
 ###########################################################
 
@@ -1187,62 +1189,221 @@ if (!isGeneric("MAplot"))
 
 
 setMethod("MAplot",signature("PLMset"),
-          function(object,ref=NULL,subset=NULL,which=NULL,pch=".",...){
-            x <- coefs(object)
-            if (is.null(which)){
-              which <- 1:dim(x)[2]
-            }
-            
-
-            if (is.null(subset)){
-              if (is.null(ref)){
-                medianchip <- apply(x, 1, median)
-              } else {
-                medianchip <- x[,ref]
+          function(object,groups=NULL,ref=NULL,which=NULL,pch=".",ref.fn=c("median","mean"),ref.title="vs pseudo-median reference chip",pairs=FALSE,...){
+          
+            if (is.null(groups)){
+              if (is.character(ref)){
+                ref.indices <- match(ref,sampleNames(object))
+                if (all(is.na(ref.indices))){
+                  stop("No known sampleNames in ref")
+                }
+                
+                if (any(is.na(ref.indices))){
+                  warning(paste("Omitting the following from ref:",ref[is.na(ref.indices)], "because they can not be found."))
+                }
+                ref <- ref.indices[!is.na(ref.indices)]
               }
             
-              M <- sweep(x,1,medianchip,FUN='-')
-              A <- 1/2*sweep(x,1,medianchip,FUN='+')
-              if (is.null(ref)){
-                for (i in which){
-                  title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
-                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
+            
+              if (is.character(which)){
+                which.indices <- match(which,sampleNames(object))
+                if (all(is.na(which.indices))){
+                  stop("No known sampleNames in which")
                 }
-              } else {
-                for (i in which){
-                  if (i != ref){
-                    title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
-                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
+                
+                if (any(is.na(which.indices))){
+                  warning(paste("Omitting the following from which:",which[is.na(which.indices)], "because they can not be found."))
+                }
+                which <- which.indices[!is.na(which.indices)]
+              }
+              
+              ref.fn <- match.arg(ref.fn)
+              
+              x <- coefs(object)
+              
+              if (!pairs){
+                if (is.null(which)){
+                  which <- 1:dim(x)[2]
+                }
+                
+                if (is.null(ref)){
+                  medianchip <- apply(x, 1, median)
+                }  else if (length(ref) > 1){
+                  if (ref.fn == "median"){
+                    medianchip <- rowMedians(x[,ref])
+                  } else {
+                    medianchip <- rowMeans(x[,ref])
                   }
-                }
-              }
-            } else {
-              if (is.null(ref)){
-                medianchip <- apply(x[,subset], 1, median)
-              } else {
-                if (is.element(ref,subset)){
-                  medianchip <- x[,ref]
                 } else {
-                  stop("Ref ",ref, "is not part of the subset")
+                  medianchip <- x[,ref]
                 }
-              }
-              if (!all(is.element(which,subset))){
-                stop("Specified arrays not part of subset")
-              }
-              M <- sweep(x,1,medianchip,FUN='-')
-              A <- 1/2*sweep(x,1,medianchip,FUN='+')
-              if (is.null(ref)){
-                for (i in which){
-                  title <- paste(sampleNames(object)[i],"vs pseudo-median reference chip")
-                  ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
-                }
-              } else {
-                for (i in which){
-                  if (i != ref){
-                    title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
+                
+                M <- sweep(x,1,medianchip,FUN='-')
+                A <- 1/2*sweep(x,1,medianchip,FUN='+')
+                if (is.null(ref)){
+                  for (i in which){
+                    title <- paste(sampleNames(object)[i],ref.title)
                     ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
                   }
+                } else {
+                  for (i in which){
+                    if (length(ref) == 1){
+                      if (i != ref){
+                        title <- paste(sampleNames(object)[i],"vs",sampleNames(object)[ref])
+                        ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
+                      }
+                    } else {
+                      title <- paste(sampleNames(object)[i],ref.title)
+                      ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
+                    }
+                  }
                 }
+              } else {
+                if (!is.null(ref)) stop("Can't use pairs with non-null 'ref'")
+                if(is.null(which)) which <- 1:ncol(x)
+                mva.pairs(x[,which],log.it=FALSE,...)
+              }
+            } else {## group labels have been given
+
+              ## check that group variable is of same length as number of samples 
+              
+              if (dim(coefs(object))[2] != length(groups)){
+                stop("'groups' is of wrong length.")
+              }
+              
+
+              ### group labels variable can be integer, character or factor variable.
+              ### need to check that if any names supplied
+              ### for ref or which can be found in group.labels
+                
+              if (!is.null(which)){
+                if (is.numeric(groups)){
+                  if (!is.numeric(which)){
+                    stop("'which' labels must also be found in 'groups'") 
+                  } else {
+                    if (!all(is.element(which,groups))){
+                      stop("'which' labels must also be found in 'groups'") 
+                    }
+                  }
+                } else if (is.factor(groups)){
+                  if (!is.character(which)){
+                    stop("'which' should be character vector") 
+                  } else {
+                    if (!all(is.element(which,as.character(groups)))){
+                      stop("'which' labels must also be found in 'groups'") 
+                    }
+                  }
+                } else if (is.character(groups)){
+                  if (!is.character(which)){
+                    stop("'which' should be character vector") 
+                  } else {
+                    if (!all(is.element(which,groups))){
+                      stop("'which' labels must also be found in 'groups'") 
+                    }
+                  }
+                }
+              }
+              
+              if (!is.null(ref)){
+                if (is.numeric(groups)){
+                  if (!is.numeric(ref)){
+                    stop("'ref' labels must also be found in 'groups'") 
+                  } else {
+                    if (!all(is.element(ref,groups))){
+                      stop("'ref' labels must also be found in 'groups'") 
+                    }
+                  }
+                } else if (is.factor(groups)){
+                  if (!is.character(ref)){
+                    stop("'ref' should be character vector") 
+                  } else {
+                    if (!all(is.element(ref,as.character(groups)))){
+                      stop("'ref' labels must also be found in 'groups'") 
+                    }
+                  }
+                } else if (is.character(groups)){
+                  if (!is.character(ref)){
+                    stop("'ref' should be character vector") 
+                  } else {
+                    if (!all(is.element(ref,groups))){
+                      stop("'ref' labels must also be found in 'groups'") 
+                    }
+                  }
+                }
+              }
+              
+              ref.fn <- match.arg(ref.fn)
+              
+              groups.list <- split(1:dim(coefs(object))[2], as.factor(groups))
+
+              
+              grouped.data <- matrix(0,nrow(coefs(object)),length(groups.list))
+              colnames(grouped.data) <- names(groups.list)
+              which.col <- 1
+              for (group in groups.list){
+                grouped.data[,which.col] <- rowMeans(coefs(object)[,group,drop=FALSE])
+                which.col <- which.col + 1
+              }
+              
+              
+              if (!pairs){
+                if (is.null(which)){
+                  which <- names(groups.list)
+                }
+                
+                if (is.null(ref)){
+                  if (ref.fn == "median"){
+                    medianchip <- apply(grouped.data, 1, median)
+                  } else {
+                    medianchip <- rowMeans(grouped.data)
+                  }
+                  
+                } else if (length(ref) == 1){
+                  ref.name <- ref
+                  ref <- match(ref,names(groups.list))
+                  medianchip <- grouped.data[,ref]
+                } else {
+                  ref <- match(ref,names(groups.list))
+                  if (ref.fn == "median"){
+                    medianchip <- rowMedians(grouped.data[,ref])
+                  } else {
+                    medianchip <- rowMeans(grouped.data[,ref])
+                  }
+                  
+                }
+                
+                M <- sweep(grouped.data,1,medianchip,FUN='-')
+                A <- 1/2*sweep(grouped.data,1,medianchip,FUN='+')
+                if (is.null(ref)){
+                  for (i in which){
+                    title <- paste(i,ref.title)
+                    ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
+                  }
+                } else {
+                  for (i in which){
+                    if (length(ref) == 1){
+                      if (i != ref.name){
+                        title <- paste(i,"vs",ref)
+                        ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
+                      }
+                    } else {
+                      title <- paste(i,ref.title)
+                      ma.plot(A[,i],M[,i],main=title,xlab="A",ylab="M",pch=pch,...)
+                    }
+                  }
+                  
+                }
+
+                  
+
+              } else {
+                if (!is.null(ref)) stop("Can't use pairs with non-null 'ref'")
+                if (is.null(which)){
+                  which <- names(groups.list)
+                }
+                
+                mva.pairs(grouped.data[,which],log.it=FALSE,...)
+                
               }
             }
           })
