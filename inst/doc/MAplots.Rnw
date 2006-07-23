@@ -1,0 +1,260 @@
+%\VignetteIndexEntry{affyPLM: Advanced use of the MAplot function}
+%\VignettePackage{affyPLM}
+\documentclass[12pt]{article}
+\usepackage{amsmath,pstricks}
+\usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+
+\newcommand\Rpackage[1]{{\textsf{#1}\index{#1 (package)}}}
+\newcommand\dataset[1]{{\textit{#1}\index{#1 (data set)}}}
+\newcommand\Rclass[1]{{\textit{#1}\index{#1 (class)}}}
+\newcommand\Rfunction[1]{{{\small\texttt{#1}}\index{#1 (function)}}}
+\newcommand\Rfunarg[1]{{\small\texttt{#1}}}
+\newcommand\Robject[1]{{\small\texttt{#1}}}
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\title{affyPLM: Advanced use of the MAplot function}
+\author{Ben Bolstad \\ {\tt bmb@bmbolstad.com}\\ \url{http://bmbolstad.com}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+
+\section{Introduction}
+
+This document is a basic users guide to the \Rfunction{MAplot} facilities of the \Rpackage{affyPLM} package. Other vignettes for this package describe other functionalities. Note that the \Rfunction{MAplot} generic function supports dealing with the \Rclass{AffyBatch} (actually supplied by the \Rpackage{affy} package), \Rclass{exprSet} and \Rclass{PLMset} objects.
+
+To begin, load the package using
+<<loadPackage>>=
+library(affyPLM)
+options(width=60)
+@
+
+While the \Rfunction{MAplot} function can be applied to all of the objects discussed this document will illustrate the general usage of this function with an \Rclass{exprSet} object. However, the same \Rfunction{MAplot} function calls will give the same results on the \Rclass{AffyBatch} and \Rclass{PLMset} objects.
+
+The \dataset{Dilution} dataset which is built into the \Rpackage{affydata} package will be used. Now \Robject{Dilution} is an \Rclass{AffyBatch} which can be turned into an \Rclass{exprSet} object by using one of the many functions for producing expression values. In this case the \Rfunction{rma} function will be used. 
+<<makeexprSet>>=
+data(Dilution)
+eset.Dilution <- rma(Dilution)
+@ 
+Now \Robject{eset.Dilution} is an \Rclass{exprSet} containing RMA expression values.
+
+\section{Basic Usage of the MAplot function}
+
+The initial way that most users use the \Rfunction{MAplot} function is to simply call it by supplying only the input object. To do this with the RMA expression values in \Robject{eset.Dilution} use: 
+<<FirstUsageShow,eval=FALSE>>=
+par(mfrow=c(2,2))
+MAplot(eset.Dilution)
+@ 
+
+<<FirstUsageDo, results=hide, echo=FALSE, fig=FALSE>>=
+bitmap("MAplot-FirstUse.png",height=8,width=8,pointsize=10,res=300)
+par(mfrow=c(2,2))
+MAplot(eset.Dilution)
+dev.off()
+@
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.49\textwidth]{MAplot-FirstUse}
+\end{center}
+\caption{\label{First Use}MA-plots comparing the expression values for each array with a synthetic probeset-wise median array.}
+\end{figure}
+
+This produces the set of MA-plots shown in Figure \ref{First Use}. The MA-plots produced by default compare the expression values on each array in the dataset with a synthetic array created using probeset-wise median expression values. The MA-plots have loess lines in red and the $M=0$ horizontal axis in blue. In situations where it is believed that there should be little change in expression between arrays these can be used to assess the effectiveness of the normalization. Situations where an array has a clearly abberant loess line on these MA-plots often are indicative of potential quality problems. The median and IQR values appearing on each plot relate to the center and vertical spread of the M values. These statistics can be turned off by supplying the \Rfunarg{show.statistics=FALSE} argument to \Rfunction{MAplot}.
+
+
+\section{Gaining greater control over the function}
+
+There are a number of optional parameters that can be provided to a call to \Rfunction{MAplot}. The first is \Rfunarg{plot.method="smoothScatter"} which gives an alternative method of drawing the MA-plot. It requires that you have the \Rpackage{geneplotter} package installed and internally it uses the \Rfunction{smoothScatter} function to do the plotting. MA-plots can be created in this manner for the  \Robject{eset.Dilution} dataset using:
+<<smoothScatterShow,eval=FALSE>>=
+par(mfrow=c(2,2))
+MAplot(eset.Dilution,plot.method="smoothScatter")
+@ 
+with the resulting set of MA-plots shown in Figure \ref{smoothScatter}.
+
+<<smoothScatterDo, results=hide, echo=FALSE, fig=FALSE>>=
+bitmap("MAplot-smoothScatter.png",height=8,width=8,pointsize=10,res=300)
+par(mfrow=c(2,2))
+MAplot(eset.Dilution,plot.method="smoothScatter",nrpoints=256)
+dev.off()
+@
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.49\textwidth]{MAplot-smoothScatter}
+\end{center}
+\caption{\label{smoothScatter}MA-plots created using smoothScatter}
+\end{figure}
+
+
+Sometimes it is more desirable to create MA-plots which compare each array against one of the arrays in the dataset rather than against a synthetic array created using probeset-wise median expression values. The array which is used as the reference is controlled using the \Rfunarg{ref} argument. For instance to create MA-plots using the first array as the reference array and then comparing it to each of the other 3 arrays in the dataset the following code can be used: 
+<<RefUsageShow,eval=FALSE>>=
+par(mfrow=c(2,2))
+MAplot(eset.Dilution,plot.method="smoothScatter",ref=1)
+@ 
+with the results shown in Figure \ref{smoothScatterRef}.
+
+<<RefUsageDo, results=hide, echo=FALSE, fig=FALSE>>=
+bitmap("MAplot-smoothScatterRef.png",height=8,width=8,pointsize=10,res=300)
+par(mfrow=c(2,2))
+MAplot(eset.Dilution,ref=1,plot.method="smoothScatter",nrpoints=256)
+dev.off()
+@ 
+
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.49\textwidth]{MAplot-smoothScatterRef}
+\end{center}
+\caption{\label{smoothScatterRef}MA-plots created with the \Rfunarg{ref} argument.}
+\end{figure}
+
+
+
+Additionally, rather than all possible pairwise MA-plots sometimes it desirable to look only at subset of the possible arrays. This can be done using the \Rfunarg{which} function argument. For instance to examine MA-plots comparing the second array to the first array and also the second array to the first array the following code can be used: 
+<<RefUsageWhichShow,eval=FALSE>>=
+par(mfrow=c(2,1))
+MAplot(eset.Dilution,which=c(2,4),ref=1,plot.method="smoothScatter")
+@ 
+with the resultant plots shown in Figure \ref{smoothScatterWhich}. Notice that these are identical to the corresponding plots in Figure \ref{smoothScatterRef}.
+<<RefUsageWhichShow, results=hide, echo=FALSE, fig=FALSE>>=
+bitmap("MAplot-smoothScatterWhich.png",height=8,width=8,pointsize=10,res=300)
+par(mfrow=c(2,1))
+MAplot(eset.Dilution,which=c(2,4),ref=1,plot.method="smoothScatter",nrpoints=256)
+dev.off()
+@ 
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.49\textwidth]{MAplot-smoothScatterWhich}
+\end{center}
+\caption{\label{smoothScatterWhich}MA-plots created with the \Rfunarg{which} argument.}
+\end{figure}
+
+
+
+If it is desirable to compute the median reference array using a subset of arrays then the \Rfunarg{ref} can also be used. For instance the following code:
+<<SubsetUsageWhichShow,eval=FALSE>>=
+par(mfrow=c(2,1))
+MAplot(eset.Dilution,which=c(1,2),ref=c(1,2),plot.method="smoothScatter")
+@ 
+creates the MA-plots for the first and second arrays each against a median reference array created using these two arrays. The resulting plots are shown in Figure \ref{smoothScatterSubset}.
+
+<<SubsetUsageWhichDo, results=hide, echo=FALSE, fig=FALSE>>=
+bitmap("MAplot-smoothScatterSubset.png",height=8,width=8,pointsize=10,res=300)
+par(mfrow=c(2,1))
+MAplot(eset.Dilution,which=c(1,2),ref=c(1,2),plot.method="smoothScatter",nrpoints=256)
+dev.off()
+@ 
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.49\textwidth]{MAplot-smoothScatterSubset}
+\end{center}
+\caption{\label{smoothScatterSubset}MA-plots created with the \Rfunarg{ref} argument.}
+\end{figure}
+
+
+It should be noted that it is perfectly acceptable to supply sample names rather than integer indices for both \Rfunarg{ref} and \Rfunarg{which}. For example,
+<<SubsetUsageWithNames, results=hide, fig=FALSE>>=
+MAplot(eset.Dilution,which=c("20A","20B"),ref=c("20A","20B"),plot.method="smoothScatter",nrpoints=256)
+@ 
+could be used in place of the above.
+
+
+\section{Advanced Usage}
+
+
+To demonstrate how the \Rfunction{MAplot} function can be used to build up an MA-plot by adding additional points Presence/Absence calls will be used stratify probesets. Use the following code to compute P/A calls and then count how many times a probeset is present in  the dataset:
+<<calcPA>>=
+PA.calls <- mas5calls(Dilution)
+Is.Present <- exprs(PA.calls) == "P"
+Number.Present <- apply(Is.Present,1,sum)
+@ 
+
+The \Rfunarg{plot.method="add"} function argument can be used to add additional points to an existing MA-plot. Note that \Rfunarg{add.loess=FALSE} prevents the loess smoother from being added to the MA-plot. The following code produces an MA-plot comparing the first array in the dataset with the probesetwise median array. However, different color points are used to identify the number of times that probeset is called Present in the dataset.
+<<addShow,eval=FALSE>>=
+MAplot(eset.Dilution[Number.Present ==4,],show.statistics=FALSE,which=1,pch=20,cex=0.4,ylim=c(-0.8,0.8),xlim=c(2,15),add.loess=FALSE)
+MAplot(eset.Dilution[Number.Present ==0,],plot.method="add",col="red",which=1,pch=20,cex=0.4,show.statistics=FALSE,add.loess=FALSE)
+MAplot(eset.Dilution[Number.Present ==3,],plot.method="add",show.statistics=FALSE,which=1,col="green",pch=20,cex=0.4,add.loess=FALSE)
+MAplot(eset.Dilution[Number.Present ==2,],plot.method="add",show.statistics=FALSE,which=1,col="blue",pch=20,cex=0.4,add.loess=FALSE)
+MAplot(eset.Dilution[Number.Present ==1,],plot.method="add",show.statistics=FALSE,which=1,col="orange",pch=20,cex=0.4,add.loess=FALSE)
+@ 
+which results in Figure \ref{UsingAddPercentPresent}.
+
+
+<<addDo, results=hide, echo=FALSE, fig=FALSE>>=
+bitmap("MAplot-add.png",height=8,width=8,pointsize=10,res=300)
+par(mfrow=c(1,1))
+MAplot(eset.Dilution[Number.Present ==4,],show.statistics=FALSE,which=1,pch=20,cex=0.4,ylim=c(-0.8,0.8),xlim=c(2,15),add.loess=FALSE)
+MAplot(eset.Dilution[Number.Present ==0,],plot.method="add",col="red",which=1,pch=20,cex=0.4,show.statistics=FALSE,add.loess=FALSE)
+MAplot(eset.Dilution[Number.Present ==3,],plot.method="add",show.statistics=FALSE,which=1,col="green",pch=20,cex=0.4,add.loess=FALSE)
+MAplot(eset.Dilution[Number.Present ==2,],plot.method="add",show.statistics=FALSE,which=1,col="blue",pch=20,cex=0.4,add.loess=FALSE)
+MAplot(eset.Dilution[Number.Present ==1,],plot.method="add",show.statistics=FALSE,which=1,col="orange",pch=20,cex=0.4,add.loess=FALSE)
+dev.off()
+@ 
+
+
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.49\textwidth]{MAplot-add}
+\end{center}
+\caption{\label{UsingAddPercentPresent}MA-plots created with the \Rfunarg{add} argument.}
+\end{figure}
+
+
+Rather than just MA-plots of an individual array versus another array or combination of arrays, it is also possible to combine arrays into groups (by averaging for instance) and then compare groups. This can be done using the \Rfunarg{groups} argument. If the groups argument is used then \Rfunarg{ref} and \Rfunarg{which} are refer to groups rather than individual arrays. Suppose that we want to compare the arrays which were liver dilution 20 to those that were liver dilution 10. This can be done using:
+<<groupsShow,eval=FALSE>>=
+MAplot(eset.Dilution,groups=c("Liver 20","Liver 20","Liver 10","Liver 10"),ref="Liver 10")
+@ 
+with the resulting plot in Figure \ref{UsingGroups}.
+
+<<groupsDo,results=hide, echo=FALSE, fig=FALSE>>=
+bitmap("MAplot-groups.png",height=8,width=8,pointsize=10,res=300)
+MAplot(eset.Dilution,groups=c("Liver 20","Liver 20","Liver 10","Liver 10"),ref="Liver 10")
+dev.off()
+@
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.49\textwidth]{MAplot-groups}
+\end{center}
+\caption{\label{UsingGroups}MA-plots created with the \Rfunarg{groups} argument.}
+\end{figure}
+
+
+
+\section{Special notes about differences in \Rfunction{MAplot} for \Rclass{AffyBatch}, \Rclass{exprSet} and \Rclass{PLMset} objects.}
+
+The main difference is in the value of the \Rfunarg{log} argument. For an \Rclass{AffyBatch} by default \Rfunarg{log=TRUE}, whilst for both \Rclass{exprSet} and \Rclass{PLMset} this argument is \Rfunarg{log=FALSE} by default. This argument tells the function whether or the data needs to be logarithmically transformed before computing the M and A values by differencing and averaging. Note that when \Rfunarg{log=TRUE} $\log_2$ is used. Since \Rclass{AffyBatch} objects often store raw cel file data they typically need to be logged first. If \Rfunction{rma} or \Rfunction{threestep} is used then the resulting \Rclass{exprSet} contains $\log_2$ scale expression values. If \Rfunction{expresso}, or another function, is used which produces expression values in the natural scale then \Rfunarg{log=TRUE} should be supplied to MAplot.
+
+For \Rclass{AffyBatch} objects there is also a special function argument \Rfunarg{type} that can be used to control which probe type is plotted. The default is \Rfunarg{type="both"}, but \Rfunarg{type="pm"} and \Rfunarg{type="mm"} can also be used.
+
+\section{Final Comments}
+
+The \Rfunction{MAplot} function has many options and is more powerful than it might first appear. This document serves to highlight some of its more advanced features and demonstrates their usage.
+
+
+
+\end{document}
+
+
+
