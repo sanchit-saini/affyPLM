@@ -1,3 +1,8 @@
+1.9.10
+------
+Added hist() for exprSet
+
+
 1.9.9
 -----
 Added an additional vignette explaining various ways to use the MAplot function.

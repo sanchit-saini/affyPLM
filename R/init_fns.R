@@ -20,6 +20,7 @@
 ## Jun 22, 2006 - add pch to MAplot
 ## Jul 21, 2006 - MAplot now handles sampleName arguments. Removed the subset argument.
 ##                now ref and which can basically do the same things. Added pairs as a possible argument.
+## Jul 26, 2006 - added hist() method for exprSet
 ##
 ############################################################
 
@@ -314,6 +315,36 @@
                 }
               }
             })
+
+
+  plotDensity.exprSet <- function(x, col=1:6, log=FALSE,
+                                  ylab="density",
+                                  xlab=NULL,
+                                  ...){
+  
+    x <- exprs(x)
+    
+    if(log){
+      x <- log2(x)
+      if(is.null(xlab)) xlab <- "log intensity"
+    }
+    else  if(is.null(xlab)) xlab <- "intensity"
+    
+    rv <- plotDensity(x, ylab=ylab, xlab=xlab, col=col, ...)
+    
+    invisible(rv)
+  }
+
+  
+
+  if(!isGeneric("hist"))
+    setGeneric("hist")
+  
+  setMethod("hist",signature(x="exprSet"), 
+            function(x,...) plotDensity.exprSet(x,...))
+  
+
+  
   
 }
 
