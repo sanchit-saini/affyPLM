@@ -1,6 +1,6 @@
 Package: affyPLM
-Version: 1.9.10
-Date: 2006-07-26
+Version: 1.9.11
+Date: 2006-08-01
 Title: Methods for fitting probe-level models
 Author: Ben Bolstad <bmb@bmbolstad.com>
 Maintainer: Ben Bolstad <bmb@bmbolstad.com>

@@ -48,6 +48,7 @@
  ** Jun 5, 2006 - Re-organize code blocks
  **               Add normalization within blocks functions
  ** Jun 9, 2006 - change nearbyint to floor(x +0.5) (to fix problems on Sparc Solaris builds)
+ ** Aug 1, 2006 - fix bug in determining/applying target
  **
  ***********************************************************/
 
@@ -1484,7 +1485,7 @@ int qnorm_c_using_target(double *data, int *rows, int *cols, double *target, int
 	  if ((target_ind < *targetrows) && (target_ind > 0)){
 	    data[j*(*rows) +ind] = (1.0- target_ind_double)*row_mean[target_ind-1] + target_ind_double*row_mean[target_ind];
 	  } else if (target_ind >= *targetrows){
-	    data[j*(*rows) +ind] = row_mean[*rows-1];
+	    data[j*(*rows) +ind] = row_mean[*targetrows-1];
 	  } else {
 	    data[j*(*rows) +ind] = row_mean[0];
 	  }
@@ -1575,7 +1576,7 @@ int qnorm_c_determine_target(double *data, int *rows, int *cols, double *target,
 	if ((row_mean_ind < *rows) && (row_mean_ind > 0)){
 	  target[i] = (1.0- row_mean_ind_double)*row_mean[row_mean_ind-1] + row_mean_ind_double*row_mean[row_mean_ind];
 	} else if (row_mean_ind >= *rows){
-	  target[i] = row_mean[row_mean_ind-1];
+	  target[i] = row_mean[*rows-1];
 	} else {
 	  target[i] = row_mean[0];
 	}
