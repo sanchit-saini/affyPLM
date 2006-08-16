@@ -4,7 +4,7 @@
  **
  ** Aim: implement robust linear models specialized to samples + probes model.
  **
- ** Copyright (C) 2004 Ben Bolstad
+ ** Copyright (C) 2004-2006 Ben Bolstad
  **
  ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
  ** 

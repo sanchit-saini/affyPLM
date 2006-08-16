@@ -49,6 +49,7 @@
  **               Add normalization within blocks functions
  ** Jun 9, 2006 - change nearbyint to floor(x +0.5) (to fix problems on Sparc Solaris builds)
  ** Aug 1, 2006 - fix bug in determining/applying target
+ **               some changes in how quantiles are estimated in determining/applyin target
  **
  ***********************************************************/
 
@@ -1461,7 +1462,8 @@ int qnorm_c_using_target(double *data, int *rows, int *cols, double *target, int
       for (i =0; i < *rows; i++){
 
 	samplepercentile = (double)ranks[i]/(double)(*rows +1);
-	target_ind_double = 1.0/3.0 + ((double)(*targetrows) + 1.0/3.0) * samplepercentile;
+	/* target_ind_double = 1.0/3.0 + ((double)(*targetrows) + 1.0/3.0) * samplepercentile; */
+	target_ind_double = 1.0 + ((double)(*targetrows) - 1.0) * samplepercentile;
 	target_ind_double_floor = floor(target_ind_double + 4*DOUBLE_EPS);
 	
 	target_ind_double = target_ind_double - target_ind_double_floor;
@@ -1553,8 +1555,10 @@ int qnorm_c_determine_target(double *data, int *rows, int *cols, double *target,
     /* need to estimate quantiles */
     for (i =0; i < *targetrows; i++){
       samplepercentile = (double)(i+1)/(double)(*targetrows +1);
+      
+      /* row_mean_ind_double = 1.0/3.0 + ((double)(*rows) + 1.0/3.0) * samplepercentile; */
+      row_mean_ind_double = 1.0 + ((double)(*rows) -1.0) * samplepercentile;
 
-      row_mean_ind_double = 1.0/3.0 + ((double)(*rows) + 1.0/3.0) * samplepercentile;
       row_mean_ind_double_floor = floor(row_mean_ind_double + 4*DOUBLE_EPS);
 	
       row_mean_ind_double = row_mean_ind_double - row_mean_ind_double_floor;
