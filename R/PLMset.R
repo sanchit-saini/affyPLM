@@ -2,9 +2,9 @@
 ##
 ## file: PLMset.R
 ##
-## Copyright (C) 2003    Ben Bolstad
+## Copyright (C) 2003-2006    Ben Bolstad
 ##
-## created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
+## created by: B. M. Bolstad <bmb@bmbolstad.com>
 ## created on: Jan 14, 2003
 ##
 ##
@@ -91,6 +91,7 @@
 ## Jun 22, 2006 - add pch to MAplot,
 ## Jul 21, 2006 - allow which, ref, subset arguments of MAplot to be sample names. removed subset. added pairs as arguments for MAplot
 ## Jul 22, 2006 - add groups variable to MAplot
+## Aug 21, 2006 - fix some bugs in boxplot (also affects NUSE) when a non-default model is used
 ##
 ###########################################################
 
@@ -728,7 +729,7 @@ setMethod("boxplot",signature(x="PLMset"),
            
 
             compute.nuse <- function(which){
-              nuse <- apply(x@weights[which,],2,sum)
+              nuse <- apply(x@weights[[1]][which,],2,sum)
               1/sqrt(nuse)
             }
             
@@ -744,11 +745,13 @@ setMethod("boxplot",signature(x="PLMset"),
                 # not the default model try constructing them using weights.
                 which <-indexProbesProcessed(x)
                 ses <- matrix(0,length(which) ,4)
-                
-                for (i in 1:length(which))
-                  ses[i,] <- compute.nuse(which[[i]])
-                
-                
+                if (x@model.description$R.model$response.variable == 1){
+                  for (i in 1:length(which))
+                    ses[i,] <- compute.nuse(which[[i]])
+                } else {
+                  stop("Sorry I can't currently impute NUSE values for this PLMset object")
+                }
+
                 grp.rma.se1.median <- apply(ses, 1,median)
                 grp.rma.rel.se1.mtx <- sweep(ses,1,grp.rma.se1.median,FUN='/')
                 boxplot(data.frame(grp.rma.rel.se1.mtx),range=range,...)
@@ -770,7 +773,7 @@ setMethod("boxplot",signature(x="PLMset"),
               if (x@model.description$R.model$response.variable == -1){
                 boxplot(data.frame(x@residuals[[2]]),...)
               } else if (x@model.description$R.model$response.variable == 1){
-                boxplot(data.frame(x@wresiduals[[1]]),...)
+                boxplot(data.frame(x@residuals[[1]]),...)
               } else {
                 boxplot(data.frame(rbind(x@residuals[[1]],x@residuals[[2]])),...)
               }

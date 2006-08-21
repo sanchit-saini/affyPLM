@@ -73,7 +73,7 @@
       standard error estimates for the chip coefficients}
     \item{\code{model.description}:}{Object of class "character". This
       string describes the probe level model fitted.}
-    \item{\code{weights}:}{Object of class "matrix". Contains probe
+    \item{\code{weights}:}{List of objects of class "matrix". Contains probe
       weights for each fit. The matrix has columns for chips and rows
       are probes}
     \item{\code{phenoData}:}{Object of class "phenoData" This is an
@@ -97,7 +97,7 @@
       variance/covariance matrices}
     \item{\code{residualSE}:}{Object of class "matrix". Contains residual
       standard error and df}
-    \item{\code{residuals}:}{Object of class "matrix". Contains
+    \item{\code{residuals}:}{List of objects of class "matrix". Contains
       residuals from model fit (if stored)}
   }
 }
