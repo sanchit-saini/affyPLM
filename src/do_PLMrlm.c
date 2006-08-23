@@ -77,6 +77,7 @@
  **                a different and faster algorithm
  ** July 9, 2004 - start integrating new structure
  ** Mar 12, 2005 - changed the loop in do_PLMrlm
+ ** Aug 23, 2006 - fix a bug in checkDefaultModel. It incorrectly said that PM ~ -1 + samples + treatment:probes was a valid default model.
  **
  *********************************************************************/
 
@@ -796,7 +797,10 @@ static int  checkDefaultModel(const PLM_model_parameters *model){
   if (model->constraints[4] == 1){
     return 0;
   }
-  
+
+  if (model->strata[4] !=0){
+    return 0;
+  }
 
   if (model->mmorpm_covariate != 0){
     return 0;
