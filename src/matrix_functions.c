@@ -13,6 +13,7 @@
  ** History: 
  ** June 22, 2004 - Initial version
  ** Mar 1, 2006 - change commenting style to ansi C style
+ ** Aug 28, 2006 - change moduleCdynload to R_moduleCdynload
  **
  ********************************************************************/
 
@@ -58,7 +59,7 @@ static int use_lapack = 1;
 
 void Lapack_Init(void)
 {
-    int res = moduleCdynload("lapack", 0, 1);
+    int res = R_moduleCdynload("lapack", 0, 1);
     Lapack_initialized = -1;
     if(!res) return;
 
