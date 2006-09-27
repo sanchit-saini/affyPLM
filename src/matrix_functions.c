@@ -14,6 +14,7 @@
  ** June 22, 2004 - Initial version
  ** Mar 1, 2006 - change commenting style to ansi C style
  ** Aug 28, 2006 - change moduleCdynload to R_moduleCdynload
+ ** Sept 26, 2006 - remove R_moduleCdynload. SHould fix windows build problems.
  **
  ********************************************************************/
 
@@ -59,7 +60,7 @@ static int use_lapack = 1;
 
 void Lapack_Init(void)
 {
-    int res = R_moduleCdynload("lapack", 0, 1);
+  int res = 1; /* R_moduleCdynload("lapack", 0, 1); */
     Lapack_initialized = -1;
     if(!res) return;
 
