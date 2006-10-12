@@ -1,3 +1,14 @@
+1.11.1
+------
+
+Make functions less verbose (this can be controlled with verbosity.level parameter). This applies to fitPLM, threestep, threestepPLM, rmaPLM.
+change a few apply(x,1,median) to rowMedians
+
+
+
+
+
+
 1.9.17
 ------
 Fix R_moduleCdynload on windows so it should now build

@@ -16,6 +16,8 @@
  ** Sept 14, 2003 - Intial version
  ** May 3, 2004   - Fixed a subtle and small memory leak.
  ** March 1, 2006 - change all comments to ansi c standard
+ ** Oct 10, 2006 - add verbosity arguments to pp_* calls
+ ** Oct 11, 2006 - make verbosity argument get passed to summarization function
  **
  *********************************************************************/
 
@@ -124,10 +126,12 @@ static void rmaPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outputsett
  **
  *********************************************************************/
 
-SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP outputparam, SEXP modelparam){
+SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP outputparam, SEXP modelparam, SEXP verbosity){
 
   int i;
 
+  int verbosity_level;
+  
   outputsettings *store = (outputsettings *)Calloc(1,outputsettings);
   Datagroup *data = (Datagroup *)Calloc(1,Datagroup);
   PLMoutput *output = (PLMoutput *)Calloc(1,PLMoutput);
@@ -140,6 +144,8 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   SEXP param;
 
 
+
+  verbosity_level = asInteger(verbosity);
 
 
   /* organise data to be passed to model fitting routines */
@@ -215,8 +221,9 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   
 
   /* now go actually fit the model */
-
-  Rprintf("Fitting models\n");
+  if (verbosity_level > 0){
+    Rprintf("Fitting models\n");
+  }
 
   do_PLMrma(data, model, output,store);
   
@@ -274,7 +281,7 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
  **
  ********************************************************************/
 
-SEXP R_rmaPLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP background_parameters,SEXP norm_parameters, SEXP output_parameters, SEXP model_parameters){
+SEXP R_rmaPLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP background_parameters,SEXP norm_parameters, SEXP output_parameters, SEXP model_parameters, SEXP verbosity){
 
 
   SEXP dim1,PMcopy,rmaPLMresults;
@@ -289,17 +296,17 @@ SEXP R_rmaPLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
 
   /* If Background correction do it */
   if (INTEGER(bg_flag)[0]){
-    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters);
+    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters, verbosity);
   }
 
   /* If Normalization do it */
   if (INTEGER(norm_flag)[0]){
-    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters);
+    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters, verbosity);
   }
   
   /* Now do RLM fit */
 
-  rmaPLMresults = rmaPLMset(PMcopy, MMmat, ProbeNamesVec, N_probes, output_parameters,model_parameters);
+  rmaPLMresults = rmaPLMset(PMcopy, MMmat, ProbeNamesVec, N_probes, output_parameters,model_parameters, verbosity);
   
   UNPROTECT(2);
 

@@ -13,7 +13,8 @@ constraint.type=c(default="contr.treatment"),
 subset=NULL,
 background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param =
                  verify.output.param(), model.param =
-                 verify.model.param(object, model))
+                 verify.model.param(object, model),
+                 verbosity.level=0)
 }
 
 \arguments{
@@ -39,6 +40,8 @@ background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = 
   \item{output.param}{A list of parameters controlling optional output
     from the routine.}
   \item{model.param}{A list of parameters controlling model procedure}
+  \item{verbosity.level}{An integer specifying how much to print
+    out. Higher values indicate more verbose. A value of 0 will print nothing}
 }
 \details{
   This function fits robust Probe Level linear Models to all the probesets in

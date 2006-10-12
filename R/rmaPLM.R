@@ -19,10 +19,11 @@
 ## Aug 5, 2004 - some changes to deal with new pre-processing structure
 ##               Changes to deal with new PLMset structure
 ## Mar 12, 2005 - fix it so that probe effects are returned
+## Oct 10, 2006 - add verbosity.level argument
 ##
 #############################################################
 
-rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",background.param = list(),normalize.param=list(),output.param=list(),model.param=list()){
+rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",background.param = list(),normalize.param=list(),output.param=list(),model.param=list(),verbosity.level=0){
 
   if (!is(object, "AffyBatch")) {
     stop(paste("argument is",class(object),"fitPLM requires AffyBatch"))
@@ -51,11 +52,15 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
 
   # to avoid having to pass location information to the c code, we will just call the R code method
   if (is.element(background.method,c("MAS","MASIM")) & background){
-    cat("Background Correcting\n")
+    if (verbosity.level > 0){
+      cat("Background Correcting\n")
+    }
     object <- bg.correct.mas(object)
   }
   if (is.element(background.method,c("gcrma","GCRMA")) & background){
-    cat("Background Correcting\n")
+    if (verbosity.level > 0){
+      cat("Background Correcting\n")
+    }
     object <- bg.correct.gcrma(object)
   }
   md.param <- list(psi.type = "Huber",psi.k=NULL)
@@ -66,7 +71,7 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
   }
   md.param$psi.type <- get.psi.code(md.param$psi.type)
   
-  fit.results <- .Call("R_rmaPLMset_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, background.method, normalize.method,b.param,n.param,op.param,md.param,PACKAGE="affyPLM") #, PACKAGE="affyPLM") 
+  fit.results <- .Call("R_rmaPLMset_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, background.method, normalize.method,b.param,n.param,op.param,md.param,verbosity.level,PACKAGE="affyPLM") #, PACKAGE="affyPLM") 
   probenames <- rownames(pm(object,subset))
   colnames(fit.results[[1]]) <- sampleNames(object)
   colnames(fit.results[[4]]) <- sampleNames(object)

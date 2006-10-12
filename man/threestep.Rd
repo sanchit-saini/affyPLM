@@ -7,14 +7,13 @@
  a three step expression measure.
 }
 \usage{
-threestep(object,subset=NULL, verbose=TRUE, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),summary.param=list())
+threestep(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),summary.param=list(),verbosity.level=0)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
   \item{object}{an \code{\link[affy:AffyBatch-class]{AffyBatch}}}
   \item{subset}{a vector with the names of probesets to be used. If NULL
   then all probesets are used.}
-  \item{verbose}{logical value. If \code{TRUE} it writes out some messages. (Curently ignored)}
   \item{normalize}{logical value. If \code{TRUE} normalize data using
     quantile normalization}
   \item{background}{logical value. If \code{TRUE} background correct
@@ -25,6 +24,8 @@ threestep(object,subset=NULL, verbose=TRUE, normalize=TRUE,background=TRUE,backg
   \item{background.param}{list of parameters for background correction methods}
   \item{normalize.param}{list of parameters for normalization methods}
   \item{summary.param}{list of parameters for summary methods}
+  \item{verbosity.level}{An integer specifying how much to print
+    out. Higher values indicate more verbose. A value of 0 will print nothing}
 	    
 }
 \details{

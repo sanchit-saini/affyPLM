@@ -6,7 +6,7 @@
   \code{\link{PLMset}} using a three step expression measure.
 }
 \usage{
-threestepPLM(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),output.param=list(), model.param=list())
+threestepPLM(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),output.param=list(), model.param=list(),verbosity.level=0)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -24,6 +24,9 @@ threestepPLM(object,subset=NULL, normalize=TRUE,background=TRUE,background.metho
   \item{normalize.param}{list of parameters for normalization methods}
   \item{output.param}{list of parameters for output methods}
   \item{model.param}{list of parameters for model methods}
+  \item{verbosity.level}{An integer specifying how much to print
+    out. Higher values indicate more verbose. A value of 0 will print nothing}
+
 }
 \details{
   This function computes the expression measure using threestep

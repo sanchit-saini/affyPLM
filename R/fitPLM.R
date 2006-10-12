@@ -90,6 +90,7 @@
 ## Aug 3, 2004 -  a new fitPLM introduced along with various support functions.
 ## Feb 18, 2005 - gcrma background is also now an option
 ## Apr 27-28, 2006 - clean up how normalization methods are check and normalization parameters are validated.
+## Oct 10, 2006 - add verbosity.level argument to fitPLM
 ##
 ###########################################################
 
@@ -2127,7 +2128,7 @@ verify.norm.param <- function(R.model, normalize.method,normalize.param = list()
 
 
 
-fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),subset=NULL,background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=verify.output.param(),model.param=verify.model.param(object,model)){
+fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(default="factor"),constraint.type=c(default="contr.treatment"),subset=NULL,background=TRUE,normalize=TRUE, background.method = "RMA.2",normalize.method = "quantile",background.param=list(),normalize.param=list(),output.param=verify.output.param(),model.param=verify.model.param(object,model),verbosity.level=0){
 
 
   if (!is(object, "AffyBatch")) {
@@ -2159,18 +2160,22 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
                                         # to avoid having to pass location information to the c code, we will just call the R code method
   if (is.element(background.method,c("MAS","MASIM")) & background){
-    cat("Background Correcting\n")
+    if (verbosity.level > 0){
+      cat("Background Correcting\n")
+    }
     object <- bg.correct.mas(object)
   }
   if (is.element(background.method,c("gcrma","GCRMA")) & background){
-    cat("Background Correcting\n")
+    if (verbosity.level > 0){
+      cat("Background Correcting\n")
+    }
     object <- bg.correct.gcrma(object)
   }
 
 
   #Fitresults <- .Call("rlm_PLMset",pm(object,subset),mm(object,subset),probeNames(object,subset),n.probesets,R.model,output,modelparam)
 
-  Fitresults <- .Call("R_rlm_PLMset_c",pm(object,subset),mm(object,subset),probeNames(object,subset),n.probesets,R.model,output,modelparam,background, background.method,background.param, normalize, normalize.method, normalize.param,PACKAGE="affyPLM")
+  Fitresults <- .Call("R_rlm_PLMset_c",pm(object,subset),mm(object,subset),probeNames(object,subset),n.probesets,R.model,output,modelparam,background, background.method,background.param, normalize, normalize.method, normalize.param,verbosity.level,PACKAGE="affyPLM")
   
   x <- new("PLMset")
   x@chip.coefs=Fitresults[[1]]

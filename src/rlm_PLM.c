@@ -60,6 +60,8 @@
  ** Mar 1, 2006 - change all comments to ansi style
  ** Jun 6, 2006 - fix problem with space allocation when only one probe in probeset and trying to estimate
  **               probe-effects. (Example is Soybean chips).
+ ** Oct 11, 2006 - make verbosity argument get passed to summarization function
+ **
  **
  *********************************************************************/
 
@@ -222,117 +224,117 @@ static void rlmPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outputsett
  ** and the probeNames accessor used in the calling of functionality here does not do this.
  **  
  **
- **
+ ** NOTE THAT THIS IS THE OLD FUNCTION. It will be completely removed in a future
  **
  *********************************************************************/
 
-SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rlm_model_type,  SEXP chipcovariates, SEXP outputparam, SEXP modelparam){
-  
-  int i;
-
-  outputsettings *store = (outputsettings *)Calloc(1,outputsettings);
-  Datagroup *data = (Datagroup *)Calloc(1,Datagroup);
-  PLMoutput *output = (PLMoutput *)Calloc(1,PLMoutput);
-  PLMmodelparam *model = (PLMmodelparam *)Calloc(1,PLMmodelparam);
-  PLMRoutput *Routput = (PLMRoutput *)Calloc(1,PLMRoutput);
-  
-  SEXP dim1,dim2;
-  SEXP dimnames,names;
-  SEXP output_list;
-  SEXP param;
-
-
+//SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rlm_model_type,  SEXP chipcovariates, SEXP outputparam, SEXP modelparam){
+//
+//  int i;
+//
+//  outputsettings *store = (outputsettings *)Calloc(1,outputsettings);
+//  Datagroup *data = (Datagroup *)Calloc(1,Datagroup);
+//  PLMoutput *output = (PLMoutput *)Calloc(1,PLMoutput);
+//  PLMmodelparam *model = (PLMmodelparam *)Calloc(1,PLMmodelparam);
+//  PLMRoutput *Routput = (PLMRoutput *)Calloc(1,PLMRoutput);
+//  
+//  SEXP dim1,dim2;
+//  SEXP dimnames,names;
+//  SEXP output_list;
+//  SEXP param;
 
 
-  /* organise data to be passed to model fitting routines */
-  
-  PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
-  
-  data->rows = INTEGER(dim1)[0];
-  data->cols = INTEGER(dim1)[1];
-  
-  PROTECT(dim2 = getAttrib(chipcovariates,R_DimSymbol));
 
-  data->PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
-  data->MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
-  data->nprobesets = INTEGER(N_probes)[0];
+
+//  /* organise data to be passed to model fitting routines */
   
-  /* Get the names corresponding to each row */
+//  PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
+  
+//  data->rows = INTEGER(dim1)[0];
+//  data->cols = INTEGER(dim1)[1];
+  
+//  PROTECT(dim2 = getAttrib(chipcovariates,R_DimSymbol));
+
+//  data->PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
+//  data->MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
+//  data->nprobesets = INTEGER(N_probes)[0];
+  
+//  /* Get the names corresponding to each row */
     
-  data->ProbeNames = (char **)Calloc(data->rows,char *);
-  for (i =0; i < data->rows; i++){
-    data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
-  }
+//  data->ProbeNames = (char **)Calloc(data->rows,char *);
+//  for (i =0; i < data->rows; i++){
+//    data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+//  }
   
 
   /* figure out what the covariate matrix should be based on the rlm_model_type information and chipcovariates */
 
-  param = GetParameter(modelparam,"psi.type");
-  model->psi_code = asInteger(param);
-  model->method = asInteger(rlm_model_type);
+//  param = GetParameter(modelparam,"psi.type");
+//  model->psi_code = asInteger(param);
+//  model->method = asInteger(rlm_model_type);
 
-  param = GetParameter(modelparam,"se.type");
-  model->se_method = asInteger(param);
+//  param = GetParameter(modelparam,"se.type");
+//  model->se_method = asInteger(param);
   
-  param = GetParameter(modelparam,"psi.k");
-  model->psi_k = asReal(param);
-  model->input_chipcovariates = NUMERIC_POINTER(chipcovariates);
-  model->nchipparams = INTEGER(dim2)[1];
-  param = GetParameter(modelparam,"max.its");
-  model->n_rlm_iterations = asInteger(param);
-  param = GetParameter(modelparam,"init.method");
-  if (strcmp(CHAR(VECTOR_ELT(param,0)),"ls") == 0){
-    model->init_method = 0;
-  } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"median.polish") == 0){
-    model->init_method = 1;
-  } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"Huber") == 0){
-    model->init_method = 2;
-  }
-  param = GetParameter(modelparam,"isdefaultmodel");
-  model->default_model = asInteger(param);
+//  param = GetParameter(modelparam,"psi.k");
+//  model->psi_k = asReal(param);
+//  model->input_chipcovariates = NUMERIC_POINTER(chipcovariates);
+//  model->nchipparams = INTEGER(dim2)[1];
+//  param = GetParameter(modelparam,"max.its");
+//  model->n_rlm_iterations = asInteger(param);
+//  param = GetParameter(modelparam,"init.method");
+//  if (strcmp(CHAR(VECTOR_ELT(param,0)),"ls") == 0){
+//    model->init_method = 0;
+//  } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"median.polish") == 0){
+//    model->init_method = 1;
+//  } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"Huber") == 0){
+//    model->init_method = 2;
+//  }
+//  param = GetParameter(modelparam,"isdefaultmodel");
+//   model->default_model = asInteger(param);
 
-  param = GetParameter(modelparam,"MMorPM.covariate");
-  model->mmorpm_covariate = asInteger(param);
+//   param = GetParameter(modelparam,"MMorPM.covariate");
+//   model->mmorpm_covariate = asInteger(param);
 
 
   /* figure out what optional features we want to output */
-  param = GetParameter(outputparam,"weights");
-  store->weights = asInteger(param);
-  param = GetParameter(outputparam,"residuals");
-  store->residuals = asInteger(param);
-  param = GetParameter(outputparam,"resid.SE");
-  store->residSE = asInteger(param);
-  param = GetParameter(outputparam,"varcov");
+//   param = GetParameter(outputparam,"weights");
+//   store->weights = asInteger(param);
+//   param = GetParameter(outputparam,"residuals");
+//   store->residuals = asInteger(param);
+//   param = GetParameter(outputparam,"resid.SE");
+//   store->residSE = asInteger(param);
+//   param = GetParameter(outputparam,"varcov");
   
-  if (strcmp(CHAR(VECTOR_ELT(param,0)),"none") == 0){
-    store->varcov = 0;
-  } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"chiplevel") == 0){
-    store->varcov =1;
-  } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"all") == 0){
-    store->varcov =2;
-  }
+//   if (strcmp(CHAR(VECTOR_ELT(param,0)),"none") == 0){
+ //    store->varcov = 0;
+//   } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"chiplevel") == 0){
+//     store->varcov =1;
+//   } else if (strcmp(CHAR(VECTOR_ELT(param,0)),"all") == 0){
+//     store->varcov =2;
+//   }
 
 
   /* Make space for output */
-  rlmPLM_alloc_space(Routput, output, store, data, model);
+//   rlmPLM_alloc_space(Routput, output, store, data, model);
   
   
 
   /* now go actually fit the model */
 
-  Rprintf("Fitting models\n");
+//   Rprintf("Fitting models\n");
 
-  do_PLMrlm(data, model, output,store);
+//   do_PLMrlm(data, model, output,store);
   
   /* now lets put names on the output matrices */
   /* First the chip coef matrix */
-  PROTECT(dimnames = allocVector(VECSXP,2));
-  PROTECT(names = allocVector(STRSXP,data->nprobesets));
-  for ( i =0; i < data->nprobesets; i++)
-    SET_VECTOR_ELT(names,i,mkChar(output->outnames[i]));
-  SET_VECTOR_ELT(dimnames,0,names);
-  setAttrib(Routput->chip_coef, R_DimNamesSymbol, dimnames); 
-  setAttrib(Routput->chip_SE,R_DimNamesSymbol, dimnames);
+//   PROTECT(dimnames = allocVector(VECSXP,2));
+//   PROTECT(names = allocVector(STRSXP,data->nprobesets));
+//   for ( i =0; i < data->nprobesets; i++)
+//     SET_VECTOR_ELT(names,i,mkChar(output->outnames[i]));
+//   SET_VECTOR_ELT(dimnames,0,names);
+//   setAttrib(Routput->chip_coef, R_DimNamesSymbol, dimnames); 
+//   setAttrib(Routput->chip_SE,R_DimNamesSymbol, dimnames);
 
   
   /* Now the probe coef matrix */
@@ -341,34 +343,34 @@ SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rl
   */
   /*Now lets create the output_list */
 
-  PROTECT(output_list = allocVector(VECSXP,10));
+//   PROTECT(output_list = allocVector(VECSXP,10));
 
-  SET_VECTOR_ELT(output_list,0,Routput->chip_coef);
-  SET_VECTOR_ELT(output_list,1,Routput->probe_coef);
-  SET_VECTOR_ELT(output_list,2,Routput->weights);
-  SET_VECTOR_ELT(output_list,3,Routput->chip_SE);
-  SET_VECTOR_ELT(output_list,4,Routput->probe_SE);
-  SET_VECTOR_ELT(output_list,5,Routput->const_coef);
-  SET_VECTOR_ELT(output_list,6,Routput->const_SE);
-  SET_VECTOR_ELT(output_list,7,Routput->residuals);
-  SET_VECTOR_ELT(output_list,8,Routput->residSE);
-  SET_VECTOR_ELT(output_list,9,Routput->varcov);
-  UNPROTECT(Routput->nprotected + 5);
+//   SET_VECTOR_ELT(output_list,0,Routput->chip_coef);
+//   SET_VECTOR_ELT(output_list,1,Routput->probe_coef);
+//   SET_VECTOR_ELT(output_list,2,Routput->weights);
+//   SET_VECTOR_ELT(output_list,3,Routput->chip_SE);
+//   SET_VECTOR_ELT(output_list,4,Routput->probe_SE);
+//   SET_VECTOR_ELT(output_list,5,Routput->const_coef);
+//   SET_VECTOR_ELT(output_list,6,Routput->const_SE);
+//   SET_VECTOR_ELT(output_list,7,Routput->residuals);
+//   SET_VECTOR_ELT(output_list,8,Routput->residSE);
+//   SET_VECTOR_ELT(output_list,9,Routput->varcov);
+//   UNPROTECT(Routput->nprotected + 5);
 
-  for ( i =0; i < data->nprobesets; i++)
-    Free(output->outnames[i]);
+//   for ( i =0; i < data->nprobesets; i++)
+//     Free(output->outnames[i]);
+//   
+//   Free(output->outnames);
+//   Free(data->ProbeNames);
+//   Free(data);
+//   Free(output);
+//   Free(Routput);
+//   Free(store);
+//   Free(model);
   
-  Free(output->outnames);
-  Free(data->ProbeNames);
-  Free(data);
-  Free(output);
-  Free(Routput);
-  Free(store);
-  Free(model);
+//   return output_list;
   
-  return output_list;
-  
-}
+// }
 
 
 
@@ -405,39 +407,41 @@ SEXP rlmPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP rl
  **
  ** SEE ALSO documentation for rlmPLMset
  **
+ ** NOTE THIS IS THE OLD FUNCTION. SHOULD BE REMOVED IN THE FUTURE.
+ **
  ********************************************************************/
 
-SEXP R_rlmPLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP rlm_model_type, SEXP chipcovariates, SEXP background_parameters,SEXP norm_parameters, SEXP output_parameters, SEXP model_parameters){
+// SEXP R_rlmPLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP rlm_model_type, SEXP chipcovariates, SEXP background_parameters,SEXP norm_parameters, SEXP output_parameters, SEXP model_parameters){
 
 
-  SEXP dim1,PMcopy,rlmPLMresults;
-  int rows,cols;
+//  SEXP dim1,PMcopy,rlmPLMresults;
+//  int rows,cols;
 
-  /*Create a copy matrix to work on. Allows us to modify data in background and normalization steps without affecting original data */
-  PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
-  rows = INTEGER(dim1)[0];
-  cols = INTEGER(dim1)[1];
-  PROTECT(PMcopy = allocMatrix(REALSXP,rows,cols));
-  copyMatrix(PMcopy,PMmat,0);
+//  /*Create a copy matrix to work on. Allows us to modify data in background and normalization steps without affecting original data */
+//  PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
+//  rows = INTEGER(dim1)[0];
+//  cols = INTEGER(dim1)[1];
+//  PROTECT(PMcopy = allocMatrix(REALSXP,rows,cols));
+//  copyMatrix(PMcopy,PMmat,0);
 
-  /* If Background correction do it */
-  if (INTEGER(bg_flag)[0]){
-    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters);
-  }
+//  /* If Background correction do it */
+//  if (INTEGER(bg_flag)[0]){
+//    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters);
+//  }
 
-  /* If Normalization do it */
-  if (INTEGER(norm_flag)[0]){
-    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters);
-  }
+//  /* If Normalization do it */
+//  if (INTEGER(norm_flag)[0]){
+//    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters);
+//  }
   
-  /* Now do RLM fit */
+//  /* Now do RLM fit */
 
-  rlmPLMresults = rlmPLMset(PMcopy, MMmat, ProbeNamesVec, N_probes, rlm_model_type, chipcovariates,output_parameters,model_parameters);
+//  rlmPLMresults = rlmPLMset(PMcopy, MMmat, ProbeNamesVec, N_probes, rlm_model_type, chipcovariates,output_parameters,model_parameters);
   
-  UNPROTECT(2);
+//  UNPROTECT(2);
 
-  return rlmPLMresults;
-}
+//  return rlmPLMresults;
+//}
 
 
 
@@ -1458,9 +1462,11 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 
 
 
-SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R_model, SEXP outputparam, SEXP modelparam){
+SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R_model, SEXP outputparam, SEXP modelparam, SEXP verbosity){
   
   int i;
+  int verbosity_level;
+
 
   PLM_outputsettings *store = (PLM_outputsettings *)Calloc(1,PLM_outputsettings);
   PLM_Datagroup *data = (PLM_Datagroup *)Calloc(1,PLM_Datagroup);
@@ -1494,7 +1500,7 @@ SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R
     data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
   }
   
-
+  verbosity_level = asInteger(verbosity);
 
 
   /********************* This part of the code completely fills up "model" *************************************/
@@ -1608,8 +1614,10 @@ SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R
 
   /* now go actually fit the model */
 
-  Rprintf("Fitting models\n");
-
+  if (verbosity_level > 0){
+    Rprintf("Fitting models\n");
+  }
+  
   do_PLM_rlm(data, model, output,store);
   
   /* now lets put names on the output matrices */
@@ -1667,7 +1675,7 @@ SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R
 
 
 
-SEXP R_rlm_PLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R_model, SEXP outputparam, SEXP modelparam,  SEXP bg_flag, SEXP bg_type, SEXP background_parameters, SEXP norm_flag, SEXP norm_type,SEXP norm_parameters){
+SEXP R_rlm_PLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R_model, SEXP outputparam, SEXP modelparam,  SEXP bg_flag, SEXP bg_type, SEXP background_parameters, SEXP norm_flag, SEXP norm_type,SEXP norm_parameters, SEXP verbosity){
 
 
   SEXP dim1,rlmPLMresults; 
@@ -1680,17 +1688,17 @@ SEXP R_rlm_PLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SE
  
   /* If Background correction do it */
   if (INTEGER(bg_flag)[0]){
-    PMmat = pp_background(PMmat, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters);
+    PMmat = pp_background(PMmat, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters,verbosity);
   }
 
   /* If Normalization do it */
   if (INTEGER(norm_flag)[0]){
-    PMmat = pp_normalize(PMmat, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters);
+    PMmat = pp_normalize(PMmat, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters,verbosity);
   }
   
   /* Now do RLM fit */
 
-  rlmPLMresults = rlm_PLMset(PMmat, MMmat, ProbeNamesVec, N_probes, R_model, outputparam, modelparam);
+  rlmPLMresults = rlm_PLMset(PMmat, MMmat, ProbeNamesVec, N_probes, R_model, outputparam, modelparam,verbosity);
   
   UNPROTECT(1);
 

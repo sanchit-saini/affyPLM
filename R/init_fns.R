@@ -21,6 +21,7 @@
 ## Jul 21, 2006 - MAplot now handles sampleName arguments. Removed the subset argument.
 ##                now ref and which can basically do the same things. Added pairs as a possible argument.
 ## Jul 26, 2006 - added hist() method for exprSet
+## Oct 11, 2006 - make apply(x,1,median) a rowMedians() call
 ##
 ############################################################
 
@@ -68,7 +69,7 @@
               } else {
                 x <- exprs(object)
               }
-              medianchip <- apply(x, 1, median)
+              medianchip <- rowMedians(x)    ###apply(x, 1, median)
               M <- sweep(x,1,medianchip,FUN='-')
               boxplot(data.frame(M),...)
             })
@@ -125,7 +126,7 @@
                   
                   if (is.null(ref)){
                     if (ref.fn == "median"){
-                      medianchip <- apply(x, 1, median)
+                      medianchip <- rowMedians(x)    ####apply(x, 1, median)
                     } else {
                       medianchip <- rowMeans(x)
                     }
@@ -260,7 +261,7 @@
                   
                   if (is.null(ref)){
                     if (ref.fn == "median"){
-                      medianchip <- apply(grouped.data, 1, median)
+                      medianchip <- rowMedians(grouped.data)   ####apply(grouped.data, 1, median)
                     } else {
                       medianchip <- rowMeans(grouped.data)
                     }

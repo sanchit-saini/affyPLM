@@ -32,6 +32,7 @@
  ** Apr 5, 2004 - all malloc/free should now be Calloc/Free
  ** Sep 13, 2005 - fix a possible gc() situation
  ** March 1, 2006 - change comments to ansi c style
+ ** Oct 10, 2006 - add verbosity arguments
  **
  ************************************************************************/
 
@@ -73,7 +74,7 @@
  **
  *******************************************************************************************/
 
-SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP summary_type, SEXP summary_parameters){
+SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP summary_type, SEXP summary_parameters,SEXP verbosity){
   
   int rows, cols;
   double *outexpr, *outSE;
@@ -82,6 +83,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   char **ProbeNames;
   int i,nprobesets;
   int Method;
+  int verbosity_level;
 
   summary_plist *summary_param = (summary_plist *)Calloc(1,summary_plist);
 
@@ -103,7 +105,10 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
 
   PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
   MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
-  
+   
+  verbosity_level = asInteger(verbosity);
+
+
   nprobesets=INTEGER(N_probes)[0];
   
   ProbeNames = (char **)Calloc(rows,char *);
@@ -130,7 +135,9 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   summary_param->psi_method = asInteger(cur_param);
 
 
-  Rprintf("Calculating Expression\n");
+  if (verbosity_level > 0){
+    Rprintf("Calculating Expression\n");
+  }
   do_3summary(PM, ProbeNames, &rows, &cols,outexpr,outnames,nprobesets,SummaryMethod(Method),outSE,summary_param);
   
 
@@ -179,7 +186,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
  *******************************************************************************************/
 
 
-SEXP R_threestep_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP summary_type,SEXP background_parameters,SEXP norm_parameters, SEXP summary_parameters){
+SEXP R_threestep_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP summary_type,SEXP background_parameters,SEXP norm_parameters, SEXP summary_parameters, SEXP verbosity){
   
   SEXP dim1,PMcopy,exprs;
   int rows,cols;
@@ -201,16 +208,16 @@ SEXP R_threestep_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
 
   /* If Background correction do it */
   if (INTEGER(bg_flag)[0]){
-    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type, background_parameters); /* densfunc, rho, LESN_params); */
+    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type, background_parameters,verbosity); /* densfunc, rho, LESN_params); */
   }
 
   /* If Normalization do it */
   if (INTEGER(norm_flag)[0]){
-    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters);
+    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters,verbosity);
   }
 
   /* Do Summarization */  
-  exprs = threestep_summary(PMcopy, MMmat, ProbeNamesVec,N_probes,summary_type,summary_parameters);
+  exprs = threestep_summary(PMcopy, MMmat, ProbeNamesVec,N_probes,summary_type,summary_parameters,verbosity);
   UNPROTECT(1);
   return exprs;
   

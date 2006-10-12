@@ -16,7 +16,7 @@
  ** Oct 9, 2003 - Initial version
  ** Apr 5, 2004 - all malloc/free are now Calloc/Free
  ** May 3, 2004   - Fixed a subtle and small memory leak.
- ** 
+ ** Oct 11, 2006 - add verbosity argument to functions
  **
  *********************************************************************/
 
@@ -124,10 +124,11 @@ static void threestepPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outp
  **
  *********************************************************************/
 
-SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP outputparam, SEXP modelparam){
+SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP outputparam, SEXP modelparam, SEXP verbosity){
 
   int i,modelcode;
-
+  int verbosity_level;
+  
   outputsettings *store = (outputsettings *)Calloc(1,outputsettings);
   Datagroup *data = (Datagroup *)Calloc(1,Datagroup);
   PLMoutput *output = (PLMoutput *)Calloc(1,PLMoutput);
@@ -139,8 +140,8 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
   SEXP output_list;
   SEXP param;
 
-
-
+  
+  verbosity_level = asInteger(verbosity);
 
   /* organise data to be passed to model fitting routines */
   
@@ -223,8 +224,10 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
 
   /* now go actually fit the model */
 
-  Rprintf("Calculating Expression\n");
-
+  if (verbosity_level > 0){
+    Rprintf("Calculating Expression\n");
+  }
+  
   do_PLMthreestep(data, model, output,store);
   
   /* now lets put names on the output matrices */
@@ -282,7 +285,7 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
  **
  ********************************************************************/
 
-SEXP R_threestepPLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP background_parameters,SEXP norm_parameters, SEXP output_parameters, SEXP model_parameters){
+SEXP R_threestepPLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP background_parameters,SEXP norm_parameters, SEXP output_parameters, SEXP model_parameters, SEXP verbosity){
 
 
   SEXP dim1,PMcopy,threestepPLMresults;
@@ -297,17 +300,17 @@ SEXP R_threestepPLMset_c(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probe
 
   /* If Background correction do it */
   if (INTEGER(bg_flag)[0]){
-    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters);
+    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type,background_parameters,verbosity);
   }
 
   /* If Normalization do it */
   if (INTEGER(norm_flag)[0]){
-    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters);
+    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters,verbosity);
   }
   
   /* Now do threestep summarization fit */
 
-  threestepPLMresults = threestepPLMset(PMcopy, MMmat, ProbeNamesVec, N_probes, output_parameters,model_parameters);
+  threestepPLMresults = threestepPLMset(PMcopy, MMmat, ProbeNamesVec, N_probes, output_parameters,model_parameters,verbosity);
   
   UNPROTECT(2);
 

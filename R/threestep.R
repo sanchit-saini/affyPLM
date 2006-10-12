@@ -30,10 +30,11 @@
 # Jan 18, 2004 - remove mapping functions to internalfunctions.R
 # Feb 23, 2004 - "subset" parameter is now not ignored
 # Aug 05, 2004 - some small changes to deal with new pre-process structure.
+# Oct 10, 2006 - add verbosity.level argument to function (remove older and unused verbose argument
 #
 #####################################################################
 
-threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),summary.param=list()){
+threestep <- function(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),summary.param=list(),verbosity.level=0){
 
 
   if (!is(object, "AffyBatch")) {
@@ -68,14 +69,18 @@ threestep <- function(object,subset=NULL, verbose=TRUE,normalize=TRUE,background
   
   # to avoid having to pass location information to the c code, we will just call the R code method
   if (is.element(background.method,c("MAS","MASIM")) & background){
-    cat("Background Correcting\n")
+    if (verbosity.level > 0){
+      cat("Background Correcting\n")
+    }
     object <- bg.correct.mas(object)
   }
   if (is.element(background.method,c("gcrma","GCRMA")) & background){
-    cat("Background Correcting\n")
+    if (verbosity.level > 0){
+      cat("Background Correcting\n")
+    }
     object <- bg.correct.gcrma(object)
   }
-  results <- .Call("R_threestep_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, background.method, normalize.method, get.summary.code(summary.method),background.param,normalize.param,s.param, PACKAGE="affyPLM") 
+  results <- .Call("R_threestep_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, background.method, normalize.method, get.summary.code(summary.method),background.param,normalize.param,s.param,verbosity.level, PACKAGE="affyPLM") 
   
   colnames(results[[1]]) <- sampleNames(object)
   colnames(results[[2]]) <- sampleNames(object)

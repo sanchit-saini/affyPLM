@@ -20,13 +20,14 @@
 ## May 3, 2005 - added conditional to stop processing if windows
 ##               cause of segfault on windows still unknown
 ## Sep 18, 2005 - removed check for windows
+## Oct 10, 2006 - add verbosity.level argument to function
 ##
 #############################################################
 
 
 
 
-threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),output.param=list(),model.param=list()){
+threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),output.param=list(),model.param=list(),verbosity.level=0){
  # if (.Platform$OS.type == "windows"){
  #   cat("Sorry threestepPLM not currently available on Windows operating systems.\n")
  # } else {
@@ -51,11 +52,15 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
     
                                         # to avoid having to pass location information to the c code, we will just call the R code method
     if (is.element(background.method,c("MAS","MASIM")) & background){
-      cat("Background Correcting\n")
+      if (verbosity.level > 0){
+        cat("Background Correcting\n")
+      }
       object <- bg.correct.mas(object)
     }
     if (is.element(background.method,c("gcrma","GCRMA")) & background){
-      cat("Background Correcting\n")
+      if (verbosity.level > 0){
+        cat("Background Correcting\n")
+      }
       object <- bg.correct.gcrma(object)
     }  
     md.param <- list(psi.type = "Huber",psi.k=NULL,summary.code=get.summary.code(summary.method))
@@ -66,7 +71,7 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
     }
     md.param$psi.type <- get.psi.code(md.param$psi.type)
     
-    fit.results <- .Call("R_threestepPLMset_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, background.method, normalize.method,b.param,n.param,op.param,md.param, PACKAGE="affyPLM") 
+    fit.results <- .Call("R_threestepPLMset_c",pm(object,subset), mm(object,subset), probeNames(object,subset), ngenes, normalize, background, background.method, normalize.method,b.param,n.param,op.param,md.param,verbosity.level, PACKAGE="affyPLM") 
     probenames <- rownames(pm(object,subset))
     colnames(fit.results[[1]]) <- sampleNames(object)
     colnames(fit.results[[4]]) <- sampleNames(object)
