@@ -1,3 +1,10 @@
+1.11.2
+------
+
+Introduce preprocess() for general pre-processing (ie normalize and background correcting)
+
+
+
 1.11.1
 ------
 

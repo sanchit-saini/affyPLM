@@ -11,7 +11,7 @@
  ** 
  ** created on: Jan 17, 2003
  **
- ** Last modified: Oct 10, 2006
+ ** Last modified: Oct 12, 2006
  **
  ** This file contains the normalization and background preprocessing
  ** steps.
@@ -44,7 +44,7 @@
  ** Apr 27, 2006 - add "quantile.robust" to normalization methods
  ** Jul 10, 2006 - add log.scalefactors support into scaling normalization.
  ** Oct 10, 2006 - add verbosity argument to functions. Higher levels of verbosity give more text output to the screen
- **
+ ** Oct 12, 2006 - add a function that does both background and normalization
  **
  *********************************************************************/
 
@@ -660,3 +660,32 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
   return PMmat;
 }
 
+
+
+SEXP pp_bothstages(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP background_parameters,SEXP norm_parameters, SEXP verbosity){
+  
+  SEXP dim1,PMcopy,exprs;
+  int rows,cols;
+  
+  /*Create a copy matrix to work on. Allows us to modify data in background and normalization steps without affecting original data */
+  PROTECT(dim1 = getAttrib(PMmat,R_DimSymbol));
+  rows = INTEGER(dim1)[0];
+  cols = INTEGER(dim1)[1];
+  /*PROTECT(PMcopy = allocMatrix(REALSXP,rows,cols));
+    copyMatrix(PMcopy,PMmat,0); */
+  UNPROTECT(1);
+  PMcopy = PMmat;
+
+  
+  /* If Background correction do it */
+  if (INTEGER(bg_flag)[0]){
+    PMcopy = pp_background(PMcopy, MMmat, ProbeNamesVec,N_probes,bg_type, background_parameters,verbosity); /* densfunc, rho, LESN_params); */
+  }
+  
+  /* If Normalization do it */
+  if (INTEGER(norm_flag)[0]){
+    PMcopy = pp_normalize(PMcopy, MMmat, ProbeNamesVec,N_probes,norm_type, norm_parameters,verbosity);
+  }
+  
+  return PMcopy;
+}
