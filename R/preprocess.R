@@ -55,10 +55,12 @@ preprocess <- function(object,subset=NULL, normalize=TRUE,background=TRUE,backgr
     }
     object <- bg.correct.gcrma(object)
   }
-  
-  print(background.param$type)
-  print(normalize.param$type)
 
+  if (verbosity.level > 1){
+    print(background.param$type)
+    print(normalize.param$type)
+  }
+  
   if ((background.param$type == "pmonly") && (normalize.param$type == "pmonly")){
 ### SEXP pp_bothstages(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP background_parameters,SEXP norm_parameters, SEXP verbosity)
     pm(object) <- .Call("pp_bothstages",pm(object,subset),
