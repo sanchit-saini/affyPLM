@@ -30,7 +30,7 @@
   all.affy <- ls(where)
   start <- nchar("normalize.exprSet.")
   assign("normalize.exprSet.methods",
-         substr(all.affy[grep("normalize\.exprSet\.*", all.affy)], start+1, 100),
+         substr(all.affy[grep("normalize\\.exprSet\\.*", all.affy)], start+1, 100),
          envir=as.environment(where))
  
   setMethod("normalize", signature(object="exprSet"),
