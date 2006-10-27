@@ -50,6 +50,7 @@
  ** Jun 9, 2006 - change nearbyint to floor(x +0.5) (to fix problems on Sparc Solaris builds)
  ** Aug 1, 2006 - fix bug in determining/applying target
  **               some changes in how quantiles are estimated in determining/applyin target
+ ** Oct 26, 2006 - fix unbalanced UNPROTECT in use_target.
  **
  ***********************************************************/
 
@@ -1637,8 +1638,9 @@ SEXP R_qnorm_using_target(SEXP X, SEXP target,SEXP copy){
 
   qnorm_c_using_target(Xptr, &rows, &cols,targetptr,&target_rows);
 
-
-  UNPROTECT(1);
+  if (asInteger(copy)){
+    UNPROTECT(1);
+  }
   return Xcopy;
 }
 

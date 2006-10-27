@@ -1,3 +1,9 @@
+1.11.4
+------
+
+instances of "\." in a pattern were changed to "\\."
+
+
 1.11.3
 ------
 fix minor verbosity problem in pre-process
