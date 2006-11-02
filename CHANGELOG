@@ -1,3 +1,15 @@
+1.11.6
+------
+Add SE output to raw rlm function (for direct calling).
+
+
+
+1.11.5
+------
+Fixed an unbalanced UNPROTECT
+
+
+
 1.11.4
 ------
 
