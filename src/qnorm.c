@@ -51,6 +51,7 @@
  ** Aug 1, 2006 - fix bug in determining/applying target
  **               some changes in how quantiles are estimated in determining/applyin target
  ** Oct 26, 2006 - fix unbalanced UNPROTECT in use_target.
+ ** Nov 13, 2006 - remove median code
  **
  ***********************************************************/
 
@@ -302,40 +303,6 @@ static double weights_huber(double u, double k){
 
 /**************************************************************************
  **
- ** double median(double *x, int length)
- **
- ** double *x - vector
- ** int length - length of *x
- **
- ** returns the median of *x
- **
- *************************************************************************/
-
-static double median(double *x, int length){
-  int i;
-  int half;
-  double med;
-  double *buffer = Calloc(length,double);
-  
-  for (i = 0; i < length; i++)
-    buffer[i] = x[i];
-  
-  qsort(buffer,length,sizeof(double), (int(*)(const void*, const void*))sort_double);
-  half = (length + 1)/2;
-  if (length % 2 == 1){
-    med = buffer[half - 1];
-  } else {
-    med = (buffer[half] + buffer[half-1])/2.0;
-  }
-  
-  Free(buffer);
-  return med;
-}
-
-
-
-/**************************************************************************
- **
  ** static double med_abs(double *x, int length)
  **
  ** double *x - a data vector
@@ -353,7 +320,7 @@ static double med_abs(double *x, int length){
   for (i = 0; i < length; i++)
     buffer[i] = fabs(x[i]);
 
-  med_abs = median(buffer,length);
+  med_abs = median_nocopy(buffer,length);
 
   Free(buffer);
   return(med_abs);

@@ -25,6 +25,7 @@
  **                 algorithm
  ** Oct 05, 2003 - added in summary_param
  ** Apr 5, 2004 - change malloc/free to Calloc/Free
+ ** Nov 13, 2006 - make median calls to median_nocopy
  **
  ************************************************************************/
 
@@ -87,7 +88,7 @@ void get_row_median(double *z, double *rdelta, int rows, int cols){
     for (j = 0; j < cols; j++){
       buffer[j] = z[j*rows + i];
     }
-    rdelta[i] = median(buffer,cols);
+    rdelta[i] = median_nocopy(buffer,cols);
   }
   
   Free(buffer);
@@ -114,7 +115,7 @@ void get_col_median(double *z, double *cdelta, int rows, int cols){
     for (i = 0; i < rows; i++){  
       buffer[i] = z[j*rows + i];
     }
-    cdelta[j] = median(buffer,rows);
+    cdelta[j] = median_nocopy(buffer,rows);
   }
   
   Free(buffer);

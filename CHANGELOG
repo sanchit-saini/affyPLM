@@ -1,3 +1,8 @@
+1.11.7
+------
+Some small memory/speed optimizations in some of the C code
+
+
 1.11.6
 ------
 Add SE output to raw rlm function (for direct calling).
