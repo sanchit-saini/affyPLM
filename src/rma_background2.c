@@ -35,6 +35,8 @@
  ** Apr 22, 2003 - fix error in bg_parameters2 so that can more closely duplicate the results in R
  ** Mar 06, 2004 - Changed last remaining malloc to a Calloc
  ** Aug 04, 2004 - Remove "Background correcting" message
+ ** Nov 13, 2006 - following a suggestion/submitted code by Paul Gordon <gordonp@ucalgary.ca> have made find max use
+ **                a linear search which should be much more efficient
  **
  *****************************************************************************/
 
@@ -58,19 +60,28 @@
 
 double find_max(double *x,int length){
   int i;
-  double *buffer = Calloc(length,double);
+  /*  double *buffer = Calloc(length,double); */
   double max;
-  
-  for (i=0; i < length; i++){
+
+  /*
+    for (i=0; i < length; i++){
     buffer[i] = x[i];
+    }
+  */
+
+  /* qsort(buffer,length,sizeof(double),(int(*)(const void*, const void*))sort_double); */
+
+  max = x[0];
+  for (i=1; i < length; i++){
+    if (x[i] > max){
+      max = x[i];
+    }
   }
-
-  qsort(buffer,length,sizeof(double),(int(*)(const void*, const void*))sort_double);
-
-  max = buffer[length-1];
   
+
+
   /* printf("max is %f \n", max); */
-  Free(buffer);
+  /* Free(buffer); */
   return max;
 }
 
@@ -284,11 +295,11 @@ double phi(double x){
 void bg_adjust(double *PM,double *MM, double *param, int rows, int cols, int column){
   int i;
   double a;
-  
+    
   for (i=0; i < rows; i++){
     a = PM[column*rows + i] - param[1] - param[0]*param[2]*param[2]; 
     PM[column*rows + i] = a + param[2] * phi(a/param[2])/Phi(a/param[2]);
-  }
+  } 
   
 }
 
