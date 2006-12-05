@@ -29,19 +29,14 @@
 
 
 PLMset2exprSet <- function(pset){
-
-  eset <- new("exprSet")
-
-  exprs(eset) <- coefs(pset)
-  se.exprs(eset) <- se(pset)
-
-  eset@phenoData <- phenoData(pset)
-  eset@annotation <- annotation(pset)
-  eset@description <- description(pset)
-  eset@notes <- notes(pset)
-
-  eset
-
+ new("ExpressionSet",
+    exprs =  coefs(pset),
+    se.exprs =  se(pset),
+    phenoData = phenoData(pset),
+    annotation = annotation(pset),
+    experimentData = description(pset))
+  ##FIXME: update this when notes is fixed
+  # eset@notes <- notes(pset)
 }
 
 

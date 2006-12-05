@@ -86,13 +86,20 @@ threestep <- function(object,subset=NULL, normalize=TRUE,background=TRUE,backgro
   colnames(results[[2]]) <- sampleNames(object)
   #se.exprs <- array(NA, dim(exprs)) # to be fixed later, besides which don't believe much in nominal se's with medianpolish
   
-  phenodata <- phenoData(object)
+  phenodata <- as(phenoData(object), "AnnotatedDataFrame")
   annotation <- annotation(object)
-  description <- description(object) 
-  notes <- notes(object)
+  experimentData <- description(object) 
+  ##FIXME: remove # when notes is fixed
+  #notes <- notes(object)
   
-  new("exprSet", exprs = results[[1]], se.exprs = results[[2]], phenoData = phenodata, 
-       annotation = annotation, description = description, notes = notes)
+  new("ExpressionSet", 
+       exprs = results[[1]], 
+       se.exprs = results[[2]], 
+       phenoData = phenodata, 
+       annotation = annotation, 
+       ##FIXME: remove # when notes is fixed
+       #notes = notes,
+       experimentData = description)
 }
 
 

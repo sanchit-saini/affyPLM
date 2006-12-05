@@ -100,28 +100,33 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
   notes <- notes(object)
 
   
-  x <- new("PLMset")
-  x@chip.coefs=fit.results[[1]]
-  x@probe.coefs= split(fit.results[[2]],probeNames(object,subset))
-  x@weights=list(PM.weights=fit.results[[3]],MM.weights=matrix(0,0,0))
-  x@se.chip.coefs=fit.results[[4]]
-  x@se.probe.coefs=split(fit.results[[5]],probeNames(object,subset))
-  x@exprs=fit.results[[6]]
-  x@se.exprs=fit.results[[7]]
-  x@residuals=list(PM.resid=fit.results[[8]],MM.resid=matrix(0,0,0))
-  x@residualSE=fit.results[[9]]
-  x@varcov = fit.results[[10]]
-  x@phenoData = phenodata
-  x@annotation = annotation
-  x@description = description
-  x@notes = notes
-  x@cdfName=object@cdfName
-  x@nrow=object@nrow
-  x@ncol=object@ncol
-
-  x@model.description = list(which.function="rmaPLM",preprocessing=list(bg.method=background.method,bg.param=b.param,background=background,norm.method=normalize.method,norm.param=n.param,normalize=normalize),modelsettings =list(model.param=md.param,summary.method=NULL,model=NULL,constraint.type=NULL,variable.type=NULL),outputsettings=op.param)
-   x@model.description = c(x@model.description, list(R.model=R.model))
-  
-  x
+  new("PLMset",
+  chip.coefs=fit.results[[1]],
+ probe.coefs= split(fit.results[[2]],probeNames(object,subset)),
+ weights=list(PM.weights=fit.results[[3]],MM.weights=matrix(0,0,0)),
+ se.chip.coefs=fit.results[[4]],
+  se.probe.coefs=split(fit.results[[5]],probeNames(object,subset)),
+ exprs=fit.results[[6]],
+ se.exprs=fit.results[[7]],
+ residuals=list(PM.resid=fit.results[[8]],MM.resid=matrix(0,0,0)),
+ residualSE=fit.results[[9]],
+ varcov = fit.results[[10]],
+ phenoData = phenodata,
+ annotation = annotation,
+ experimentData= description,
+ ##FIXME: remove # after notes is fixed
+ # x@notes = notes,
+ cdfName=object@cdfName,
+ nrow=object@nrow,
+ ncol=object@ncol,
+ model.description = list(which.function="rmaPLM",
+    preprocessing=list(bg.method=background.method,bg.param=b.param,
+          background=background,norm.method=normalize.method,
+          norm.param=n.param,normalize=normalize),
+    modelsettings =list(model.param=md.param,summary.method=NULL,model=NULL,
+            constraint.type=NULL,variable.type=NULL),
+    outputsettings=op.param, 
+    R.model=R.model)
+ )
 
 }

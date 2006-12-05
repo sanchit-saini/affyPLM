@@ -268,26 +268,27 @@ fitPLM.old <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(d
   notes <- notes(object)
 
   
-  x <- new("PLMset")
-  x@chip.coefs=fit.results[[1]]
-  x@probe.coefs= fit.results[[2]]
-  x@weights=fit.results[[3]]
-  x@se.chip.coefs=fit.results[[4]]
-  x@se.probe.coefs=fit.results[[5]]
-  x@exprs=fit.results[[6]]
-  x@se.exprs=fit.results[[7]]
-  x@residuals=fit.results[[8]]
-  x@residualSE=fit.results[[9]]
-  x@varcov = fit.results[[10]]
-  x@phenoData = phenodata
-  x@annotation = annotation
-  x@description = description
-  x@notes = notes
-  x@cdfName=object@cdfName
-  x@nrow=object@nrow
-  x@ncol=object@ncol
-  x@model.description = list(which.function="fitPLM",preprocessing=list(bg.method=background.method,bg.param=b.param,background=background,norm.method=normalize.method,norm.param=n.param,normalize=normalize),modelsettings =list(model.param=md.param,summary.method=NULL,model=model,constraint.type=constraint.type,variable.type=variable.type),outputsettings=op.param)
-  x
+  new("PLMset",
+   chip.coefs=fit.results[[1]],
+   probe.coefs= fit.results[[2]],
+   weights=fit.results[[3]],
+   se.chip.coefs=fit.results[[4]],
+   se.probe.coefs=fit.results[[5]],
+   exprs=fit.results[[6]],
+  se.exprs=fit.results[[7]],
+  residuals=fit.results[[8]],
+  residualSE=fit.results[[9]],
+  varcov = fit.results[[10]],
+  phenoData = phenodata,
+  annotation = annotation,
+  experimentData = description,
+  ##FIXME: remove after notes is fixed
+  #x@notes = notes,
+  cdfName=object@cdfName,
+  nrow=object@nrow,
+  ncol=object@ncol,
+  model.description = list(which.function="fitPLM",preprocessing=list(bg.method=background.method,bg.param=b.param,background=background,norm.method=normalize.method,norm.param=n.param,normalize=normalize),modelsettings =list(model.param=md.param,summary.method=NULL,model=model,constraint.type=constraint.type,variable.type=variable.type),outputsettings=op.param)
+ ) 
 }
 
 
@@ -2177,27 +2178,31 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
 
   Fitresults <- .Call("R_rlm_PLMset_c",pm(object,subset),mm(object,subset),probeNames(object,subset),n.probesets,R.model,output,modelparam,background, background.method,background.param, normalize, normalize.method, normalize.param,verbosity.level,PACKAGE="affyPLM")
   
-  x <- new("PLMset")
-  x@chip.coefs=Fitresults[[1]]
-  x@probe.coefs= Fitresults[[2]]
-  x@weights=Fitresults[[3]]
-  x@se.chip.coefs=Fitresults[[4]]
-  x@se.probe.coefs=Fitresults[[5]]
-  x@exprs=Fitresults[[6]]
-  x@se.exprs=Fitresults[[7]]
-  x@residuals=Fitresults[[8]]
-  x@residualSE=Fitresults[[9]]
-  x@varcov = Fitresults[[10]]
-  x@cdfName = object@cdfName
-  x@phenoData = object@phenoData
-  x@annotation = object@annotation
-  x@description = object@description
-  x@notes = object@notes
-  x@nrow= object@nrow
-  x@ncol= object@ncol
-  x@model.description = list(which.function="fitPLM",preprocessing=list(bg.method=background.method,bg.param=background.param,background=background,norm.method=normalize.method,norm.param=normalize.param,normalize=normalize),modelsettings =list(constraint.type=constraint.type,variable.type=variable.type,model.param=modelparam),outputsettings=output)
-  x@model.description = c(x@model.description, list(R.model=R.model))
-  x
-
+new("PLMset",
+ chip.coefs=Fitresults[[1]],
+probe.coefs= Fitresults[[2]],
+weights=Fitresults[[3]],
+se.chip.coefs=Fitresults[[4]],
+se.probe.coefs=Fitresults[[5]],
+exprs=Fitresults[[6]],
+se.exprs=Fitresults[[7]],
+residuals=Fitresults[[8]],
+residualSE=Fitresults[[9]],
+varcov = Fitresults[[10]],
+cdfName = object@cdfName,
+phenoData = object@phenoData,
+annotation = object@annotation,
+experimentData = object@description,
+##FIXME: remove # after notes is fixed.
+#notes = object@notes,
+nrow= object@nrow,
+ncol= object@ncol,
+model.description = list(which.function="fitPLM",
+  preprocessing=list(bg.method=background.method,bg.param=background.param,
+     background=background,norm.method=normalize.method,
+     norm.param=normalize.param,normalize=normalize),
+  modelsettings =list(constraint.type=constraint.type,
+       variable.type=variable.type,model.param=modelparam),
+   outputsettings=output, R.model=R.model))
 
 }

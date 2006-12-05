@@ -43,6 +43,8 @@ this will load \Rpackage{affyPLM} as well as the \Rpackage{affy} package and its
 The simplest method  of calling the \Rfunction{threestep} function is to call it with no arguments beyond an \Rclass{AffyBatch}.
 <<eval=FALSE>>=
 data(Dilution)
+##FIXME: remove the next line
+Dilution = updateObject(Dilution)
 eset <- threestep(Dilution)
 @
 this will compute the conventional RMA expression measure. 

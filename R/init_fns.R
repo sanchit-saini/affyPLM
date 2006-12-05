@@ -374,7 +374,7 @@
 ###               which <- 1:length(sampleNames(object))
 ###              }
 ###              for(i in which){
-###                m <- object@exprs[,i]
+###                m <- exprs(object)[,i]
 ###                if (is.function(transfo)) {
 ###                  m <- transfo(m)
 ###               }

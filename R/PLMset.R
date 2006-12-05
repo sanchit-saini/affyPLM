@@ -127,12 +127,13 @@ setClass("PLMset",
              residualSE=matrix(nr=0,nc=0),
              normVec=matrix(nr=0,nc=0),
              varcov=list(),
-             description=new("MIAME"),
+             experimentData = new("MIAME"),
              model.description=list(),
              annotation="",
              cdfName="",
-             nrow=0, ncol=0,
-             notes=""),contains="exprSet")
+             ##FIXME: remove # below when notes is fixed
+             #notes=""
+             nrow=0, ncol=0),contains="ExpressionSet")
 
 
   #now some accessors.
@@ -804,7 +805,8 @@ setMethod("show", "PLMset",
             cat("number of probesets=", num.ids, "\n",sep="")
             cat("number of chip level parameters for each probeset=",dim(object@chip.coefs)[2],"\n")
             cat("annotation=",object@annotation,"\n",sep="")
-            cat("notes=",object@notes,"\n\n",sep="")
+            ##FIXM:E remove # below when notes is fixed
+            ##cat("notes=",object@notes,"\n\n",sep="")
             cat("PLMset settings\n")
             cat("Creating function:",object@model.description$which.function,"\n")
             cat("Preprocessing\n")

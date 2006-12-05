@@ -34,6 +34,8 @@ This majority of this document describes the \Rfunction{fitPLM} function. Other 
 <<loadData,results=hide>>=
 library(affyPLM)
 data(Dilution)   # an example dataset provided by the affy package
+##FIXME: drop this after Dilution is updated
+Dilution = updateObject(Dilution)
 options(width=36)
 @
 this will load \Rpackage{affyPLM} as well as the \Rpackage{affy} package and its dependencies. The \dataset{Dilution} dataset will serve as an example dataset for this document.
@@ -398,6 +400,8 @@ the highest term in this hierarchy that is in a particular model is always left 
 Constraints are controlled using the \Rfunarg{constraint.type} argument which is a vector with named items should be either \Rfunarg{"contr.sum"} or \Rfunarg{"contr.treatment"}. The names for this vector should be names of items in the model. 
 <<constraintExample>>=
 data(Dilution)
+##FIXME: remove next line
+Dilution = updateObject(Dilution)
 Pset <- fitPLM(Dilution, model = PM ~ probes + samples,constraint.type=c(samples="contr.sum"),subset = geneNames(Dilution)[1:100])
 coefs.const(Pset)[1:2]
 coefs(Pset)[1:2,]
