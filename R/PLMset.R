@@ -133,9 +133,19 @@ setClass("PLMset",
              cdfName="",
              ##FIXME: remove # below when notes is fixed
              #notes=""
-             nrow=0, ncol=0),contains="ExpressionSet")
+             nrow=0, ncol=0),contains="eSet")
 
+## let initialize catch empty exprs or se.exprs
 
+setMethod("initialize",
+          signature("PLMset"),
+          function(.Object, exprs=matrix(0,0,0), se.exprs=matrix(0,0,0), ...) {
+              if (length(exprs)==0 && length(exprs)==length(se.exprs))
+                callNextMethod(.Object, ...)
+              else
+                callNextMethod(.Object,
+                               exprs=exprs, se.exprs=se.exprs, ...)
+          })
   #now some accessors.
   
 if (is.null(getGeneric("cdfName")))
@@ -145,7 +155,59 @@ if (is.null(getGeneric("cdfName")))
 setMethod("cdfName", "PLMset", function(object)
           object@cdfName)
 
+## accessors to override eSet defaults
 
+setMethod("exprs",
+          signature("PLMset"),
+          function(object) {
+              res <- assayData(object)[["exprs"]]
+              if (is.null(res)) matrix(0,0,0)
+              else res
+          })
+
+setReplaceMethod("exprs",
+                 signature(object="PLMset", value="matrix"),
+                 function(object, value) {
+                     assayData(object)[["exprs"]] <- value
+                     object
+                 })
+
+setMethod("se.exprs",
+          signature("PLMset"),
+          function(object) {
+              res <- assayData(object)[["se.exprs"]]
+              if (is.null(res)) matrix(0,0,0)
+              else res
+          })
+
+setReplaceMethod("se.exprs",
+                 signature(object="PLMset", value="matrix"),
+                 function(object, value) {
+                     assayData(object)[["se.exprs"]] <- value
+                     object
+                 })
+
+setMethod("sampleNames",
+          signature("PLMset"),
+          function(object) sampleNames(phenoData(object)))
+
+setReplaceMethod("sampleNames",
+                 signature("PLMset"),
+                 function(object, value) {
+                     sampleNames(phenoData(object)) <- value
+                     object
+                 })
+
+setMethod("featureNames",
+          signature("PLMset"),
+          function(object) featureNames(featureData(object)))
+
+setReplaceMethod("featureNames",
+                 signature(object="PLMset"),
+                 function(object, value) {
+                     featureNames(featureData(object)) <- value
+                     object
+                 })
                                         #access weights
 setMethod("weights",signature(object="PLMset"),
           function(object,genenames=NULL){ 
