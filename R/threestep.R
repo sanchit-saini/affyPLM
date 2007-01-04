@@ -99,7 +99,7 @@ threestep <- function(object,subset=NULL, normalize=TRUE,background=TRUE,backgro
        annotation = annotation, 
        ##FIXME: remove # when notes is fixed
        #notes = notes,
-       experimentData = description)
+       experimentData = experimentData)
 }
 
 

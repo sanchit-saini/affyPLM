@@ -91,6 +91,8 @@
 ## Feb 18, 2005 - gcrma background is also now an option
 ## Apr 27-28, 2006 - clean up how normalization methods are check and normalization parameters are validated.
 ## Oct 10, 2006 - add verbosity.level argument to fitPLM
+## Jan 3, 2007 - exprs, and se.exprs are no longer used in PLMset
+##
 ##
 ###########################################################
 
@@ -2184,8 +2186,8 @@ fitPLM <- function(object,model=PM ~ -1 + probes + samples,variable.type=c(defau
       weights=Fitresults[[3]],
       se.chip.coefs=Fitresults[[4]],
       se.probe.coefs=Fitresults[[5]],
-      exprs=Fitresults[[6]],
-      se.exprs=Fitresults[[7]],
+      const.coefs=Fitresults[[6]],
+      se.const.coefs=Fitresults[[7]],
       residuals=Fitresults[[8]],
       residualSE=Fitresults[[9]],
       varcov = Fitresults[[10]],

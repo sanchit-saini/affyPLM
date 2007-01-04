@@ -92,6 +92,8 @@
 ## Jul 21, 2006 - allow which, ref, subset arguments of MAplot to be sample names. removed subset. added pairs as arguments for MAplot
 ## Jul 22, 2006 - add groups variable to MAplot
 ## Aug 21, 2006 - fix some bugs in boxplot (also affects NUSE) when a non-default model is used
+## Jan 3, 2007 - lessen the direct dependence of the PLMset on the eSet object.
+##
 ##
 ###########################################################
 
@@ -103,6 +105,8 @@ setClass("PLMset",
                           se.probe.coefs="list",
                           chip.coefs = "matrix",
                           se.chip.coefs = "matrix",
+                          const.coefs = "matrix",
+                          se.const.coefs = "matrix",
                           cdfName="character",
                           nrow="numeric",
                           ncol="numeric",
@@ -121,6 +125,8 @@ setClass("PLMset",
              se.probe.coefs=list(),                        #matrix(nr=0,nc=0),
              chip.coefs=matrix(nr=0,nc=0),
              se.chip.coefs=matrix(nr=0,nc=0),
+             const.coefs=matrix(nr=0,nc=0),
+             se.const.coefs=matrix(nr=0,nc=0),
              model.description=list(),
              weights=list(),                               #matrix(nr=0,nc=0),
              residuals =list(),                            #matrix(nr=0,nc=0),
@@ -899,7 +905,7 @@ if (!isGeneric("coefs.const"))
   
   setMethod("coefs.const","PLMset",
             function(object){
-              exprs(object)
+              object@const.coefs
             })
 
 
@@ -909,7 +915,7 @@ if (!isGeneric("se.const"))
 
 setMethod("se.const","PLMset",
           function(object){
-            se.exprs(object)
+            object@se.const.coefs
           })
 
 #A summary method, to be cleaned up better at a later date.
@@ -926,8 +932,8 @@ setMethod("summary","PLMset",
               allindexs <- indexProbesProcessed(object)
               for (probeset.names in genenames){
                 if (all(dim( exprs(object)) != 0)){
-                  cur.const.coef <- exprs(object)[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs))]
-                  cur.const.se <-  se.exprs(object)[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs))]
+                  cur.const.coef <- coefs.const(object)[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs))]
+                  cur.const.se <-  se.const(object)[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs))]
                 }
                 inds <- allindexs[probeset.names]
                 inds <- do.call("c",inds)

@@ -22,6 +22,7 @@
 ##                now ref and which can basically do the same things. Added pairs as a possible argument.
 ## Jul 26, 2006 - added hist() method for exprSet
 ## Oct 11, 2006 - make apply(x,1,median) a rowMedians() call
+## Jan 3, 2006 - add normalize methods for ExpressionSet objects
 ##
 ############################################################
 
@@ -42,8 +43,23 @@
               object <- do.call(method, alist(object, ...))
               return(object)
             })
-  
 
+
+  
+  start <- nchar("normalize.ExpressionSet.")
+  assign("normalize.ExpressionSet.methods",
+         substr(all.affy[grep("normalize\\.ExpressionSet\\.*", all.affy)], start+1, 100),
+         envir=as.environment(where))
+ 
+  setMethod("normalize", signature(object="ExpressionSet"),
+            function(object, method=getOption("BioC")$affy$normalize.method, ...) {
+              method <- match.arg(method, normalize.exprSet.methods)
+              if (is.na(method))
+                stop("unknown method")
+              method <- paste("normalize.ExpressionSet", method, sep=".")
+              object <- do.call(method, alist(object, ...))
+              return(object)
+            })
 }
 
 

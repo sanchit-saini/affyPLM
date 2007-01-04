@@ -1,3 +1,9 @@
+1.11.11
+-------
+
+Some fixes to make it pass R CMD check. changes how const.coefs are stored.
+
+
 1.11.8
 ------
 Small optimization for RMA background C code.
