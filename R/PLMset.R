@@ -93,6 +93,7 @@
 ## Jul 22, 2006 - add groups variable to MAplot
 ## Aug 21, 2006 - fix some bugs in boxplot (also affects NUSE) when a non-default model is used
 ## Jan 3, 2007 - lessen the direct dependence of the PLMset on the eSet object.
+## Jan 4, 2007 - make PLMset its own kind of object. ie it no longer contains the eset object.
 ##
 ##
 ###########################################################

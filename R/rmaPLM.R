@@ -20,6 +20,7 @@
 ##               Changes to deal with new PLMset structure
 ## Mar 12, 2005 - fix it so that probe effects are returned
 ## Oct 10, 2006 - add verbosity.level argument
+## Jan 4, 2007 - change how const.coef etc are handled
 ##
 #############################################################
 
@@ -102,31 +103,31 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
   
   new("PLMset",
   chip.coefs=fit.results[[1]],
- probe.coefs= split(fit.results[[2]],probeNames(object,subset)),
- weights=list(PM.weights=fit.results[[3]],MM.weights=matrix(0,0,0)),
- se.chip.coefs=fit.results[[4]],
-  se.probe.coefs=split(fit.results[[5]],probeNames(object,subset)),
- exprs=fit.results[[6]],
- se.exprs=fit.results[[7]],
- residuals=list(PM.resid=fit.results[[8]],MM.resid=matrix(0,0,0)),
- residualSE=fit.results[[9]],
- varcov = fit.results[[10]],
- phenoData = phenodata,
- annotation = annotation,
- experimentData= description,
- ##FIXME: remove # after notes is fixed
- # x@notes = notes,
- cdfName=object@cdfName,
- nrow=object@nrow,
- ncol=object@ncol,
- model.description = list(which.function="rmaPLM",
-    preprocessing=list(bg.method=background.method,bg.param=b.param,
+      probe.coefs= split(fit.results[[2]],probeNames(object,subset)),
+      weights=list(PM.weights=fit.results[[3]],MM.weights=matrix(0,0,0)),
+      se.chip.coefs=fit.results[[4]],
+      se.probe.coefs=split(fit.results[[5]],probeNames(object,subset)),
+      const.coefs=fit.results[[6]],
+      se.const.coefs=fit.results[[7]],
+      residuals=list(PM.resid=fit.results[[8]],MM.resid=matrix(0,0,0)),
+      residualSE=fit.results[[9]],
+      varcov = fit.results[[10]],
+      phenoData = phenodata,
+      annotation = annotation,
+      experimentData= description,
+      ##FIXME: remove # after notes is fixed
+                                        # x@notes = notes,
+      cdfName=object@cdfName,
+      nrow=object@nrow,
+      ncol=object@ncol,
+      model.description = list(which.function="rmaPLM",
+        preprocessing=list(bg.method=background.method,bg.param=b.param,
           background=background,norm.method=normalize.method,
           norm.param=n.param,normalize=normalize),
-    modelsettings =list(model.param=md.param,summary.method=NULL,model=NULL,
-            constraint.type=NULL,variable.type=NULL),
-    outputsettings=op.param, 
-    R.model=R.model)
+        modelsettings =list(model.param=md.param,summary.method=NULL,model=NULL,
+          constraint.type=NULL,variable.type=NULL),
+        outputsettings=op.param, 
+        R.model=R.model)
  )
 
 }

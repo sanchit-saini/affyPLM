@@ -1,7 +1,19 @@
+1.11.12
+-------
+Additional fixes to get it to pass R CMD check (which it now does). MAplot for ExpressionSet.
+PLMSet will no longer "contain" an eset object from next version (1.11.13)
+All exprSet methods/functions will be removed in next version (1.11.13)
+
+
 1.11.11
 -------
 
 Some fixes to make it pass R CMD check. changes how const.coefs are stored.
+
+
+1.11.9-1.11.10
+--------------
+These versions where done by people at FHCRC. Basically modernizing the package. Try to make some things that were exprSet dependent instead be eset/ExpressionSet based.
 
 
 1.11.8

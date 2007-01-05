@@ -21,6 +21,7 @@
 ##               cause of segfault on windows still unknown
 ## Sep 18, 2005 - removed check for windows
 ## Oct 10, 2006 - add verbosity.level argument to function
+## Jan 4, 2007 - fix how const.coef and se.const.coef are stored.
 ##
 #############################################################
 
@@ -106,8 +107,8 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
      weights=list(PM.weights=fit.results[[3]],MM.weights=matrix(0,0,0)),
      se.chip.coefs=fit.results[[4]],
                                         #x@se.probe.coefs=fit.results[[5]]
-     exprs=fit.results[[6]],
-     se.exprs=fit.results[[7]],
+     const.coefs=fit.results[[6]],
+     se.const.coefs=fit.results[[7]],
      residuals=list(PM.resid=fit.results[[8]],MM.resid=matrix(0,0,0)),
      residualSE=fit.results[[9]],
      varcov = fit.results[[10]],
