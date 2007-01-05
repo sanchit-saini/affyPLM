@@ -1,3 +1,11 @@
+1.11.13
+-------
+PLMset no longer contains an eSet object and has no direct dependencies on ExpressionSets etc
+all the exprSet functions/methods have been replaced with equivalent ExpressionSet methods
+
+
+
+
 1.11.12
 -------
 Additional fixes to get it to pass R CMD check (which it now does). MAplot for ExpressionSet.

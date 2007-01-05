@@ -49,6 +49,12 @@
 \alias{summary,PLMset-method}
 \alias{sampleNames,PLMset-method}
 \alias{sampleNames<-,PLMset-method}
+\alias{annotation,PLMset-method}
+\alias{description,PLMset-method}
+\alias{phenoData,PLMset-method}
+\alias{phenoData<-,PLMset,AnnotatedDataFrame-method}
+\alias{pData,PLMset-method}
+\alias{pData<-,PLMset,data.frame-method}
 \alias{nuse}
 \alias{NUSE}
 \alias{RLE}

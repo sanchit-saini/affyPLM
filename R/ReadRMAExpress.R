@@ -7,7 +7,7 @@
 
 
 
-ReadRMAExpress <- function(filename,return.value=c("exprSet","matrix")){
+ReadRMAExpress <- function(filename,return.value=c("ExpressionSet","matrix")){
 
   return.value <- match.arg(return.value)
 

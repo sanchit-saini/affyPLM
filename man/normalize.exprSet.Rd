@@ -1,26 +1,26 @@
-\name{normalize.exprSet}
-\alias{normalize.exprSet.quantiles}
-\alias{normalize.exprSet.loess}
-\alias{normalize.exprSet.contrasts}
-\alias{normalize.exprSet.qspline}
-\alias{normalize.exprSet.invariantset}
-\alias{normalize.exprSet.scaling}
-\alias{normalize.exprSet.methods}
+\name{normalize.ExpressionSet}
+\alias{normalize.ExpressionSet.quantiles}
+\alias{normalize.ExpressionSet.loess}
+\alias{normalize.ExpressionSet.contrasts}
+\alias{normalize.ExpressionSet.qspline}
+\alias{normalize.ExpressionSet.invariantset}
+\alias{normalize.ExpressionSet.scaling}
+\alias{normalize.ExpressionSet.methods}
 
-\title{Normalization applied to exprSets}
+\title{Normalization applied to ExpressionSets}
 \description{
-  Allows the user to apply normalization routines to exprSets.
+  Allows the user to apply normalization routines to ExpressionSets.
 }
 \usage{
-  normalize.exprSet.quantiles(eset,transfn=c("none","log","antilog"))
-  normalize.exprSet.loess(eset,transfn=c("none","log","antilog"),...)
-  normalize.exprSet.contrasts(eset, span = 2/3, choose.subset = TRUE, subset.size = 5000, verbose = TRUE, family = "symmetric",transfn=c("none","log","antilog"))
-  normalize.exprSet.qspline(eset,transfn=c("none","log","antilog"),...)
-  normalize.exprSet.invariantset(eset,prd.td = c(0.003, 0.007),verbose=FALSE,transfn=c("none","log","antilog"),baseline.type=c("mean","median","pseudo-mean","pseudo-median"))
-normalize.exprSet.scaling(eset,trim=0.02,baseline=-1,transfn=c("none","log","antilog"))
+  normalize.ExpressionSet.quantiles(eset,transfn=c("none","log","antilog"))
+  normalize.ExpressionSet.loess(eset,transfn=c("none","log","antilog"),...)
+  normalize.ExpressionSet.contrasts(eset, span = 2/3, choose.subset = TRUE, subset.size = 5000, verbose = TRUE, family = "symmetric",transfn=c("none","log","antilog"))
+  normalize.ExpressionSet.qspline(eset,transfn=c("none","log","antilog"),...)
+  normalize.ExpressionSet.invariantset(eset,prd.td = c(0.003, 0.007),verbose=FALSE,transfn=c("none","log","antilog"),baseline.type=c("mean","median","pseudo-mean","pseudo-median"))
+normalize.ExpressionSet.scaling(eset,trim=0.02,baseline=-1,transfn=c("none","log","antilog"))
 }
 \arguments{
-  \item{eset}{An \code{\link[Biobase:exprSet-class]{exprSet}}}
+  \item{eset}{An \code{\link[Biobase:ExpressionSet-class]{ExpressionSet}}}
   \item{span}{parameter to be passed to the function \code{\link[modreg]{loess}}.}
   \item{choose.subset}{}
   \item{subset.size}{}
@@ -33,7 +33,7 @@ normalize.exprSet.scaling(eset,trim=0.02,baseline=-1,transfn=c("none","log","ant
     the mean when using the scaling normalization}
   \item{baseline}{Index of array to use as baseline, negative values
     (-1,-2,-3,-4) control different baseline selection methods}
-  \item{transfn}{Transform the exprSet before normalizing. Useful when
+  \item{transfn}{Transform the ExpressionSet before normalizing. Useful when
     dealing with expression values that are log-scale}
   \item{baseline.type}{A method of selecting the baseline array}
   \item{...}{Additional parameters that may be passed to the
@@ -45,14 +45,14 @@ normalize.exprSet.scaling(eset,trim=0.02,baseline=-1,transfn=c("none","log","ant
   general you should either normalize at the probe level or at the
   expression value level, not both.
 
-  Typing \code{normalize.exprSet.methods} should give you a list of
+  Typing \code{normalize.ExpressionSet.methods} should give you a list of
   methods that you may use. note that you can also use the
-  \code{normalize} function on exprSets. Use \code{method} to select the
+  \code{normalize} function on ExpressionSets. Use \code{method} to select the
   normalization method.
 }
 
 \value{
-  A normalized \code{\link[Biobase:exprSet-class]{exprSet}}.
+  A normalized \code{\link[Biobase:ExpressionSet-class]{ExpressionSet}}.
 }
 
 \examples{
