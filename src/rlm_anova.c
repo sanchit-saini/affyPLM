@@ -4,7 +4,7 @@
  **
  ** Aim: implement robust linear models specialized to samples + probes model.
  **
- ** Copyright (C) 2004-2006 Ben Bolstad
+ ** Copyright (C) 2004-2007 Ben Bolstad
  **
  ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
  ** 
@@ -16,6 +16,7 @@
  ** July 29, 2004 - change routines so output order is the same as 
  **                 in new structure.
  ** Mar 1, 2006 - change comment style to ansi
+ ** Apr 10, 2007 - add rlm_wfit_anova
  **
  *********************************************************************/
 
@@ -545,6 +546,169 @@ abs(resid(rlm(as.vector(log2(y)) ~ -1 + as.factor(samples) + C(as.factor(probes)
 */
 
 
+void rlm_wfit_anova(double *y, int y_rows, int y_cols, double *w, double *out_beta, double *out_resids, double *out_weights,double (* PsiFn)(double, double, int), double psi_k,int max_iter, int initialized){
+
+  int i,j,iter;
+  /* double tol = 1e-7; */
+  double acc = 1e-4;
+  double scale =0.0;
+  double conv;
+  double endprobe;
+
+  double *wts = out_weights; 
+
+  double *resids = out_resids; 
+  double *old_resids = Calloc(y_rows*y_cols,double);
+  
+  double *rowmeans = Calloc(y_rows,double);
+
+  double *xtwx = Calloc((y_rows+y_cols-1)*(y_rows+y_cols-1),double);
+  double *xtwy = Calloc((y_rows+y_cols),double);
+
+  double sumweights, rows;
+  
+  rows = y_rows*y_cols;
+  
+  if (!initialized){
+    
+    /* intially use equal weights */
+    for (i=0; i < rows; i++){
+      wts[i] = w[i]*1.0;
+    }
+  }
+
+  /* starting matrix */
+  
+  for (i=0; i < y_rows; i++){
+    for (j=0; j < y_cols; j++){
+      resids[j*y_rows + i] = y[j*y_rows + i];
+    }
+  }
+  
+  /* sweep columns (ie chip effects) */
+
+  for (j=0; j < y_cols; j++){
+    out_beta[j] = 0.0;
+    sumweights = 0.0;
+    for (i=0; i < y_rows; i++){
+      out_beta[j] += wts[j*y_rows + i]* resids[j*y_rows + i];
+      sumweights +=  wts[j*y_rows + i];
+    }
+    out_beta[j]/=sumweights;
+    for (i=0; i < y_rows; i++){
+      resids[j*y_rows + i] = resids[j*y_rows + i] -  out_beta[j];
+    }
+  }
+
+
+ /* sweep rows  (ie probe effects) */
+  
+  for (i=0; i < y_rows; i++){
+    rowmeans[i] = 0.0;
+    sumweights = 0.0;
+    for (j=0; j < y_cols; j++){
+      rowmeans[i] += wts[j*y_rows + i]* resids[j*y_rows + i]; 
+      sumweights +=  wts[j*y_rows + i];
+    }
+    rowmeans[i]/=sumweights;
+    for (j=0; j < y_cols; j++){
+       resids[j*y_rows + i] =  resids[j*y_rows + i] - rowmeans[i];
+    }
+  }
+  for (i=0; i < y_rows-1; i++){
+    out_beta[i+y_cols] = rowmeans[i];
+  }
+
+
+
+  for (iter = 0; iter < max_iter; iter++){
+    
+    scale = med_abs(resids,rows)/0.6745;
+    
+    if (fabs(scale) < 1e-10){
+      /*printf("Scale too small \n"); */
+      break;
+    }
+    for (i =0; i < rows; i++){
+      old_resids[i] = resids[i];
+    }
+
+    for (i=0; i < rows; i++){
+      wts[i] = w[i]*PsiFn(resids[i]/scale,psi_k,0);  /*           psi_huber(resids[i]/scale,k,0); */
+    }
+   
+    /* printf("%f\n",scale); */
+
+
+    /* weighted least squares */
+    
+    memset(xtwx,0,(y_rows+y_cols-1)*(y_rows+y_cols-1)*sizeof(double));
+
+
+    XTWX(y_rows,y_cols,wts,xtwx);
+    XTWXinv(y_rows, y_cols,xtwx);
+    XTWY(y_rows, y_cols, wts,y, xtwy);
+
+    
+    for (i=0;i < y_rows+y_cols-1; i++){
+      out_beta[i] = 0.0;
+       for (j=0;j < y_rows+y_cols -1; j++){
+    	 out_beta[i] += xtwx[j*(y_rows+y_cols -1)+i]*xtwy[j];
+       }
+    }
+
+    /* residuals */
+    
+    for (i=0; i < y_rows-1; i++){
+      for (j=0; j < y_cols; j++){
+	resids[j*y_rows +i] = y[j*y_rows + i]- (out_beta[j] + out_beta[i + y_cols]); 
+      }
+    }
+
+    for (j=0; j < y_cols; j++){
+      endprobe=0.0;
+      for (i=0; i < y_rows-1; i++){
+	endprobe+= out_beta[i + y_cols];
+      }
+      resids[j*y_rows + y_rows-1] = y[j*y_rows + y_rows-1]- (out_beta[j] - endprobe);
+    }
+
+    /*check convergence  based on residuals */
+    
+    conv = irls_delta(old_resids,resids, rows);
+    
+    if (conv < acc){
+      /*    printf("Converged \n");*/
+      break; 
+
+    }
+
+
+
+  }
+    
+  /* order output in probes, samples order */
+  /*
+    for (i=0;i < y_rows+y_cols-1; i++){
+    old_resids[i] = out_beta[i];
+    }  
+    for (i=0; i <y_rows-1;i++){
+    out_beta[i] = old_resids[i+y_cols];
+    }
+    for (i=0; i < y_cols; i++){
+    out_beta[i+(y_rows-1)] = old_resids[i];
+    }
+  */
+
+
+
+  Free(xtwx);
+  Free(xtwy);
+  Free(old_resids);
+  Free(rowmeans);
+
+
+}
 
 
 /*************************************************************************
