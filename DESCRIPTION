@@ -13,4 +13,4 @@ Description: A package that extends and improves the functionality of
 License: GPL version 2 or newer
 URL: http://bmbolstad.com
 biocViews: Microarray, OneChannel, Preprocessing, QualityControl
-SaveImage: yes
+LazyLoad: yes
