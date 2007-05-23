@@ -26,7 +26,6 @@
  **
  ************************************************************/
 
-#include "qnorm.h"
 #include <R.h>
 #include <Rdefines.h>
 #include <Rmath.h>
@@ -37,6 +36,9 @@
 #include "avg_log.h"
 #include "medianPM.h"
 #include "log_avg.h"
+
+#include "preprocessCore_normalization_stubs.c"
+
 
 /*************************************************************
  **

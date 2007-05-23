@@ -22,7 +22,6 @@
  **
  ************************************************************************/
 
-#include "qnorm.h"
 #include "threestep_common.h"
 #include "median_logPM.h"
 

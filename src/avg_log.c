@@ -26,7 +26,7 @@
  ************************************************************************/
 
 #include "avg_log.h"
-#include "qnorm.h"
+
 
 #include <R.h> 
 #include <Rdefines.h>

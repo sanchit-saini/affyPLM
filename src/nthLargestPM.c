@@ -25,7 +25,7 @@
  **
  ************************************************************************/
 
-#include "qnorm.h"
+
 #include "threestep_common.h"
 #include "rma_common.h"
 #include "nthLargestPM.h"

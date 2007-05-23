@@ -22,7 +22,7 @@
  **
  ************************************************************************/
 
-#include "qnorm.h"
+
 #include "medianPM.h"
 #include "threestep_common.h"
 
