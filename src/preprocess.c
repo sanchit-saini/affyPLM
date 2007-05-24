@@ -50,7 +50,7 @@
 
 #include "rma_common.h" 
 #include "rma_background2.h" 
-
+#include "qnorm.h"
 #include "idealmismatch.h"
 #include "LESN.h"
 #include "preprocess.h"
@@ -66,7 +66,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-//#include "preprocessCore_normalization_stubs.c"
 
 /********************************************************************************************
  **

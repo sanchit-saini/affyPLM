@@ -1,3 +1,17 @@
+1.13.2
+------
+fix a compiler warning
+
+
+
+1.13.1
+------
+remove the qnorm.c code. This has been moved to preprocessCore, along with normalize.quantiles.determine.target(), normalize.quantiles.use.target() and a few related things.
+
+
+
+
+
 1.11.13
 -------
 PLMset no longer contains an eSet object and has no direct dependencies on ExpressionSets etc
