@@ -1,3 +1,9 @@
+1.13.3
+------
+
+The core medianpolish algorithm is now from preprocessCore
+
+
 1.13.2
 ------
 fix a compiler warning

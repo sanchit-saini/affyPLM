@@ -33,7 +33,7 @@ pt2Summary funcArr[9];
 
 pt2Summary SummaryMethod(int code){
   
-  funcArr[0] = &median_polish;
+  funcArr[0] = &median_polish_threestep;
   funcArr[1] = &tukeybiweight;
   funcArr[2] = &AverageLog;
   funcArr[3] = &rlm_threestep;
