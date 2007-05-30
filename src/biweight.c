@@ -25,6 +25,7 @@
  ** Jul 23, 2003 - SE parameter added and implemented
  ** Oct 10, 2003 - added in PLM version
  ** Apr 5, 2004 - Change mallocs to Callocs
+ ** May 26, 2007 - clean code. Core routines are now in preprocessCore
  **
  ************************************************************************/
 
@@ -39,150 +40,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-/******************************************************************************
- **
- ** double weight_bisquare(double x)
- **
- ** computes bisquare weights
- **
- ** double x - data
- **
- ** returns bisquare weight
- **
- *******************************************************************************/
-
-double weight_bisquare(double x){
-
-  if (fabs(x) <= 1.0){
-    return (1-x*x)*(1-x*x);
-  } else {
-    return 0;
-  }
-}
-
-/****************************************************************************
- **
- ** double Tukey_Biweight(double *x, int length)
- **
- ** implements one step Tukey's Biweight as documented in the Affymetrix 
- ** Statistical Algorithms Description Document. 
- **
- ** double *x - vector of data
- ** int length - length of *x
- **
- ****************************************************************************/
-
-double Tukey_Biweight(double *x, int length){
-  
-  double median;
-  int i;
-  double *buffer = (double *)Calloc(length,double);
-  double c = 5.0;
-  double epsilon = 0.0001;
-  double S;
-  double sum = 0.0;
-  double sumw = 0.0;
-
-  for (i=0; i < length; i++){
-    buffer[i] = x[i];
-  }
-
-  qsort(buffer,length,sizeof(double),(int(*)(const void*, const void*))sort_double);
-
-  if (length%2 == 0){
-    median = (buffer[length/2 -1] + buffer[length/2])/2.0;
-  } else {
-    median = buffer[length/2];
-  }
-  /* printf("%f \n",median); */
-  for (i=0; i < length; i++){
-    buffer[i] = fabs(x[i] - median);
-  }
-  qsort(buffer,length,sizeof(double),(int(*)(const void*, const void*))sort_double);
-
-  if (length%2 == 0){
-    S = (buffer[length/2 -1] + buffer[length/2])/2.0;
-  } else {
-    S = buffer[length/2];
-  }
-  
-  /*  printf("%f \n",S); */
-
-  for (i=0; i < length; i++){
-    buffer[i] = (x[i] - median)/(c*S + epsilon);
-  }
-  
-  for (i =0; i < length; i++){
-    sum+= weight_bisquare(buffer[i])*x[i];
-    sumw += weight_bisquare(buffer[i]);
-  }
-  Free(buffer);
-  return(sum/sumw);
-}
-
-
-
-/****************************************************************************
- **
- ** double Tukey_Biweight_SE(double *x, double BW, int length)
- **
- ** implements one step Tukey's Biweight SE as documented in the Affymetrix 
- ** Statistical Algorithms Description Document. 
- **
- ** double *x - vector of data
- ** int length - length of *x
- **
- ****************************************************************************/
-
-double Tukey_Biweight_SE(double *x,double BW, int length){
-  
-  double median;
-  int i;
-  double *buffer = (double *)Calloc(length,double);
-  double c = 5.0;
-  double epsilon = 0.0001;
-  double S;
-  double sum = 0.0;
-  double sumw = 0.0;
-
-  for (i=0; i < length; i++){
-    buffer[i] = x[i];
-  }
-
-  qsort(buffer,length,sizeof(double),(int(*)(const void*, const void*))sort_double);
-
-  if (length%2 == 0){
-    median = (buffer[length/2 -1] + buffer[length/2])/2.0;
-  } else {
-    median = buffer[length/2];
-  }
-  /* printf("%f \n",median); */
-  for (i=0; i < length; i++){
-    buffer[i] = fabs(x[i] - median);
-  }
-  qsort(buffer,length,sizeof(double),(int(*)(const void*, const void*))sort_double);
-
-  if (length%2 == 0){
-    S = (buffer[length/2 -1] + buffer[length/2])/2.0;
-  } else {
-    S = buffer[length/2];
-  }
-  
-  /*  printf("%f \n",S); */
-
-  for (i=0; i < length; i++){
-    buffer[i] = (x[i] - median)/(c*S + epsilon);
-  }
-  
-  for (i =0; i < length; i++){
-    sum+= weight_bisquare(buffer[i])*weight_bisquare(buffer[i])*(x[i]- BW)*(x[i] - BW);
-    if (buffer[i] < 1.0){
-      sumw += (1.0-buffer[i]*buffer[i])*(1.0 - 5.0*buffer[i]*buffer[i]);
-    }
-  }
-  Free(buffer);
-  return(sqrt(sum)/fabs(sumw));
-}
 
 
 
@@ -204,47 +61,21 @@ double Tukey_Biweight_SE(double *x,double BW, int length){
  **
  ***********************************************************************************/ 
 
-void tukeybiweight(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
-  int i,j;
-  double *z = Calloc(nprobes*cols,double);
-
-  for (j = 0; j < cols; j++){
-    for (i =0; i < nprobes; i++){
-      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
-    }
-  } 
+void TukeyBiweight_threestep(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
   
-  for (j=0; j < cols; j++){
-    results[j] = Tukey_Biweight(&z[j*nprobes],nprobes);
-    resultsSE[j] = Tukey_Biweight_SE(&z[j*nprobes],results[j],nprobes);
-  }
-  Free(z);
+  TukeyBiweight(data, rows, cols, cur_rows, results, nprobes, resultsSE);
 }
 
 
-void tukeybiweight_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
+void TukeyBiweight_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
   int i,j;
-  double *z = Calloc(nprobes*cols,double);
+
+  TukeyBiweight(data, rows, cols, cur_rows, results, nprobes, resultsSE);
 
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
-      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
+      residuals[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0) - results[j];  
     }
   } 
   
-  for (j=0; j < cols; j++){
-    results[j] = Tukey_Biweight(&z[j*nprobes],nprobes);
-    resultsSE[j] = Tukey_Biweight_SE(&z[j*nprobes],results[j],nprobes);
-  }
-
-  for (j = 0; j < cols; j++){
-    for (i =0; i < nprobes; i++){
-      residuals[j*nprobes + i] = z[j*nprobes + i] - results[j];  
-    }
-  } 
-  
-
-
-
-  Free(z);
 }

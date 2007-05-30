@@ -34,8 +34,8 @@ pt2Summary funcArr[9];
 pt2Summary SummaryMethod(int code){
   
   funcArr[0] = &median_polish_threestep;
-  funcArr[1] = &tukeybiweight;
-  funcArr[2] = &AverageLog;
+  funcArr[1] = &TukeyBiweight_threestep;
+  funcArr[2] = &AverageLog_threestep;
   funcArr[3] = &rlm_threestep;
   funcArr[4] = &LogAverage_threestep;
   funcArr[5] = &LogMedianPM_threestep;
@@ -52,7 +52,7 @@ pt2PLMSummary funcArr2[9];
 pt2PLMSummary PLMSummaryMethod(int code){
   
   funcArr2[0] = &median_polish_threestep_PLM;
-  funcArr2[1] = &tukeybiweight_PLM;
+  funcArr2[1] = &TukeyBiweight_PLM;
   funcArr2[2] = &AverageLog_PLM;
   funcArr2[3] = &rlm_threestep_PLM;
   funcArr2[4] = &LogAverage_threestep_PLM;
