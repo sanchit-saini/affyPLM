@@ -64,12 +64,12 @@
  **
  ************************************************************************************/
 
-void do_3summary(double *PM, char **ProbeNames, int *rows, int *cols, double *results, char **outNames, int nps,void (* SummaryMeth)(double*, int, int, int *,double *, int, double *, summary_plist *),double *resultsSE, summary_plist *summary_param){
+void do_3summary(double *PM, const char **ProbeNames, int *rows, int *cols, double *results, char **outNames, int nps,void (* SummaryMeth)(double*, int, int, int *,double *, int, double *, summary_plist *),double *resultsSE, summary_plist *summary_param){
   int j = 0;
   int i = 0;
   int k = 0;
   int size;
-  char *first;
+  const char *first;
   int first_ind;
   int max_nrows = 1000;
   /* buffers of size 1000 should be enough. */

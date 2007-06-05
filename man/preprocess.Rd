@@ -28,7 +28,7 @@ preprocess(object,subset=NULL, normalize=TRUE,background=TRUE,background.method=
   This function carries out background correction and normalization
   pre-processing steps. It does not summarize to produce gene expression
   measures. All the same pre-processing methods supplied by
-  \code{\link{threestep}} are supported by this function.}
+  \code{\link{threestep}} are supported by this function.
 }
 \value{
 An \code{\link[affy]{AffyBatch}}

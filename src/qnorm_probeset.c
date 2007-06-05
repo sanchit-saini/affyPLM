@@ -85,12 +85,12 @@ void AdjustProbes(double *data, int rows, int cols, int *cur_rows, double *resul
 /*************************************************************
  **
  ** void qnorm_probeset(double *data, int rows, int cols, 
- **                int n_probesets, char **ProbeNames)
+ **                int n_probesets, const char **ProbeNames)
  **
  ** double *data - a matrix of probe intensities.
  ** int rows, cols - dimensions of *data
  ** int n_probesets - number of probesets
- ** char **ProbeNames - names for each probe.
+ ** const char **ProbeNames - names for each probe.
  **
  **
  ** Perform a quantile normalization, but do it at the 
@@ -102,11 +102,11 @@ void AdjustProbes(double *data, int rows, int cols, int *cur_rows, double *resul
  **
  ************************************************************/
 
-void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, char **ProbeNames, int usemedian, int uselog){
+void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, const char **ProbeNames, int usemedian, int uselog){
   int j = 0;
   int i = 0;
   int k = 0;
-  char *first;
+  const char *first;
   int first_ind;
   int max_nrows = 1000;
   /* buffers of size 1000 should be enough. */
@@ -229,7 +229,7 @@ void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, char **P
 
 }
 
-void qnorm_probeset_R(double *data, int *rows, int *cols,int *n_probesets, char **ProbeNames, int *usemedian, int *uselog){
+void qnorm_probeset_R(double *data, int *rows, int *cols,int *n_probesets, const char **ProbeNames, int *usemedian, int *uselog){
 
   qnorm_probeset_c(data, *rows, *cols, *n_probesets, ProbeNames, *usemedian, *uselog);
 

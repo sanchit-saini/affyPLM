@@ -677,7 +677,7 @@ void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,cons
 void do_PLMrlm(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, outputsettings *store){
   int i = 0,j=0,k=0;
   int size;
-  char *first;
+  const char *first;
   int first_ind;
   int max_nrows = 1000;
   int old_nprobes =0;
@@ -1253,7 +1253,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
   int first_ind;
   int max_nrows = 1000;
   int *cur_rows= (int *)Calloc(max_nrows,int);
-  char *first;
+  const char *first;
   PLM_modelfit *current= new_PLMmodelfit();
   
   first = data->ProbeNames[0];

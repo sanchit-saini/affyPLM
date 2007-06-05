@@ -163,7 +163,7 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   
   /* Get the names corresponding to each row */
     
-  data->ProbeNames = (char **)Calloc(data->rows,char *);
+  data->ProbeNames = (const char **)Calloc(data->rows,const char *);
   for (i =0; i < data->rows; i++){
     data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
   }

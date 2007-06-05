@@ -205,7 +205,7 @@ void copy_rmaPLM_results(modelfit *current, PLMoutput *output, Datagroup *data,c
 void do_PLMrma(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, outputsettings *store){
   int i = 0,j=0,k=0;
   int size;
-  char *first;
+  const char *first;
   int first_ind;
   int max_nrows = 1000;
   int old_nprobes =0;

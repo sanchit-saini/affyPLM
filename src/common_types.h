@@ -70,7 +70,7 @@ typedef struct {
   int rows;
   int cols;
   int nprobesets;
-  char **ProbeNames;
+  const char **ProbeNames;
 } Datagroup;
 
 /*******************************************************************
@@ -215,7 +215,7 @@ typedef struct {
   int n_probesets;       /* the number of probesets */
   int n_arrays;          /* the number of arrays */
   int n_probes;          /* number of probes on each array */
-  char **ProbeNames;     /* name of the probeset to which the probeset belongs */
+  const char **ProbeNames; /* name of the probeset to which the probeset belongs */
 } PLM_Datagroup;
 
 

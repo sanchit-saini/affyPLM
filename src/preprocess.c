@@ -149,7 +149,7 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
   
   double theta, baseline;
   int rows, cols;
-  char **ProbeNames;
+  const char **ProbeNames;
   
   int allrows;
   int which_lesn;
@@ -233,7 +233,7 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
     PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
     MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
 
-    ProbeNames =(char **)Calloc(rows,char *);
+    ProbeNames =(const char **)Calloc(rows,const char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
     param = GetParameter(background_param,"ideal");
@@ -358,7 +358,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
   double *allPMMM;
   int allrows;
   /*  char **outnames; */
-  char **ProbeNames; 
+  const char **ProbeNames; 
   int i,j;
   int nprobesets;
   
@@ -456,7 +456,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 
 
   } else if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"quantile.probeset") == 0){
-    ProbeNames = (char **)Calloc(rows,char *);
+    ProbeNames = (const char **)Calloc(rows, const char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
     
@@ -494,7 +494,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	  allPMMM[j*2*rows + i + rows] = MM[j*rows + i];
 	}
       }
-      ProbeNames = (char **)Realloc(ProbeNames,2*rows,char *);
+      ProbeNames = (const char **)Realloc(ProbeNames,2*rows,const char *);
       for (i =0; i < rows; i++)
 	ProbeNames[rows + i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
       qnorm_probeset_c(allPMMM, allrows, cols, 2*nprobesets, ProbeNames, usemedian, uselog2);
@@ -664,7 +664,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 
 SEXP pp_bothstages(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP norm_flag, SEXP bg_flag, SEXP bg_type,SEXP norm_type, SEXP background_parameters,SEXP norm_parameters, SEXP verbosity){
   
-  SEXP dim1,PMcopy,exprs;
+  SEXP dim1,PMcopy;
   int rows,cols;
   
   /*Create a copy matrix to work on. Allows us to modify data in background and normalization steps without affecting original data */

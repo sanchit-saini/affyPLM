@@ -42,7 +42,6 @@
  *************************************************************************/
 
 double median_low(double *x, int length){
-  int i;
   int half;
   double med;
   double *buffer = Calloc(length,double);

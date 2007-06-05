@@ -44,7 +44,7 @@
 
 /**************************************************************************************
  **
- ** void IdealMM_correct(double *PM, double *MM, int nprobes, char** ProbeNames)
+ ** void IdealMM_correct(double *PM, double *MM, int nprobes, const char** ProbeNames)
  **
  ** Correct PM by using the idea of an Ideal MM as documented in Affymetrix Statistical
  ** Algorithms Reference guide.
@@ -56,7 +56,7 @@
  **
  *************************************************************************************/
 
-static void IdealMM_correct_single(double *PM, double *MM, int rows, char** ProbeNames){
+static void IdealMM_correct_single(double *PM, double *MM, int rows, const char** ProbeNames){
   int i,j;
   double IM,SB;
   int current_buf_size=200;
@@ -67,7 +67,7 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, char** Prob
   double *buffer = Calloc(200,double);
   int k = 0;
   /*  int size; */
-  char *first;
+  const char *first;
   int first_ind;
   int nprobes;
 
@@ -136,7 +136,7 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, char** Prob
 
 /**************************************************************************************
  **
- ** void IdealMM_correct_R(double *PM, double *MM, int nprobes, char** ProbeNames)
+ ** void IdealMM_correct_R(double *PM, double *MM, int nprobes, const char** ProbeNames)
  **
  ** Wrapper to be called from R .Correct PM by using the idea of an Ideal MM as 
  ** documented in Affymetrix Statistical Algorithms Reference guide.
@@ -144,11 +144,11 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, char** Prob
  ** double *PM - PM probe intensities
  ** double *MM - MM probe intensities
  ** int nprobes - total number of PM probes
- ** char** ProbeNames - name for each probes indicating probeset membership.
+ ** const char** ProbeNames - name for each probes indicating probeset membership.
  **
  *************************************************************************************/
 
-void IdealMM_correct(double *PM, double *MM, int *nprobes, int *nchips, char** ProbeNames){
+void IdealMM_correct(double *PM, double *MM, int *nprobes, int *nchips, const char** ProbeNames){
   int i =0;
   for (i =0; i < *nchips; i++){
     /* printf("%d \n",i); */
@@ -168,7 +168,7 @@ void IdealMM_correct(double *PM, double *MM, int *nprobes, int *nchips, char** P
 
 
 
-static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, char** ProbeNames){
+static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, const char** ProbeNames){
   int i,j;
   double IM,SB;
   /*  double contrast_tau = 0.03; */
@@ -179,7 +179,7 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, cha
   double *buffer = Calloc(200,double);
   int k = 0;
   /*  int size; */
-  char *first;
+  const char *first;
   int first_ind;
   int nprobes;
 
@@ -189,6 +189,7 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, cha
 	probesets ***/
 
   
+
   first = ProbeNames[0];
   first_ind = 0;
   i =0;
@@ -246,7 +247,7 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, cha
 
 
 
-void SpecificBiweightCorrect(double *PM, double *MM, int *nprobes, int *nchips, char** ProbeNames){
+void SpecificBiweightCorrect(double *PM, double *MM, int *nprobes, int *nchips, const char** ProbeNames){
 
   int i =0;
   for (i =0; i < *nchips; i++){

@@ -131,7 +131,7 @@ static size_t fread_char(char *destination, int n, FILE *instream){
 SEXP read_rmaexpress(SEXP R_filename){
 
   SEXP intensity,colnames,rownames,dimnames;
-  char *filename;
+  const char *filename;
   const char *mode = "rb";
   
   char *buffer;  /* temporary buffer for storing strings */
@@ -246,10 +246,10 @@ SEXP read_rmaexpress_header(SEXP R_filename){
 
 
   
-  SEXP returnvalue,colnames,rownames,dimnames;
+  SEXP returnvalue,colnames,rownames;
   SEXP tmpsxp;
 
-  char *filename;
+  const char *filename;
   const char *mode = "rb";
   
   char *buffer;  /* temporary buffer for storing strings */
@@ -428,10 +428,10 @@ SEXP gz_read_rmaexpress_header(SEXP R_filename){
 
 
   
-  SEXP returnvalue,colnames,rownames,dimnames;
+  SEXP returnvalue,colnames,rownames;
   SEXP tmpsxp;
 
-  char *filename;
+  const char *filename;
   const char *mode = "rb";
   
   char *buffer;  /* temporary buffer for storing strings */
@@ -549,7 +549,7 @@ SEXP gz_read_rmaexpress_header(SEXP R_filename){
 SEXP gz_read_rmaexpress(SEXP R_filename){
 
   SEXP intensity,colnames,rownames,dimnames;
-  char *filename;
+  const char *filename;
   const char *mode = "rb";
   
   char *buffer;  /* temporary buffer for storing strings */
@@ -669,7 +669,7 @@ SEXP gz_read_rmaexpress(SEXP R_filename){
  ************************************************************************/
 
 
-int isUncompressedRMAExpress(char *filename){
+int isUncompressedRMAExpress(const char *filename){
 
   const char *mode = "rb";
   
@@ -705,7 +705,7 @@ int isUncompressedRMAExpress(char *filename){
 }
 
 
-int isCompressedRMAExpress(char *filename){
+int isCompressedRMAExpress(const char *filename){
 
   const char *mode = "rb";
   
@@ -745,7 +745,7 @@ int isCompressedRMAExpress(char *filename){
 
 SEXP check_rmaexpress_format(SEXP R_filename){
 
-  char *filename;
+  const char *filename;
   SEXP file_type;
 
   filename = CHAR(STRING_ELT(R_filename,0));

@@ -453,7 +453,7 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
   int i,j;
   int n_const_col;
   int probe_multiplier =0;
-  char *first;
+  const char *first;
   int *n_probes_probeset;
   int new_nprobes=0;
   int modifier=0;
@@ -1495,7 +1495,7 @@ SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R
   
   /* Get the names corresponding to each row */
     
-  data->ProbeNames = (char **)Calloc(data->n_probes,char *);
+  data->ProbeNames = (const char **)Calloc(data->n_probes,const char *);
   for (i =0; i < data->n_probes; i++){
     data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
   }

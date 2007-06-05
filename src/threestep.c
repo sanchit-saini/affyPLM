@@ -80,7 +80,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   double *outexpr, *outSE;
   double *PM,*MM;
   char **outnames;
-  char **ProbeNames;
+  const char **ProbeNames;
   int i,nprobesets;
   int Method;
   int verbosity_level;
@@ -111,7 +111,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
 
   nprobesets=INTEGER(N_probes)[0];
   
-  ProbeNames = (char **)Calloc(rows,char *);
+  ProbeNames = (const char **)Calloc(rows,const char *);
   for (i =0; i < rows; i++)
     ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
   outnames = (char **)Calloc(nprobesets,char *);

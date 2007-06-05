@@ -4,7 +4,7 @@
 \description{
   This function converts an \code{\link[affy]{AffyBatch}} into an
   \code{\link{PLMset}} by fitting a specified robust linear model to the
-  probe level data}
+  probe level data.
 }
 \usage{
 fitPLM(object,model=PM ~ -1 + probes +samples,

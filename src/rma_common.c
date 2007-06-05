@@ -100,7 +100,6 @@ double  median(double *x, int length){
  *************************************************************************/
 
 double  median_nocopy(double *x, int length){
-  int i;
   int half;
   double med;
   double *buffer = x;  //Calloc(length,double);

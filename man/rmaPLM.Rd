@@ -4,7 +4,7 @@
 \description{
   This function converts an \code{\link[affy]{AffyBatch}} into an
   \code{\link{PLMset}} by fitting a multichip model. In particular we
-  concentrate on the RMA model.}
+  concentrate on the RMA model.
 }
 \usage{
 rmaPLM(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",background.param = list(),normalize.param=list(),output.param=list(),model.param=list(),verbosity.level=0)
