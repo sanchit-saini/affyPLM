@@ -1,3 +1,8 @@
+1.13.6
+------
+change MAplot vignette to refer to ExpressionSet rather than exprSet objects
+
+
 1.13.4
 ------
 core rlm code is now in preprocessCore. Also moved AvgLog, LogAvg and lm code there.

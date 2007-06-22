@@ -33,7 +33,7 @@
 
 \section{Introduction}
 
-This document is a basic users guide to the \Rfunction{MAplot} facilities of the \Rpackage{affyPLM} package. Other vignettes for this package describe other functionalities. Note that the \Rfunction{MAplot} generic function supports dealing with the \Rclass{AffyBatch} (actually supplied by the \Rpackage{affy} package), \Rclass{exprSet} and \Rclass{PLMset} objects.
+This document is a basic users guide to the \Rfunction{MAplot} facilities of the \Rpackage{affyPLM} package. Other vignettes for this package describe other functionalities. Note that the \Rfunction{MAplot} generic function supports dealing with the \Rclass{AffyBatch} (actually supplied by the \Rpackage{affy} package), \Rclass{ExpressionSet} and \Rclass{PLMset} objects.
 
 To begin, load the package using
 <<loadPackage>>=
@@ -41,14 +41,14 @@ library(affyPLM)
 options(width=60)
 @
 
-While the \Rfunction{MAplot} function can be applied to all of the objects discussed this document will illustrate the general usage of this function with an \Rclass{exprSet} object. However, the same \Rfunction{MAplot} function calls will give the same results on the \Rclass{AffyBatch} and \Rclass{PLMset} objects.
+While the \Rfunction{MAplot} function can be applied to all of the objects discussed this document will illustrate the general usage of this function with an \Rclass{ExpressionSet} object. However, the same \Rfunction{MAplot} function calls will give the same results on the \Rclass{AffyBatch} and \Rclass{PLMset} objects.
 
-The \dataset{Dilution} dataset which is built into the \Rpackage{affydata} package will be used. Now \Robject{Dilution} is an \Rclass{AffyBatch} which can be turned into an \Rclass{exprSet} object by using one of the many functions for producing expression values. In this case the \Rfunction{rma} function will be used. 
-<<makeexprSet>>=
+The \dataset{Dilution} dataset which is built into the \Rpackage{affydata} package will be used. Now \Robject{Dilution} is an \Rclass{AffyBatch} which can be turned into an \Rclass{ExpressionSet} object by using one of the many functions for producing expression values. In this case the \Rfunction{rma} function will be used. 
+<<makeExpressionSet>>=
 data(Dilution)
 eset.Dilution <- rma(Dilution)
 @ 
-Now \Robject{eset.Dilution} is an \Rclass{exprSet} containing RMA expression values.
+Now \Robject{eset.Dilution} is an \Rclass{ExpressionSet} containing RMA expression values.
 
 \section{Basic Usage of the MAplot function}
 
@@ -242,9 +242,9 @@ dev.off()
 
 
 
-\section{Special notes about differences in \Rfunction{MAplot} for \Rclass{AffyBatch}, \Rclass{exprSet} and \Rclass{PLMset} objects.}
+\section{Special notes about differences in \Rfunction{MAplot} for \Rclass{AffyBatch}, \Rclass{ExpressionSet} and \Rclass{PLMset} objects.}
 
-The main difference is in the value of the \Rfunarg{log} argument. For an \Rclass{AffyBatch} by default \Rfunarg{log=TRUE}, whilst for both \Rclass{exprSet} and \Rclass{PLMset} this argument is \Rfunarg{log=FALSE} by default. This argument tells the function whether or the data needs to be logarithmically transformed before computing the M and A values by differencing and averaging. Note that when \Rfunarg{log=TRUE} $\log_2$ is used. Since \Rclass{AffyBatch} objects often store raw cel file data they typically need to be logged first. If \Rfunction{rma} or \Rfunction{threestep} is used then the resulting \Rclass{exprSet} contains $\log_2$ scale expression values. If \Rfunction{expresso}, or another function, is used which produces expression values in the natural scale then \Rfunarg{log=TRUE} should be supplied to MAplot.
+The main difference is in the value of the \Rfunarg{log} argument. For an \Rclass{AffyBatch} by default \Rfunarg{log=TRUE}, whilst for both \Rclass{ExpressionSet} and \Rclass{PLMset} this argument is \Rfunarg{log=FALSE} by default. This argument tells the function whether or the data needs to be logarithmically transformed before computing the M and A values by differencing and averaging. Note that when \Rfunarg{log=TRUE} $\log_2$ is used. Since \Rclass{AffyBatch} objects often store raw cel file data they typically need to be logged first. If \Rfunction{rma} or \Rfunction{threestep} is used then the resulting \Rclass{ExpressionSet} contains $\log_2$ scale expression values. If \Rfunction{expresso}, or another function, is used which produces expression values in the natural scale then \Rfunarg{log=TRUE} should be supplied to MAplot.
 
 For \Rclass{AffyBatch} objects there is also a special function argument \Rfunarg{type} that can be used to control which probe type is plotted. The default is \Rfunarg{type="both"}, but \Rfunarg{type="pm"} and \Rfunarg{type="mm"} can also be used.
 
