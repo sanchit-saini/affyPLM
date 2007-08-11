@@ -171,7 +171,7 @@ normalize.ExpressionSet.invariantset <- function(eset,prd.td = c(0.003, 0.007), 
     refindex <- trunc(median(rank(m)))
     rm(m)
     baseline.chip <-  c(alldata[, refindex])
-    if (verbose) cat("Data from", sampleNames(abatch)[refindex], "used as baseline.\n")
+    if (verbose) cat("Data from", sampleNames(eset)[refindex], "used as baseline.\n")
   } else if (baseline.type == "pseudo-mean"){
     ## construct a psuedo chip to serve as the baseline by taking probewise means
     refindex <- 0

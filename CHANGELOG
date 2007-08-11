@@ -1,3 +1,9 @@
+1.13.7
+------
+move affydata from Depends to Suggest:
+
+
+
 1.13.6
 ------
 change MAplot vignette to refer to ExpressionSet rather than exprSet objects

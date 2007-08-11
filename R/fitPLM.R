@@ -92,7 +92,7 @@
 ## Apr 27-28, 2006 - clean up how normalization methods are check and normalization parameters are validated.
 ## Oct 10, 2006 - add verbosity.level argument to fitPLM
 ## Jan 3, 2007 - exprs, and se.exprs are no longer used in PLMset
-##
+## Aug 10, 2007 - replace error with stop
 ##
 ###########################################################
 
@@ -1588,7 +1588,7 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
           ## special variable so do nothing but set the correct flag
           if (is.element(term,"samples")){
             if (which.parameter.types[3]){
-              error("Can't have 'samples' appear in more than one term in model.")
+              stop("Can't have 'samples' appear in more than one term in model.")
             }
             which.parameter.types[3] <- 1
             ct <- which.constraint("samples",constraint.type)
@@ -1600,7 +1600,7 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
           }
           if (is.element(term,"probe.type")){
             if (which.parameter.types[4]){
-               error("Can't have 'probe.type' appear in more than one term in model, except with probes")
+               stop("Can't have 'probe.type' appear in more than one term in model, except with probes")
              }
             which.parameter.types[4] <- 1
             ct <- which.constraint("probe.type",constraint.type)
@@ -1614,7 +1614,7 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
           }
           if (is.element(term,"probes")){
             if (which.parameter.types[5]){
-              error("Can't have 'probes' appear in more than one term in model.")
+              stop("Can't have 'probes' appear in more than one term in model.")
             }
             which.parameter.types[5] <- 1
             ct <- which.constraint("probes",constraint.type)
@@ -2108,7 +2108,7 @@ verify.norm.param <- function(R.model, normalize.method,normalize.param = list()
 
   if (R.model$response.variable == 0){
     if (is.element(default.n.param["type"],c("pmonly","mmonly"))){
-      error("Can't normalize 'pmonly' or 'mmonly' with PMMM response")
+      stop("Can't normalize 'pmonly' or 'mmonly' with PMMM response")
     }
   }
 

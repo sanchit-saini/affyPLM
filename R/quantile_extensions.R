@@ -67,7 +67,7 @@ normalize.AffyBatch.quantiles.chromosome <- function(abatch,type=c("separate","p
   }
   if (type == "together") {
     pms <- unlist(indexProbes(abatch, "both"))
-    intensity(abatch)[pms, ] <- normalize.quantiles(intensity(abatch)[pms,, drop = FALSE],rep(which.chromos,2),copy = FALSE)
+    intensity(abatch)[pms, ] <- normalize.quantiles.in.blocks(intensity(abatch)[pms,, drop = FALSE],rep(which.chromos,2),copy = FALSE)
   }
   return(abatch)
 }

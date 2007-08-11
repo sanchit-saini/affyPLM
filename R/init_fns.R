@@ -401,7 +401,7 @@
   s <- search() 
   
   require(affy,quietly = FALSE, warn.conflicts = FALSE)
-  require(affydata,quietly = FALSE, warn.conflicts = FALSE)
+  #require(affydata,quietly = FALSE, warn.conflicts = FALSE)
   require(gcrma,quietly = FALSE, warn.conflicts = FALSE)
   .initNormfunctions(match(paste("package:",pkgname,sep=""),search()))
   .initExprSetFunctions(match(paste("package:",pkgname,sep=""),search()))

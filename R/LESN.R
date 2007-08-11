@@ -53,7 +53,7 @@ bg.correct.LESN <- function(object,method = 2,baseline = 0.25, theta=4){
   } else if (method == 1){
     bg.correct.stretch(object, baseline, type="logexponential",theta) 
   } else {
-    bg.shift(object,baseline)
+    bg.correct.shift(object,baseline)
   }
 }
 

@@ -31,7 +31,7 @@ threestep(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="
 \details{
   This function computes the expression measure using threestep
   methods. Greater details can be found in a vignette.}
-}
+
 \value{
 An \code{\link[Biobase]{exprSet}}
 }

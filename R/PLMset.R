@@ -1119,14 +1119,20 @@ if (!isGeneric("sampleNames<-"))
              standardGeneric("sampleNames<-"))
 
 
-setReplaceMethod("sampleNames",signature(object="PLMset"),
+setReplaceMethod("sampleNames",signature(object="PLMset",value="character"),
                  function(object,value){
                    rownames(pData(object)) <- value
-		   if (!any(dim(object@weights) == 0)){
-			colnames(object@weights) <- value			
+		   if (!any(dim(object@weights$PM) == 0)){
+                     colnames(object@weights$PM) <- value			
+                   }
+                   if (!any(dim(object@weights$MM) == 0)){
+                     colnames(object@weights$MM) <- value			
+                   }
+                   if (!any(dim(object@residuals$PM) == 0)){
+			colnames(object@residuals$PM) <- value			
 		   }
-		    if (!any(dim(object@residuals) == 0)){
-			colnames(object@residuals) <- value			
+                   if (!any(dim(object@residuals$MM) == 0)){
+			colnames(object@residuals$MM) <- value			
 		   }
 		   object         
                  })
