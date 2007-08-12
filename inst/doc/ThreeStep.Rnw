@@ -42,6 +42,7 @@ this will load \Rpackage{affyPLM} as well as the \Rpackage{affy} package and its
 
 The simplest method  of calling the \Rfunction{threestep} function is to call it with no arguments beyond an \Rclass{AffyBatch}.
 <<eval=FALSE>>=
+require(affydata)
 data(Dilution)
 ##FIXME: remove the next line
 Dilution = updateObject(Dilution)

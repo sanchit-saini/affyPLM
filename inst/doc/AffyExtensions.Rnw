@@ -33,7 +33,8 @@
 This majority of this document describes the \Rfunction{fitPLM} function. Other vignettes for \Rpackage{affyPLM} describe quality assessment tools and the \Rfunction{threestep} function for computing expression measures. After starting R, the package should be loaded using:
 <<loadData,results=hide>>=
 library(affyPLM)
-data(Dilution)   # an example dataset provided by the affy package
+require(affydata)
+data(Dilution)   # an example dataset provided by the affydata package
 ##FIXME: drop this after Dilution is updated
 Dilution = updateObject(Dilution)
 options(width=36)

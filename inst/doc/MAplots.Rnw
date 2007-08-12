@@ -45,6 +45,7 @@ While the \Rfunction{MAplot} function can be applied to all of the objects discu
 
 The \dataset{Dilution} dataset which is built into the \Rpackage{affydata} package will be used. Now \Robject{Dilution} is an \Rclass{AffyBatch} which can be turned into an \Rclass{ExpressionSet} object by using one of the many functions for producing expression values. In this case the \Rfunction{rma} function will be used. 
 <<makeExpressionSet>>=
+require(affydata)
 data(Dilution)
 eset.Dilution <- rma(Dilution)
 @ 

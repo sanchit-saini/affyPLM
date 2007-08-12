@@ -45,7 +45,8 @@ The core function for fitting the probe-level models is \Rfunction{fitPLM}. As i
 
 In this vignette we will use the \dataset{Dilution} dataset. Note that this is a small test dataset provided by the \Rpackage{affydata} package. The following code loads this dataset and then fits probe-level models to all of the probesets.
 <<loadData>>=
-data(Dilution)   # an example dataset provided by the affy package
+require(affydata)
+data(Dilution)   # an example dataset provided by the affydata package
 #FIXME:remove the next line
 Dilution = updateObject(Dilution)
 Pset <- fitPLM(Dilution)
