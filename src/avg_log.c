@@ -27,8 +27,9 @@
  **
  ************************************************************************/
 
-#include "avg_log.h"
+#include "PLM_avg_log.h"
 
+#include <avg_log.h>  /* the preprocessCore one */
 
 #include <R.h> 
 #include <Rdefines.h>

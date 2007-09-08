@@ -35,7 +35,7 @@
 \alias{show,PLMset-method}
 \alias{boxplot,PLMset-method}
 \alias{getCdfInfo,PLMset-method}
-\alias{indexProbes,PLMset-method,character-method}
+\alias{indexProbes,PLMset,character-method}
 \alias{cdfName,PLMset-method}
 \alias{normvec,PLMset-method}
 \alias{resid,PLMset-method}
@@ -48,7 +48,7 @@
 \alias{model.description,PLMset-method}
 \alias{summary,PLMset-method}
 \alias{sampleNames,PLMset-method}
-\alias{sampleNames<-,PLMset-method,character-method}
+\alias{sampleNames<-,PLMset,character-method}
 \alias{annotation,PLMset-method}
 \alias{description,PLMset-method}
 \alias{phenoData,PLMset-method}

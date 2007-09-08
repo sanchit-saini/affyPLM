@@ -2,8 +2,8 @@
 #define THREESTEP_SUMMARY_METHODS_H 1
 
 #include "medianpolish.h"
-#include "biweight.h"
-#include "avg_log.h"
+#include "PLM_biweight.h"
+#include "PLM_avg_log.h"
 #include "rlm_threestep.h"
 #include "log_avg.h"
 #include "medianPM.h"

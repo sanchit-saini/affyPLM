@@ -1,5 +1,5 @@
-#ifndef BIWEIGHT_H
-#define BIWEIGHT_H 1
+#ifndef PLM_BIWEIGHT_H
+#define PLM_BIWEIGHT_H 1
 
 #include "threestep_summary_methods_param.h"
 

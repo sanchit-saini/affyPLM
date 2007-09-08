@@ -30,7 +30,9 @@
  ************************************************************************/
 
 /*#include "threestep_common.h" */
-#include "biweight.h"
+
+#include "PLM_biweight.h"
+#include <biweight.h>
 #include "rma_common.h"
 #include <R.h> 
 #include <Rdefines.h>

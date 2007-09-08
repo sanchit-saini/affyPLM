@@ -1,5 +1,5 @@
-#ifndef AVG_LOG_H
-#define AVG_LOG_H
+#ifndef PLM_AVG_LOG_H
+#define PLM_AVG_LOG_H
 
 #include "threestep_summary_methods_param.h"
 

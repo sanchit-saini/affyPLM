@@ -33,7 +33,7 @@
 #include <math.h>
 
 #include "median_logPM.h"
-#include "avg_log.h"
+#include <avg_log.h>
 #include "medianPM.h"
 #include "log_avg.h"
 
