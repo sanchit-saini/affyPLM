@@ -32,6 +32,8 @@
 #include "rlm.h"
 #include "psi_fns.h"
 #include "threestep_common.h"
+
+#include <lm.h>
 #include <R.h> 
 #include <Rdefines.h>
 

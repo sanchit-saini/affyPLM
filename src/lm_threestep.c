@@ -30,6 +30,7 @@
 #include "lm_threestep.h"
 #include "rlm_threestep.h"
 #include "rlm.h"
+#include "lm.h"
 
 #include <R.h>
 #include <Rdefines.h>

@@ -35,7 +35,7 @@
 #include "median_logPM.h"
 #include <avg_log.h>
 #include "medianPM.h"
-#include "log_avg.h"
+#include <log_avg.h>
 
 #include "preprocessCore_normalization_stubs.c"
 

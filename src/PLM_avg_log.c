@@ -1,9 +1,9 @@
 /************************************************************************
  **
- ** avg_log.c
+ ** PLM_avg_log.c
  **
- ** created by: B. M. Bolstad   <bolstad@stat.berkeley.edu>
- ** created on: Jan 7, 2002  (but based on earlier work from Nov 2002)
+ ** created by: B. M. Bolstad   <bmb@bmbolstad.com>
+ ** created on: Jan 7, 2003  (but based on earlier work from Nov 2002)
  **
  ** Copyright (C) 2002-2007 Ben Bolstad
  **
@@ -24,6 +24,7 @@
  ** Oct 10, 2003 - added threestepPLM version of this summary.
  ** May 26, 2007 - clean up. most of the core functionality has been moved
  **                to preprocessCore
+ ** Sept 3, 2007 - renamed this file from avg_log.c to PLM_avg_log.c
  **
  ************************************************************************/
 

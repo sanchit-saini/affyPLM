@@ -87,7 +87,7 @@
 #include "rlm.h"
 #include "psi_fns.h"
 #include "common_types.h"
-#include "medianpolish.h"
+#include "PLM_medianpolish.h"
 #include "PLM_modelmatrix.h"
 #include "transfns.h"
 

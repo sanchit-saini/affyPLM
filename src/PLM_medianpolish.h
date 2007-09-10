@@ -1,5 +1,5 @@
-#ifndef MEDIANPOLISH_H
-#define MEDIANPOLISH_H 1
+#ifndef PLM_MEDIANPOLISH_H
+#define PLM_MEDIANPOLISH_H 1
 
 
 #include "threestep_summary_methods_param.h"

@@ -1,8 +1,8 @@
 /************************************************************************
  **
- ** file: biweight.c
+ ** file: PLM_biweight.c
  **
- ** Copyright (C) 2003 Ben Bolstad
+ ** Copyright (C) 2003-2007 Ben Bolstad
  ** 
  ** aim: implement the tukey biweight - one step method of summarizing a probeset 
  **
@@ -26,6 +26,7 @@
  ** Oct 10, 2003 - added in PLM version
  ** Apr 5, 2004 - Change mallocs to Callocs
  ** May 26, 2007 - clean code. Core routines are now in preprocessCore
+ ** Sept 9, 2007 - renames this file PLM_biweight.c from biweight.c
  **
  ************************************************************************/
 

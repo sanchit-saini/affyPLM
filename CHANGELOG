@@ -1,3 +1,11 @@
+1.13.10
+-------
+
+Continue clean up with code that had previously been moved to preprocessCore
+
+
+
+
 1.13.9
 ------
 Remove R_rlm_interfaces.c from affyPLM (it has been moved to preproceeCore 

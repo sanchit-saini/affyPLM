@@ -36,7 +36,7 @@ typedef struct{
   
 } modelfit;
 
-#include "medianpolish.h"
+#include "PLM_medianpolish.h"
 #include "common_types.h"
 #include "threestep_summary_methods_param.h"
 

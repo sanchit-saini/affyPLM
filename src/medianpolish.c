@@ -30,9 +30,11 @@
  ************************************************************************/
 
 
-#include "medianpolish.h"
+#include "PLM_medianpolish.h"
 #include "rma_common.h"
 #include "threestep_common.h"
+
+#include <medianpolish.h>
 
 #include <R.h> 
 #include <Rdefines.h>

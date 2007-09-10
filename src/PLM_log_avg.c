@@ -1,10 +1,10 @@
 /************************************************************************
  **
- ** log_avg.c
+ ** PLM_log_avg.c
  **
  ** Copyright (C) 2003 Ben Bolstad
  **
- ** created by: B. M. Bolstad   <bolstad@stat.berkeley.edu>
+ ** created by: B. M. Bolstad   <bmb@bmbolstad.com>
  ** created on: Feb 6, 2003  (but based on earlier work from Nov 2002)
  **
  ** last modified: Feb 6, 2003
@@ -19,11 +19,13 @@
  ** Jul 23, 2003 - parameter for storing SE added (not yet implemented)
  ** Oct 5, 2003 - method of adding parameters.
  ** May 26, 2007 - clean up code. Core functionality has been moved to preprocessCore
+ ** Sept 9, 2007 - rename this file PLM_log_avg.c from log_avg.c
  **
  ************************************************************************/
 
-#include "log_avg.h"
+#include "PLM_log_avg.h"
 
+#include <log_avg.h>
 
 #include <R.h> 
 #include <Rdefines.h>
