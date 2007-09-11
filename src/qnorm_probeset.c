@@ -32,9 +32,9 @@
 #include <Rinternals.h>
 #include <math.h>
 
-#include "median_logPM.h"
+#include <median_log.h>
 #include <avg_log.h>
-#include "medianPM.h"
+#include <log_median.h>
 #include <log_avg.h>
 
 #include "preprocessCore_normalization_stubs.c"
@@ -149,13 +149,13 @@ void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, const ch
       }
       if (uselog){
 	if (usemedian){
-	  MedianLogPM_noSE(data, rows, cols, cur_rows, cur_exprs, nprobes);
+	  MedianLog_noSE(data, rows, cols, cur_rows, cur_exprs, nprobes);
 	} else {
 	  AverageLog_noSE(data, rows, cols, cur_rows, cur_exprs, nprobes);
 	}
       } else {
 	if (usemedian){
-	  LogMedianPM(data, rows, cols, cur_rows, cur_exprs, nprobes,cur_SE);
+	  LogMedian(data, rows, cols, cur_rows, cur_exprs, nprobes,cur_SE);
 	} else {
 	  LogAverage(data, rows, cols, cur_rows, cur_exprs, nprobes,cur_SE);
 	}

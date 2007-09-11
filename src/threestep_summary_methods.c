@@ -39,7 +39,7 @@ pt2Summary SummaryMethod(int code){
   funcArr[3] = &rlm_threestep;
   funcArr[4] = &LogAverage_threestep;
   funcArr[5] = &LogMedianPM_threestep;
-  funcArr[6] = &MedianLogPM;
+  funcArr[6] = &MedianLogPM_threestep;
   funcArr[7] = &LogNthLargestPM;
   funcArr[8] = &lm_threestep;
 

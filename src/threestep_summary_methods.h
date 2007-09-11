@@ -6,8 +6,8 @@
 #include "PLM_avg_log.h"
 #include "rlm_threestep.h"
 #include "PLM_log_avg.h"
-#include "medianPM.h"
-#include "median_logPM.h"
+#include "PLM_medianPM.h"
+#include "PLM_median_logPM.h"
 #include "nthLargestPM.h"
 #include "lm_threestep.h"
 

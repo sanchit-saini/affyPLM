@@ -1,11 +1,11 @@
 /************************************************************************
  **
- ** median_logPM.c
+ ** PLM_median_logPM.c
  **
- ** created by: B. M. Bolstad   <bolstad@stat.berkeley.edu>
+ ** created by: B. M. Bolstad   <bmb@bmbolstad.com>
  ** created on: Feb 6, 2003  (but based on earlier work from Nov 2002)
  **
- ** Copyright (C) 2003   Ben Bolstad
+ ** Copyright (C) 2003-2007   Ben Bolstad
  **
  ** last modified: Feb 6, 2003
  **
@@ -19,11 +19,12 @@
  ** Feb 24, 2003 - Remove unused variable in i from MedianLog
  ** Jul 23, 2003 - add SE parameter (but not yet implemented)
  ** Oct 10, 2003 - added PLM version
+ ** Sep 10, 2007 - renamed this file to PLM_median_logPM.c from median_logPM.c
  **
  ************************************************************************/
 
 #include "threestep_common.h"
-#include "median_logPM.h"
+#include "PLM_median_logPM.h"
 
 #include <R.h> 
 #include <Rdefines.h>
@@ -34,26 +35,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <median_log.h>
 
-/***************************************************************************
- **
- ** double MedianLog(double *x, int length)
- **
- ** double *x - a vector of PM intensities 
- ** int length - length of *x
- **
- ** take the log2 of the median of PM intensities.
- **
- ***************************************************************************/
 
-double MedianLog(double *x, int length){
-
-  double med = 0.0;
-  
-  med = median(x,length);
- 
-  return (med);    
-}
 
 /***************************************************************************
  **
@@ -72,21 +56,8 @@ double MedianLog(double *x, int length){
  **
  ***************************************************************************/
 
-void MedianLogPM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE,  summary_plist *summary_param){
-  int i,j;
-  double *z = Calloc(nprobes*cols,double);
-
-  for (j = 0; j < cols; j++){
-    for (i =0; i < nprobes; i++){
-      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
-    }
-  } 
-  
-  for (j=0; j < cols; j++){
-    results[j] = MedianLog(&z[j*nprobes],nprobes); 
-    resultsSE[j] = R_NaReal;
-  }
-  Free(z);
+void MedianLogPM_threestep(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE,  summary_plist *summary_param){
+  MedianLog(data, rows, cols, cur_rows, results, nprobes, resultsSE);
 }
 
 
@@ -109,20 +80,7 @@ void MedianLogPM(double *data, int rows, int cols, int *cur_rows, double *result
  ***************************************************************************/
 
 void MedianLogPM_noSE(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes){
-  int i,j;
-  double *z = Calloc(nprobes*cols,double);
-
-  for (j = 0; j < cols; j++){
-    for (i =0; i < nprobes; i++){
-      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
-    }
-  } 
-  
-  for (j=0; j < cols; j++){
-    results[j] = MedianLog(&z[j*nprobes],nprobes);
-
-  }
-  Free(z);
+  MedianLog_noSE(data, rows, cols, cur_rows, results, nprobes);
 }
 
 
@@ -135,15 +93,12 @@ void MedianLogPM_PLM(double *data, int rows, int cols, int *cur_rows, double *re
 
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
-      z[j*nprobes + i] = log(data[j*rows + cur_rows[i]])/log(2.0);  
+      z[j*nprobes + i] = data[j*rows + cur_rows[i]];  
     }
   } 
-  
-  for (j=0; j < cols; j++){
-    results[j] = MedianLog(&z[j*nprobes],nprobes); 
-    resultsSE[j] = R_NaReal;
-  }
 
+
+  medianlog_no_copy(z, nprobes, cols, results, resultsSE);
   
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){

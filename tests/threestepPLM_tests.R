@@ -3,8 +3,9 @@ library(affyPLM)
 
 # test threestep and threestepPLM to see if they agree
 
+
 check.coefs <- function(Pset,Pset2){
-  if (any(coefs(Pset) != exprs(Pset2))){
+  if (any(abs(coefs(Pset) - exprs(Pset2)) > 1e-14)){
    stop("No agreement between threestepPLM and threestep in coefs")
   }	
 }
