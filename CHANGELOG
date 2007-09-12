@@ -1,3 +1,14 @@
+1.13.13
+-------
+commit the deletion of a file that should have been removed from
+the repository
+
+1.13.12
+-------
+restructure medianlogPM and logmedianPM code
+
+
+
 1.13.10
 -------
 
