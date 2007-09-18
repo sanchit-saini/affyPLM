@@ -60,7 +60,7 @@ MAplot(eset.Dilution)
 @ 
 
 <<FirstUsageDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("MAplot-FirstUse.png",height=8,width=8,pointsize=10,res=300)
+bitmap("MAplotFirstUse.png",height=8,width=8,pointsize=10,res=300)
 par(mfrow=c(2,2))
 MAplot(eset.Dilution)
 dev.off()
@@ -68,7 +68,7 @@ dev.off()
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{MAplot-FirstUse}
+\includegraphics[width=0.49\textwidth]{MAplotFirstUse}
 \end{center}
 \caption{\label{First Use}MA-plots comparing the expression values for each array with a synthetic probeset-wise median array.}
 \end{figure}
@@ -86,7 +86,7 @@ MAplot(eset.Dilution,plot.method="smoothScatter")
 with the resulting set of MA-plots shown in Figure \ref{smoothScatter}.
 
 <<smoothScatterDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("MAplot-smoothScatter.png",height=8,width=8,pointsize=10,res=300)
+bitmap("MAplotsmoothScatter.png",height=8,width=8,pointsize=10,res=300)
 par(mfrow=c(2,2))
 MAplot(eset.Dilution,plot.method="smoothScatter",nrpoints=256)
 dev.off()
@@ -95,7 +95,7 @@ dev.off()
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{MAplot-smoothScatter}
+\includegraphics[width=0.49\textwidth]{MAplotsmoothScatter}
 \end{center}
 \caption{\label{smoothScatter}MA-plots created using smoothScatter}
 \end{figure}
@@ -109,7 +109,7 @@ MAplot(eset.Dilution,plot.method="smoothScatter",ref=1)
 with the results shown in Figure \ref{smoothScatterRef}.
 
 <<RefUsageDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("MAplot-smoothScatterRef.png",height=8,width=8,pointsize=10,res=300)
+bitmap("MAplotsmoothScatterRef.png",height=8,width=8,pointsize=10,res=300)
 par(mfrow=c(2,2))
 MAplot(eset.Dilution,ref=1,plot.method="smoothScatter",nrpoints=256)
 dev.off()
@@ -119,7 +119,7 @@ dev.off()
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{MAplot-smoothScatterRef}
+\includegraphics[width=0.49\textwidth]{MAplotsmoothScatterRef}
 \end{center}
 \caption{\label{smoothScatterRef}MA-plots created with the \Rfunarg{ref} argument.}
 \end{figure}
@@ -133,7 +133,7 @@ MAplot(eset.Dilution,which=c(2,4),ref=1,plot.method="smoothScatter")
 @ 
 with the resultant plots shown in Figure \ref{smoothScatterWhich}. Notice that these are identical to the corresponding plots in Figure \ref{smoothScatterRef}.
 <<RefUsageWhichShow, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("MAplot-smoothScatterWhich.png",height=8,width=8,pointsize=10,res=300)
+bitmap("MAplotsmoothScatterWhich.png",height=8,width=8,pointsize=10,res=300)
 par(mfrow=c(2,1))
 MAplot(eset.Dilution,which=c(2,4),ref=1,plot.method="smoothScatter",nrpoints=256)
 dev.off()
@@ -142,7 +142,7 @@ dev.off()
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{MAplot-smoothScatterWhich}
+\includegraphics[width=0.49\textwidth]{MAplotsmoothScatterWhich}
 \end{center}
 \caption{\label{smoothScatterWhich}MA-plots created with the \Rfunarg{which} argument.}
 \end{figure}
@@ -157,7 +157,7 @@ MAplot(eset.Dilution,which=c(1,2),ref=c(1,2),plot.method="smoothScatter")
 creates the MA-plots for the first and second arrays each against a median reference array created using these two arrays. The resulting plots are shown in Figure \ref{smoothScatterSubset}.
 
 <<SubsetUsageWhichDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("MAplot-smoothScatterSubset.png",height=8,width=8,pointsize=10,res=300)
+bitmap("MAplotsmoothScatterSubset.png",height=8,width=8,pointsize=10,res=300)
 par(mfrow=c(2,1))
 MAplot(eset.Dilution,which=c(1,2),ref=c(1,2),plot.method="smoothScatter",nrpoints=256)
 dev.off()
@@ -166,7 +166,7 @@ dev.off()
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{MAplot-smoothScatterSubset}
+\includegraphics[width=0.49\textwidth]{MAplotsmoothScatterSubset}
 \end{center}
 \caption{\label{smoothScatterSubset}MA-plots created with the \Rfunarg{ref} argument.}
 \end{figure}
@@ -201,7 +201,7 @@ which results in Figure \ref{UsingAddPercentPresent}.
 
 
 <<addDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("MAplot-add.png",height=8,width=8,pointsize=10,res=300)
+bitmap("MAplotadd.png",height=8,width=8,pointsize=10,res=300)
 par(mfrow=c(1,1))
 MAplot(eset.Dilution[Number.Present ==4,],show.statistics=FALSE,which=1,pch=20,cex=0.4,ylim=c(-0.8,0.8),xlim=c(2,15),add.loess=FALSE)
 MAplot(eset.Dilution[Number.Present ==0,],plot.method="add",col="red",which=1,pch=20,cex=0.4,show.statistics=FALSE,add.loess=FALSE)
@@ -216,7 +216,7 @@ dev.off()
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{MAplot-add}
+\includegraphics[width=0.49\textwidth]{MAplotadd}
 \end{center}
 \caption{\label{UsingAddPercentPresent}MA-plots created with the \Rfunarg{add} argument.}
 \end{figure}
@@ -229,14 +229,14 @@ MAplot(eset.Dilution,groups=c("Liver 20","Liver 20","Liver 10","Liver 10"),ref="
 with the resulting plot in Figure \ref{UsingGroups}.
 
 <<groupsDo,results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("MAplot-groups.png",height=8,width=8,pointsize=10,res=300)
+bitmap("MAplotgroups.png",height=8,width=8,pointsize=10,res=300)
 MAplot(eset.Dilution,groups=c("Liver 20","Liver 20","Liver 10","Liver 10"),ref="Liver 10")
 dev.off()
 @
 
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{MAplot-groups}
+\includegraphics[width=0.49\textwidth]{MAplotgroups}
 \end{center}
 \caption{\label{UsingGroups}MA-plots created with the \Rfunarg{groups} argument.}
 \end{figure}
