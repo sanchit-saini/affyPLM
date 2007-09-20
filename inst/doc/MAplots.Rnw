@@ -253,7 +253,10 @@ For \Rclass{AffyBatch} objects there is also a special function argument \Rfunar
 
 The \Rfunction{MAplot} function has many options and is more powerful than it might first appear. This document serves to highlight some of its more advanced features and demonstrates their usage.
 
-
+<<echo=FALSE>>=
+## give ghostscript on Windows a few seconds to catch up
+Sys.sleep(10)
+@ 
 
 \end{document}
 
