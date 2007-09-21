@@ -2,7 +2,7 @@
  **
  ** file: medianpolish.c
  **
- ** Copyright (C) 2002-2003 Ben Bolstad
+ ** Copyright (C) 2002-2007 Ben Bolstad
  **
  ** created by: B. M. Bolstad   <bolstad@stat.berkeley.edu>
  ** created on: Jan 7, 2003 (but based on code dating back as far as June 2002)
