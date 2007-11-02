@@ -1,3 +1,16 @@
+1.15.1
+------
+Add a CITATION
+
+
+
+1.13.16
+-------
+Resync with changes in preprocessCore
+
+
+
+
 1.13.13
 -------
 commit the deletion of a file that should have been removed from
@@ -19,7 +32,7 @@ Continue clean up with code that had previously been moved to preprocessCore
 
 1.13.9
 ------
-Remove R_rlm_interfaces.c from affyPLM (it has been moved to preproceeCore 
+Remove R_rlm_interfaces.c from affyPLM (it has been moved to preprocessCore 
 
 
 1.13.8

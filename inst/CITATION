@@ -1,0 +1,37 @@
+citHeader("A number of different references are relevant for affyPLM and the methodology implemented there in:")
+citEntry(entry="phdthesis",
+	title="Low Level Analysis of High-density Oligonucleotide Array Data: Background, Normalization and Summarization",
+	year = "2004",
+	school = "University of California, Berkeley.",
+	author = person(first="Benjamin",middle="M",last="Bolstad"),
+textVersion="Bolstad, BM (2004) Low Level Analysis of High-density Oligonucleotide Array Data: Background, Normalization and Summarization. Dissertation. University of California, Berkeley." , header = "General methodology for fitPLM, threestep and normalization methods")
+citEntry(entry="inbook",
+    title = "Quality Assessment of Affymetrix GeneChip Data",
+    author = personList(person(first="Benjamin",middle="M",last="Bolstad"),
+			person(first="Francois",last="Collin"),
+			person(first="Julia",last="Brettschneider"),
+			person(first="Ken",last="Simpson"),
+			person(first="Leslie",last="Cope"),
+			person(first="Rafael",middle="A",last="Irizarry"),
+			person(first="Terence",middle="P",last="Speed")),
+        booktitle="Bioinformatics and Computational Biology Solutions using R and Bioconductor",
+        editor=personList(person("R.","Gentleman"),person("V.","Carey"),person("W.","Huber"),person("R","Irizarry"),person("S","Dudoit")),
+        publisher="Springer",
+        address="New York",
+    year = 2005,
+    pages ="33--47",
+
+    textVersion = paste("Bolstad BM, Collin F, Brettschneider J, Simpson K, Cope L, Irizarry RA, and Speed TP. (2005) Quality Assessment of Affymetrix GeneChip Data in Bioinformatics and Computational Biology Solutions Using R and Bioconductor. Gentleman R, Carey V, Huber W, Irizarry R, and Dudoit S. (Eds.), Springer, New York."),
+    header="Applying the software routines for quality assessment")
+citEntry(entry="article",
+	title="Quality assessment for short oligonucleotide arrays.",
+	author=personList(person(first="Julia",last="Brettschneider"),
+			  person(first="Francois",last="Collin"),
+			  person(first="Benjamin",middle="M",last="Bolstad"),
+			  	person(first="Terence",middle="P",last="Speed")),
+	journal= "Technometrics",
+	year="2007",
+	volume="In press",
+	textVersion=paste("Brettschneider J, Collin F, Bolstad BM, and Speed TP. (2007) Quality assessment for short oligonucleotide arrays. Technometrics. In press"),
+	header="Quality assessment methodology, NUSE and RLE")
+citFooter("Considerable effort has been put into developing affyPLM. If you make use of this software package please take the time to cite it appropriately.")
