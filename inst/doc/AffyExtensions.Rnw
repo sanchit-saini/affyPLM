@@ -310,7 +310,7 @@ Probe effects can also be estimated within probe type or within probe type for e
 {\small
 \begin{tabular}{ll}\hline
 Model & {\tt fitPLM} syntax \\ \hline
-$y_{ijl} = x_j^{T}\theta + alpha_{il} + \epsilon_{ij1}$ & {\tt PMMM $\sim$ treatment + trt.cov + probe.type:probes} \\
+$y_{ijl} = x_j^{T}\theta + \alpha_{il} + \epsilon_{ij1}$ & {\tt PMMM $\sim$ treatment + trt.cov + probe.type:probes} \\
 $y_{ijl} = x_j^{T}\theta + \alpha_{ilm} + \epsilon_{ij1}$ & {\tt PMMM $\sim$ treatment + trt.cov + treatment:probe.type:probes} \\ \hline
 \end{tabular}
 }

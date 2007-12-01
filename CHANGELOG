@@ -1,3 +1,8 @@
+1.15.3
+------
+Fixed very minor typo in vignette
+
+
 1.15.2
 ------
 Remove some legacy C code from do_PLMrlm.c. This code was not part of the workflow for any user constructed fitPLM call. Removing it should help improve maintainability.
