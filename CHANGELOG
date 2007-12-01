@@ -1,3 +1,9 @@
+1.15.4
+------
+
+Removed fitPLM.old, PLM.designmatrix, PLM.designmatrix2 which were all legacy defuct functions.
+
+
 1.15.3
 ------
 Fixed very minor typo in vignette
