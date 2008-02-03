@@ -5,7 +5,7 @@
 ## Aim: Implement traditional "RMA" (Background, QN and median
 ##      polish) as a PLM (probe level model).
 ##
-## Copyright (C) 2003-2005     B. M. Bolstad 
+## Copyright (C) 2003-2008     B. M. Bolstad 
 ##
 ## Created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
 ##
@@ -21,6 +21,7 @@
 ## Mar 12, 2005 - fix it so that probe effects are returned
 ## Oct 10, 2006 - add verbosity.level argument
 ## Jan 4, 2007 - change how const.coef etc are handled
+## Feb 3, 2008 - add narrays to PLMset object
 ##
 #############################################################
 
@@ -120,6 +121,7 @@ rmaPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,background.
       cdfName=object@cdfName,
       nrow=object@nrow,
       ncol=object@ncol,
+      narrays=length(object),
       model.description = list(which.function="rmaPLM",
         preprocessing=list(bg.method=background.method,bg.param=b.param,
           background=background,norm.method=normalize.method,

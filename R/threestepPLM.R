@@ -5,9 +5,9 @@
 ## Aim: Implement threestep expression summaries in PLM framework
 ##   
 ##
-## Copyright (C) 2003-2005     B. M. Bolstad 
+## Copyright (C) 2003-2008     B. M. Bolstad 
 ##
-## Created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
+## Created by: B. M. Bolstad <bmb@bmbolstad.com>
 ##
 ## Created on: Oct 9, 2003
 ##
@@ -22,6 +22,7 @@
 ## Sep 18, 2005 - removed check for windows
 ## Oct 10, 2006 - add verbosity.level argument to function
 ## Jan 4, 2007 - fix how const.coef and se.const.coef are stored.
+## Feb 3, 2008 - add narrays to PLMset
 ##
 #############################################################
 
@@ -120,6 +121,7 @@ threestepPLM <- function(object,subset=NULL,normalize=TRUE,background=TRUE,backg
      cdfName=object@cdfName,
      nrow=object@nrow,
      ncol=object@ncol,
+     narrays=length(object),
      model.description = list(which.function="rmaPLM",
         preprocessing=list(bg.method=background.method,bg.param=b.param,
             background=background,norm.method=normalize.method,

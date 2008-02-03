@@ -2,7 +2,7 @@
 ##
 ## file: PLMset.R
 ##
-## Copyright (C) 2003-2006    Ben Bolstad
+## Copyright (C) 2003-2008    Ben Bolstad
 ##
 ## created by: B. M. Bolstad <bmb@bmbolstad.com>
 ## created on: Jan 14, 2003
@@ -94,7 +94,7 @@
 ## Aug 21, 2006 - fix some bugs in boxplot (also affects NUSE) when a non-default model is used
 ## Jan 3, 2007 - lessen the direct dependence of the PLMset on the eSet object.
 ## Jan 4, 2007 - make PLMset its own kind of object. ie it no longer contains the eset object.
-##
+## Feb 3, 2008 - Add narrays to PLMset object. Fix summary
 ##
 ###########################################################
 
@@ -119,7 +119,8 @@ setClass("PLMset",
                           normVec="matrix", varcov="list",
                           phenoData = "AnnotatedDataFrame",
                           experimentData = "MIAME",
-                          annotation = "character"),
+                          annotation = "character",
+			  narrays = "numeric"),
            prototype=list(
              probe.coefs=list(),                           #matrix(nr=0,nc=0),
              se.probe.coefs=list(),                        #matrix(nr=0,nc=0),
@@ -141,7 +142,7 @@ setClass("PLMset",
              cdfName="",
              ##FIXME: remove # below when notes is fixed
              #notes=""
-             nrow=0, ncol=0))
+             nrow=0, ncol=0, narrays=0))
 
 ## let initialize catch empty exprs or se.exprs
 
@@ -872,9 +873,9 @@ setMethod("show", "PLMset",
             cat("cdf=", object@cdfName,
                 " (", num.ids, " probeset ids)\n",
                 sep="")
-            cat("number of samples=",dim(object@weights)[2],"\n",sep="")
+            cat("number of samples=",object@narrays,"\n",sep="")
             cat("number of probesets=", num.ids, "\n",sep="")
-            cat("number of chip level parameters for each probeset=",dim(object@chip.coefs)[2],"\n")
+            cat(paste("number of chip level parameters for each probeset=",dim(object@chip.coefs)[2],"\n",sep=""))
             cat("annotation=",object@annotation,"\n",sep="")
             ##FIXM:E remove # below when notes is fixed
             ##cat("notes=",object@notes,"\n\n",sep="")
@@ -934,7 +935,7 @@ setMethod("summary","PLMset",
 
               allindexs <- indexProbesProcessed(object)
               for (probeset.names in genenames){
-                if (all(dim( exprs(object)) != 0)){
+                if (all(dim(coefs.const) != 0)){
                   cur.const.coef <- coefs.const(object)[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs))]
                   cur.const.se <-  se.const(object)[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs))]
                 }

@@ -1,3 +1,8 @@
+1.15.5
+------
+Add narrays to PLMset-class, to ensure that show(Pset) works right. Fix summary(Pset)
+
+
 1.15.4
 ------
 
