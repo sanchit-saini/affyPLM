@@ -70,70 +70,67 @@
 \section{Slots}{
   \describe{
     \item{\code{probe.coefs}:}{Object of class "matrix". Contains model
-      coefficients related to probe effects}
+      coefficients related to probe effects.}
     \item{\code{se.probe.coefs}:}{Object of class "matrix". Contains
-      standard error estimates for the probe coefficients}  
+      standard error estimates for the probe coefficients.}  
     \item{\code{chip.coefs}:}{Object of class "matrix". Contains model
       coefficients related to chip (or chip level) effects for each fit.}
     \item{\code{se.chip.coefs}:}{Object of class "matrix". Contains
-      standard error estimates for the chip coefficients}
+      standard error estimates for the chip coefficients.}
     \item{\code{model.description}:}{Object of class "character". This
       string describes the probe level model fitted.}
     \item{\code{weights}:}{List of objects of class "matrix". Contains probe
       weights for each fit. The matrix has columns for chips and rows
-      are probes}
+      are probes.}
     \item{\code{phenoData}:}{Object of class "phenoData" This is an
-      instance of class \code{phenoData} 
-      containing the patient (or case) level data. The columns of the
-      pData slot of this entity represent
-      variables and the rows represent patients or cases. }
+      instance of class \code{phenoData} containing the patient
+      (or case) level data. The columns of the pData slot of this
+      entity represent variables and the rows represent patients or cases.}
     \item{\code{annotation}}{A character string identifying the
-      annotation that may be used for the \code{exprSet} instance.}
+      annotation that may be used for the \code{ExpressionSet} instance.}
     \item{\code{description}:}{Object of class "MIAME". For
       compatibility with previous version of this class description can
       also be a "character". The class \code{characterOrMIAME} has been
       defined just for this.}
     \item{\code{cdfName}:}{A character string giving the name of the
-      cdfFile}
-    \item{\code{nrow}:}{Object of class "numeric". Number of rows in chip}
-    \item{\code{ncol}:}{Object of class "numeric". Number of cols in chip}
+      cdfFile.}
+    \item{\code{nrow}:}{Object of class "numeric". Number of rows in chip.}
+    \item{\code{ncol}:}{Object of class "numeric". Number of cols in chip.}
     \item{\code{notes}:}{Object of class "character" Vector of
-      explanatory text }
+      explanatory text.}
     \item{\code{varcov}:}{Object of class "list". A list of
-      variance/covariance matrices}
+      variance/covariance matrices.}
     \item{\code{residualSE}:}{Object of class "matrix". Contains residual
-      standard error and df}
+      standard error and df.}
     \item{\code{residuals}:}{List of objects of class "matrix". Contains
-      residuals from model fit (if stored)}
+      residuals from model fit (if stored).}
   }
-}
-\section{Extends}{
-Class \code{"exprSet"}, directly.
 }
 \section{Methods}{
   \describe{
-    \item{weights<-}{\code{signature(object = "PLMset")}: replaces the weights }
+    \item{weights<-}{\code{signature(object = "PLMset")}: replaces the weights.}
     \item{weights}{\code{signature(object = "PLMset")}: extracts the
-      model fit weights}
+      model fit weights.}
     \item{coefs<-}{\code{signature(object = "PLMset")}: replaces the
-      chip coefs.  }
+      chip coefs.}
     \item{coefs}{\code{signature(object = "PLMset")}: extracts the
-      chip coefs. }
+      chip coefs.}
     \item{se}{\code{signature(object = "PLMset")}: extracts the
-      standard error estimates of the chip coefs. }
+      standard error estimates of the chip coefs.}
     \item{se<-}{\code{signature(object = "PLMset")}: replaces the
-      standard error estimates of the chip coefs. }
+      standard error estimates of the chip coefs.}
     \item{coefs.probe}{\code{signature(object = "PLMset")}: extracts the
-      probe coefs. }
-    \item{se.probe}{\code{signature(object = "PLMset")}: extracts the standard error estimates of the probe coefs. }    
+      probe coefs.}
+    \item{se.probe}{\code{signature(object = "PLMset")}: extracts the
+      standard error estimates of the probe coefs.}    
     \item{coefs.const}{\code{signature(object = "PLMset")}: extracts the
-      intercept coefs. }
-    \item{se.const}{\code{signature(object = "PLMset")}: extracts the standard error estimates of the intercept coefs. }
+      intercept coefs.}
+    \item{se.const}{\code{signature(object = "PLMset")}: extracts the
+      standard error estimates of the intercept coefs.}
     \item{getCdfInfo}{\code{signature(object = "PLMset")}: retrieve
-      the environment that defines the location of probes by probe set. }
-    \item{image}{\code{signature(x = "PLMset")}: creates an
-      image of the robust linear model fit weights for
-      each sample.}
+      the environment that defines the location of probes by probe set.}
+    \item{image}{\code{signature(x = "PLMset")}: creates an image
+      of the robust linear model fit weights for each sample.}
     \item{indexProbes}{\code{signature(object = "PLMset", which =
 	"character")}: returns a list with locations of the probes in
       each probe  set. The list names defines the probe set
@@ -142,28 +139,24 @@ Class \code{"exprSet"}, directly.
     \item{Mbox}{\code{signature(object = "PLMset")}: gives a boxplot of
       M's for each chip. The M's are computed relative to a "median"
       chip.}
-    \item{normvec}{\code{signature(x = "PLMset")}: will return the normalization vector (if it has been
-      stored)}
-    \item{residSE}{\code{signature(x = "PLMset")}: will return the residual SE (if it has been stored)}
+    \item{normvec}{\code{signature(x = "PLMset")}: will return the normalization vector
+      (if it has been stored).}
+    \item{residSE}{\code{signature(x = "PLMset")}: will return the residual SE
+      (if it has been stored).}
     \item{boxplot}{\code{signature(x = "PLMset")}: Boxplot of Normalized
-      Unscaled Standard Errors (NUSE)}
+      Unscaled Standard Errors (NUSE).}
     \item{NUSE}{\code{signature(x = "PLMset")} : Boxplot of Normalized
-      Unscaled Standard Errors (NUSE) or NUSE values}
+      Unscaled Standard Errors (NUSE) or NUSE values.}
     \item{RLE|}{\code{signature(x = "PLMset")} : Relative Log Expression
-      boxplot or values}
+      boxplot or values.}
  }
 }
 \note{This class is better described in the vignette.}
-
 \author{B. M. Bolstad \email{bmb@bmbolstad.com}}
-
-
 \references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density
     Oligonucleotide Array Data: Background, Normalization and
     Summarization}. PhD Dissertation. University of California,
   Berkeley.}
-
 \examples{
 }
-
 \keyword{classes}

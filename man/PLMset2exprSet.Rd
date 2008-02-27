@@ -1,35 +1,29 @@
 \name{PLMset2exprSet}
 \alias{PLMset2exprSet}
 \alias{pset2eset}
-\title{Convert a PLMset to an exprSet}
+\title{Convert a PLMset to an ExpressionSet}
 \description{
-  This function converts a PLMset to an exprSet. This is often useful
-  since many Bioconductor functions operate on exprSet objects.
+  This function converts a PLMset to an ExpressionSet. This is often useful
+  since many Bioconductor functions operate on ExpressionSet objects.
 }
 \usage{
 PLMset2exprSet(pset)
 pset2eset(pset)
 }
-
 \arguments{
-  \item{pset}{The \code{\link{PLMset}} to convert to \code{\link[Biobase]{exprSet}}}
+  \item{pset}{The \code{\link{PLMset}} to convert to \code{\link[Biobase]{ExpressionSet}}.}
 }
 \details{
-  These functions convert  PLMset objects to exprSet objects. This is often useful
-  since many Bioconductor functions operate on exprSet objects. Note
-  that the finction \code{pset2eset} is a wrapper for \code{PLMset2exprSet}.
+  These functions convert PLMset objects to \code{ExpressionSet} objects.
+  This is often useful since many Bioconductor functions operate on
+  \code{ExpressionSet} objects. Note that the function \code{pset2eset}
+  is a wrapper for \code{PLMset2exprSet}.
 }
-
 \value{
-  returns a \code{\link[Biobase]{exprSet}}
-  }
-
-
-
+  returns a \code{\link[Biobase]{ExpressionSet}}
+}
 \author{Ben Bolstad \email{bmb@bmbolstad.com}}
-
-\seealso{\code{\link[Biobase]{exprSet}}}
-
+\seealso{\code{\link[Biobase]{ExpressionSet}}}
 \examples{
 data(affybatch.example)
 Pset <- fitPLM(affybatch.example)

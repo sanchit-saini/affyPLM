@@ -1,9 +1,8 @@
 ###
 ###
-### May 1, 2006 - added support for user gzipped files (should read successfully)
+### May  1, 2006 - added support for user gzipped files (should read successfully)
+### Feb 27, 2008 - removed support for exprSet objects
 ###
-
-
 
 
 
@@ -16,26 +15,6 @@ ReadRMAExpress <- function(filename,return.value=c("ExpressionSet","matrix")){
   if (file.type =="Uncompressed"){
     if (return.value == "matrix"){
       return(.Call("read_rmaexpress",filename,PACKAGE="affyPLM"))
-    } else if (return.value == "exprSet"){
-      intens <- .Call("read_rmaexpress",filename,PACKAGE="affyPLM")
-      header <- .Call("read_rmaexpress_header",filename,PACKAGE="affyPLM")
-      
-      description <- new("MIAME")
-      description@preprocessing$filenames <- header[[3]]
-      description@preprocessing$rmaexpressversion <- paste("RMAExpress",header[[1]])
-      
-      samplenames <- sub("^/?([^/]*/)*", "", header[[3]],extended = TRUE)
-      pdata <- data.frame(sample = 1:length(samplenames), row.names = samplenames)
-      phenoData <- new("AnnotatedDataFrame", data = pdata, 
-         varMetadata = data.frame(labelDescription = "arbitrary numbering"))
-      
-      return(new("ExpressionSet", 
-              exprs = intens,  
-              annotation = cleancdfname(header[[2]], addcdf = FALSE),
-              ##FIXME: remove # below when notes is fixed
-              #notes=paste("Processed using RMAExpress",header[[1]]),
-              phenoData = phenoData,
-              experimentData = description))
     }
   } else if (file.type == "Compressed"){
      if (return.value == "matrix"){
@@ -64,6 +43,5 @@ ReadRMAExpress <- function(filename,return.value=c("ExpressionSet","matrix")){
     }
    } else {
      stop("Don't recognize the format of this file.\n")
-
    }
 }

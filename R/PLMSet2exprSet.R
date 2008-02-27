@@ -2,7 +2,7 @@
 ##
 ## file: PLMset2exprSet
 ##
-## aim: Convert a PLMset to exprSet.
+## aim: Convert a PLMset to ExpressionSet.
 ##
 ## Copyright (C) 2003   Ben Bolstad
 ##
