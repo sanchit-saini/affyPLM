@@ -1,3 +1,8 @@
+1.15.6
+------
+Replaced usage of soon to be defunct class exprSet with ExpressionSet.
+
+
 1.15.5
 ------
 Add narrays to PLMset-class, to ensure that show(Pset) works right. Fix summary(Pset)
@@ -5,7 +10,6 @@ Add narrays to PLMset-class, to ensure that show(Pset) works right. Fix summary(
 
 1.15.4
 ------
-
 Removed fitPLM.old, PLM.designmatrix, PLM.designmatrix2 which were all legacy defuct functions.
 
 
