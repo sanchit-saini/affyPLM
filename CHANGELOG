@@ -1,3 +1,8 @@
+1.15.8
+------
+remove weightedkerneldensity.c which was not used anywhere.
+
+
 1.15.6
 ------
 Replaced usage of soon to be defunct class exprSet with ExpressionSet.
