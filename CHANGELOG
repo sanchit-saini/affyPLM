@@ -1,3 +1,9 @@
+1.15.9
+------
+rma background correction code from preprocessCore is now used
+rma_background2.c and rma_background2.h are now removed
+
+
 1.15.8
 ------
 remove weightedkerneldensity.c which was not used anywhere.

@@ -45,11 +45,12 @@
  ** Jul 10, 2006 - add log.scalefactors support into scaling normalization.
  ** Oct 10, 2006 - add verbosity argument to functions. Higher levels of verbosity give more text output to the screen
  ** Oct 12, 2006 - add a function that does both background and normalization
+ ** Mar 31, 2008 - make RMA background use preprocessCore implementation
  **
  *********************************************************************/
 
 #include "rma_common.h" 
-#include "rma_background2.h" 
+#include "rma_background4.h" 
 #include "qnorm.h"
 #include "idealmismatch.h"
 #include "LESN.h"
@@ -66,6 +67,7 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "preprocessCore_background_stubs.c"
 
 /********************************************************************************************
  **
@@ -145,7 +147,7 @@ SEXP GetParameter(SEXP alist, char *param_name){
 
 SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP bg_type,SEXP background_param, SEXP verbosity){
   int i,j;
-  double *PM,*MM;
+  double *PM,*MM,*PMMM;
   
   double theta, baseline;
   int rows, cols;
@@ -156,8 +158,10 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
   int verbosity_level;
   
   SEXP dim1;
-  SEXP densfunc;
-  SEXP rho;
+  /*
+    SEXP densfunc;
+    SEXP rho;
+  */
   SEXP LESN_param;
   SEXP param;
   
@@ -178,20 +182,23 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
 
 
   if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"RMA.2") == 0){
-    densfunc = GetParameter(background_param,"densfun");
-    rho = GetParameter(background_param,"rho");
     param = GetParameter(background_param,"type");
+    PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
+    MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
+    
+
     if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
       if (verbosity_level > 0){
 	Rprintf("Background correcting PM\n");
       }
-      PMmat = bg_correct_c(PMmat, MMmat, densfunc,rho,rma_bg_type);
+      rma_bg_correct(PM, rows, cols);
+
     }
     if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
       if (verbosity_level > 0){
 	Rprintf("Background correcting MM\n");
       }
-      MMmat = bg_correct_c(MMmat, PMmat, densfunc,rho,rma_bg_type);
+      rma_bg_correct(MM, rows, cols);
     }
     if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){ 
       if (verbosity_level > 0){
@@ -209,7 +216,8 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
 	  NUMERIC_POINTER(allPMMM)[j*2*rows + i + rows] = NUMERIC_POINTER(MMmat)[j*rows + i];
 	}
       }
-      allPMMM = bg_correct_c(allPMMM, MMmat, densfunc,rho,rma_bg_type);
+      PMMM = NUMERIC_POINTER(AS_NUMERIC(allPMMM));
+      rma_bg_correct(PMMM, 2*rows, cols);
       for (i=0; i < rows; i++){
 	for (j=0; j < cols; j++){
 	  NUMERIC_POINTER(PMmat)[j*rows + i] = NUMERIC_POINTER(allPMMM)[j*2*rows + i];

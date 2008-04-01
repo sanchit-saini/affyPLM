@@ -37,7 +37,7 @@
  ************************************************************************/
 
 #include "rma_common.h" 
-#include "rma_background2.h" 
+
 
 /*#include "medianpolish.h"
 #include "biweight.h"
