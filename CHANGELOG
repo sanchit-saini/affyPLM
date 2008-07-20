@@ -1,3 +1,10 @@
+1.17.1
+------
+Fix typo in get.psi.code (Geman-McClure issue)
+(see http://article.gmane.org/gmane.science.biology.informatics.conductor/19075)
+
+
+
 1.15.9
 ------
 rma background correction code from preprocessCore is now used

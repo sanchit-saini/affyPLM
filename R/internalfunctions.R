@@ -14,6 +14,7 @@
 ## Jan 18, 2004 - Initial version. Move functions out of
 ##                fitPLM, threestepPLM, threestep, rmaPLM
 ## Apr 27, 2006 - fix typo in get.background.code
+## Jul 19, 2008 - fix typo in get.psi.code
 ##
 ###########################################################
 
@@ -42,7 +43,7 @@ get.psi.code <- function(name){
   psi.names <- c("Huber","fair","Cauchy","Geman-McClure","Welsch","Tukey","Andrews")
   if (!is.element(name, psi.names)) {
     stop(paste(name, "is not a valid Psi type. Please use one of:",
-               "Huber","fair","Cauchy","Geman-Mclure","Welsch","Tukey","Andrews"))
+               "Huber","fair","Cauchy","Geman-McClure","Welsch","Tukey","Andrews"))
   }
   code <- c(0:6)[name == psi.names]
   code
