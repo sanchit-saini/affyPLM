@@ -1,7 +1,7 @@
 %\VignetteIndexEntry{affyPLM: Advanced use of the MAplot function}
 %\VignettePackage{affyPLM}
 \documentclass[12pt]{article}
-\usepackage{amsmath,pstricks}
+\usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage[authoryear,round]{natbib}
 

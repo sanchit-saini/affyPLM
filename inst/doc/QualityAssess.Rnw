@@ -1,7 +1,7 @@
 %\VignetteIndexEntry{affyPLM: Model Based QC Assessment of Affymetrix GeneChips}
 %\VignettePackage{affyPLM}
 \documentclass[12pt]{article}
-\usepackage{amsmath,pstricks}
+\usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage[authoryear,round]{natbib}
 
