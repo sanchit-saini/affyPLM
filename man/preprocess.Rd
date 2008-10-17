@@ -43,10 +43,10 @@ An \code{\link[affy]{AffyBatch}}
 \seealso{\code{\link[affy]{expresso}}, \code{\link[affy]{rma}}}
 
 \examples{
-data(affybatch.example)
+data(Dilution)
 
 # should be equivalent to the bg and norm of rma()
-abatch.preprocessed <- preprocess(affybatch.example)
+abatch.preprocessed <- preprocess(Dilution)
 
 }
 \keyword{manip}

@@ -56,8 +56,8 @@ normalize.ExpressionSet.scaling(eset,trim=0.02,baseline=-1,transfn=c("none","log
 }
 
 \examples{
-data(affybatch.example)
-eset <- rma(affybatch.example,normalize=FALSE,background=FALSE)
+data(Dilution)
+eset <- rma(Dilution, normalize=FALSE, background=FALSE)
 normalize(eset)
 }
 

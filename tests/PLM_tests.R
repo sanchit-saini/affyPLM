@@ -5,10 +5,10 @@ if (do.all.tests){
 
 library(affyPLM)
 
-data(affybatch.example)
+data(Dilution)
 
 
-Pset <- fitPLM(affybatch.example)
+Pset <- fitPLM(Dilution)
 
 #check accessors for parameters and se
 
@@ -27,18 +27,18 @@ resid(Pset)[[1]][1:5,]
 
 #test varcov
 
-Pset <- fitPLM(affybatch.example,background=FALSE,normalize=FALSE,output.param=list(varcov="chiplevel"))
+Pset <- fitPLM(Dilution,background=FALSE,normalize=FALSE,output.param=list(varcov="chiplevel"))
 varcov(Pset)[1:3]
 
 
 #test each of the possible weight functions
-Pset <- fitPLM(affybatch.example,background=FALSE,normalize=FALSE,model.param=list(psi.type="Huber"))
-Pset <- fitPLM(affybatch.example,background=FALSE,normalize=FALSE,model.param=list(psi.type="fair"))
-Pset <- fitPLM(affybatch.example,background=FALSE,normalize=FALSE,model.param=list(psi.type="Cauchy"))
-Pset <- fitPLM(affybatch.example,background=FALSE,normalize=FALSE,model.param=list(psi.type="Geman-McClure"))
-Pset <- fitPLM(affybatch.example,background=FALSE,normalize=FALSE,model.param=list(psi.type="Welsch"))
-Pset <- fitPLM(affybatch.example,background=FALSE,normalize=FALSE,model.param=list(psi.type="Tukey"))
-Pset <- fitPLM(affybatch.example,background=FALSE,normalize=FALSE,model.param=list(psi.type="Andrews"))
+Pset <- fitPLM(Dilution,background=FALSE,normalize=FALSE,model.param=list(psi.type="Huber"))
+Pset <- fitPLM(Dilution,background=FALSE,normalize=FALSE,model.param=list(psi.type="fair"))
+Pset <- fitPLM(Dilution,background=FALSE,normalize=FALSE,model.param=list(psi.type="Cauchy"))
+Pset <- fitPLM(Dilution,background=FALSE,normalize=FALSE,model.param=list(psi.type="Geman-McClure"))
+Pset <- fitPLM(Dilution,background=FALSE,normalize=FALSE,model.param=list(psi.type="Welsch"))
+Pset <- fitPLM(Dilution,background=FALSE,normalize=FALSE,model.param=list(psi.type="Tukey"))
+Pset <- fitPLM(Dilution,background=FALSE,normalize=FALSE,model.param=list(psi.type="Andrews"))
 
 # a larger example to do some testing of the graphical functions
 
@@ -105,9 +105,9 @@ coefs.probe(Pset)[1:16]
 #check that fitPLM rlm agrees with threestep rlm and threestepPLM rlm
 
 
-Pset <- fitPLM(affybatch.example)
-eset <- threestep(affybatch.example,summary.method="rlm")
-Pset2 <- threestepPLM(affybatch.example,summary.method="rlm")
+Pset <- fitPLM(Dilution)
+eset <- threestep(Dilution,summary.method="rlm")
+Pset2 <- threestepPLM(Dilution,summary.method="rlm")
 
 if (any(abs(coefs(Pset) - exprs(eset)) > 1e-14)){
   stop("no agreement between fitPLM and threestep")

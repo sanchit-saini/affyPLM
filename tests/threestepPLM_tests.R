@@ -19,47 +19,47 @@ check.resids <- function(Pset,Pset2){
 
 
 
-data(affybatch.example)
+data(Dilution)
 
-Pset <- threestepPLM(affybatch.example)
-Pset2 <- threestep(affybatch.example)
+Pset <- threestepPLM(Dilution)
+Pset2 <- threestep(Dilution)
 check.coefs(Pset,Pset2)
 
-Pset <- threestepPLM(affybatch.example,summary.method="tukey.biweight")
-Pset2 <- threestep(affybatch.example,summary.method="tukey.biweight")
+Pset <- threestepPLM(Dilution,summary.method="tukey.biweight")
+Pset2 <- threestep(Dilution,summary.method="tukey.biweight")
 check.coefs(Pset,Pset2)
 
-Pset <- threestepPLM(affybatch.example,summary.method="average.log")
-Pset2 <- threestep(affybatch.example,summary.method="average.log")
+Pset <- threestepPLM(Dilution,summary.method="average.log")
+Pset2 <- threestep(Dilution,summary.method="average.log")
 check.coefs(Pset,Pset2)
 
-Pset <- threestepPLM(affybatch.example,summary.method="rlm")
-Pset2 <- threestep(affybatch.example,summary.method="rlm")
+Pset <- threestepPLM(Dilution,summary.method="rlm")
+Pset2 <- threestep(Dilution,summary.method="rlm")
 check.coefs(Pset,Pset2)
 
-Pset <- threestepPLM(affybatch.example,summary.method="log.average")
-Pset2 <- threestep(affybatch.example,summary.method="log.average")
+Pset <- threestepPLM(Dilution,summary.method="log.average")
+Pset2 <- threestep(Dilution,summary.method="log.average")
 check.coefs(Pset,Pset2)
 
-Pset <- threestepPLM(affybatch.example,summary.method="log.median")
-Pset2 <- threestep(affybatch.example,summary.method="log.median")
+Pset <- threestepPLM(Dilution,summary.method="log.median")
+Pset2 <- threestep(Dilution,summary.method="log.median")
 check.coefs(Pset,Pset2)
 
-Pset <- threestepPLM(affybatch.example,summary.method="median.log")
-Pset2 <- threestep(affybatch.example,summary.method="median.log")
+Pset <- threestepPLM(Dilution,summary.method="median.log")
+Pset2 <- threestep(Dilution,summary.method="median.log")
 check.coefs(Pset,Pset2)
 
-Pset <- threestepPLM(affybatch.example,summary.method="log.2nd.largest")
-Pset2 <- threestep(affybatch.example,summary.method="log.2nd.largest")
+Pset <- threestepPLM(Dilution,summary.method="log.2nd.largest")
+Pset2 <- threestep(Dilution,summary.method="log.2nd.largest")
 check.coefs(Pset,Pset2)
 
-Pset <- threestepPLM(affybatch.example,summary.method="lm")
-Pset2 <- threestep(affybatch.example,summary.method="lm")
+Pset <- threestepPLM(Dilution,summary.method="lm")
+Pset2 <- threestep(Dilution,summary.method="lm")
 check.coefs(Pset,Pset2)
 
 #check if threestepPLM agrees with rmaPLM
-Pset <- threestepPLM(affybatch.example)
-Pset2 <- rmaPLM(affybatch.example)
+Pset <- threestepPLM(Dilution)
+Pset2 <- rmaPLM(Dilution)
 
 if (any(coefs(Pset) != coefs(Pset2))){
    stop("No agreement between threestepPLM and rmaPLM in coefs")

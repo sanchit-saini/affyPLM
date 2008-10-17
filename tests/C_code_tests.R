@@ -843,38 +843,38 @@ if (test.PLM.modelmatrix){
   #R.model <- PLM.designmatrix3(Dilution,model=PMMM ~ probes + blah)
   #Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
 
-  library(affyPLM);data(affybatch.example)
+  library(affyPLM);data(Dilution)
    output <- list(weights = TRUE, residuals = TRUE, varcov ="chiplevel", resid.SE = TRUE)
   modelparam <- list(trans.fn="log2", se.type = 4, psi.type = 0, psi.k =1.345,max.its = 20, init.method = "ls",weights.chip=NULL,weights.probe=NULL)
-  R.model <- PLM.designmatrix3(affybatch.example,model=PMMM ~ probe.type + probe.type:probes + samples)
-  Fitresults <- .Call("rlm_PLMset",pm(affybatch.example),mm(affybatch.example),probeNames(affybatch.example),length(geneNames(affybatch.example)),R.model,output,modelparam)
+  R.model <- PLM.designmatrix3(Dilution,model=PMMM ~ probe.type + probe.type:probes + samples)
+  Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
 
-  library(affyPLM);data(affybatch.example)
+  library(affyPLM);data(Dilution)
   output <- list(weights = TRUE, residuals = TRUE, varcov ="chiplevel", resid.SE = TRUE)
   modelparam <- list(trans.fn="log2", se.type = 4, psi.type = 0, psi.k =1.345,max.its = 20, init.method = "ls",weights.chip=NULL,weights.probe=NULL)
-  R.model <- PLM.designmatrix3(affybatch.example,model=PMMM ~ samples:probe.type + probe.type:probes + samples)
-  Fitresults <- .Call("rlm_PLMset",pm(affybatch.example),mm(affybatch.example),probeNames(affybatch.example),length(geneNames(affybatch.example)),R.model,output,modelparam)
+  R.model <- PLM.designmatrix3(Dilution,model=PMMM ~ samples:probe.type + probe.type:probes + samples)
+  Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
   
   
  output <- list(weights = TRUE, residuals = TRUE, varcov ="chiplevel", resid.SE = TRUE)
   modelparam <- list(trans.fn="log2", se.type = 4, psi.type = 0, psi.k =1.345,max.its = 20, init.method = "ls",weights.chip=NULL,weights.probe=NULL)
   blah <- c(1,2,2)
-  R.model <- PLM.designmatrix3(affybatch.example,model=PMMM ~ blah:probe.type + probe.type:probes + samples)
-  Fitresults <- .Call("rlm_PLMset",pm(affybatch.example),mm(affybatch.example),probeNames(affybatch.example),length(geneNames(affybatch.example)),R.model,output,modelparam)
+  R.model <- PLM.designmatrix3(Dilution,model=PMMM ~ blah:probe.type + probe.type:probes + samples)
+  Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
 
   
   output <- list(weights = TRUE, residuals = TRUE, varcov ="all", resid.SE = TRUE)
   modelparam <- list(trans.fn="log2", se.type = 4, psi.type = 0, psi.k =1.345,max.its = 20, init.method = "ls",weights.chip=NULL,weights.probe=NULL)
   blah <- c(1,2,2)
-  R.model <- PLM.designmatrix3(affybatch.example,model=PM ~ -1 + probes + MM + blah)
-  Fitresults <- .Call("rlm_PLMset",pm(affybatch.example),mm(affybatch.example),probeNames(affybatch.example),length(geneNames(affybatch.example)),R.model,output,modelparam)
+  R.model <- PLM.designmatrix3(Dilution,model=PM ~ -1 + probes + MM + blah)
+  Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
 
   
   output <- list(weights = TRUE, residuals = TRUE, varcov ="all", resid.SE = TRUE)
   modelparam <- list(trans.fn="log2", se.type = 4, psi.type = 0, psi.k =1.345,max.its = 20, init.method = "ls",weights.chip=NULL,weights.probe=NULL)
   blah <- c(1,2,2)
-  R.model <- PLM.designmatrix3(affybatch.example,model=PM ~ -1 + probes + MM + samples)
-  Fitresults <- .Call("rlm_PLMset",pm(affybatch.example),mm(affybatch.example),probeNames(affybatch.example),length(geneNames(affybatch.example)),R.model,output,modelparam)
+  R.model <- PLM.designmatrix3(Dilution,model=PM ~ -1 + probes + MM + samples)
+  Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
   
 
 
@@ -884,28 +884,28 @@ if (test.PLM.modelmatrix){
 
 
   output <- verify.output.param()
-  modelparam <- verify.model.param(affybatch.example,PM ~ -1 + probes + MM + samples)
-  R.model <- PLM.designmatrix3(affybatch.example,model=PM ~ -1 + probes + MM + samples)
+  modelparam <- verify.model.param(Dilution,PM ~ -1 + probes + MM + samples)
+  R.model <- PLM.designmatrix3(Dilution,model=PM ~ -1 + probes + MM + samples)
  
-  Fitresults <- .Call("rlm_PLMset",pm(affybatch.example),mm(affybatch.example),probeNames(affybatch.example),length(geneNames(affybatch.example)),R.model,output,modelparam)
+  Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
   
-  ##verify.model.param(affybatch.example,PM ~ -1 + probes + MM + samples,model.param=list(weights.probe=rep(1,10)))
+  ##verify.model.param(Dilution,PM ~ -1 + probes + MM + samples,model.param=list(weights.probe=rep(1,10)))
 
-   modelparam <- verify.model.param(affybatch.example,PMMM ~ -1 + probes + samples,model.param=list(weights.chip=c(1,2,3),weights.probe=rep(1,2400*2)))
-  R.model <- PLM.designmatrix3(affybatch.example,model=PMMM ~ -1 + probes + samples)
-  Fitresults <- .Call("rlm_PLMset",pm(affybatch.example),mm(affybatch.example),probeNames(affybatch.example),length(geneNames(affybatch.example)),R.model,output,modelparam)
+   modelparam <- verify.model.param(Dilution,PMMM ~ -1 + probes + samples,model.param=list(weights.chip=c(1,2,3),weights.probe=rep(1,2400*2)))
+  R.model <- PLM.designmatrix3(Dilution,model=PMMM ~ -1 + probes + samples)
+  Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
 
 
   
- modelparam <- verify.model.param(affybatch.example,PM ~ -1 + probes + samples,model.param=list())
-  R.model <- PLM.designmatrix3(affybatch.example,model=PM ~ -1 + probes + samples)
-  Fitresults <- .Call("rlm_PLMset",pm(affybatch.example),mm(affybatch.example),probeNames(affybatch.example),length(geneNames(affybatch.example)),R.model,output,modelparam)
+ modelparam <- verify.model.param(Dilution,PM ~ -1 + probes + samples,model.param=list())
+  R.model <- PLM.designmatrix3(Dilution,model=PM ~ -1 + probes + samples)
+  Fitresults <- .Call("rlm_PLMset",pm(Dilution),mm(Dilution),probeNames(Dilution),length(geneNames(Dilution)),R.model,output,modelparam)
   ## probes <- rep(1:16,3)
   ##  chips <- rep(1:3,c(16,16,16))
 
   ## library(MASS)
   
-  ##fit <- rlm(log2(as.vector(pm(affybatch.example,"HG2188-HT2258_at"))) ~ -1 + as.factor(chips) + C(as.factor(probes),"contr.sum"))
+  ##fit <- rlm(log2(as.vector(pm(Dilution,"HG2188-HT2258_at"))) ~ -1 + as.factor(chips) + C(as.factor(probes),"contr.sum"))
   
 
 #test creating a PLMset based on the output from rlm_PLMset
@@ -921,13 +921,13 @@ if (test.PLM.modelmatrix){
 ###  x@residuals=Fitresults[[8]]
 ###  x@residualSE=Fitresults[[9]]
 ###  x@varcov = Fitresults[[10]]
-###  x@cdfName = affybatch.example@cdfName
- ### x@phenoData = affybatch.example@phenoData
- ### x@annotation = affybatch.example@annotation
-###  x@description = affybatch.example@description
-###  x@notes = affybatch.example@notes
-###  x@nrow= affybatch.example@nrow
-###  x@ncol= affybatch.example@ncol
+###  x@cdfName = Dilution@cdfName
+ ### x@phenoData = Dilution@phenoData
+ ### x@annotation = Dilution@annotation
+###  x@description = Dilution@description
+###  x@notes = Dilution@notes
+###  x@nrow= Dilution@nrow
+###  x@ncol= Dilution@ncol
 ### x@model.description = c(x@model.description, list(R.model=R.model))
 ###  image(x)
 

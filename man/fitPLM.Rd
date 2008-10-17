@@ -64,16 +64,12 @@ background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = 
   \code{\link[affy]{rma}}, \code{\link{threestep}}}
 
 \examples{
-data(affybatch.example)
-Pset <- fitPLM(affybatch.example,model=PM ~ -1 + probes + samples)
+data(Dilution)
+Pset <- fitPLM(Dilution, model=PM ~ -1 + probes + samples)
 se(Pset)[1:5,]
 
-
-# A larger example testing weight image function
-data(Dilution)
-\dontrun{Pset <- fitPLM(Dilution,model=PM ~ -1 + probes + samples)}
-\dontrun{image(Pset)}
-\dontrun{NUSE(Pset) # NUSE}
+image(Pset)
+NUSE(Pset) 
 
 #now lets try a wider class of models
 \dontrun{Pset <- fitPLM(Dilution,model=PM ~ -1 + probes +liver,normalize=FALSE,background=FALSE)}

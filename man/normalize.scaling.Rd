@@ -30,8 +30,8 @@ normalize.AffyBatch.scaling(abatch,type=c("together","pmonly","mmonly","separate
   A normalized \code{\link[Biobase:ExpressionSet-class]{ExpressionSet}}.
 }
 \examples{
-data(affybatch.example)
-normalize.AffyBatch.scaling(affybatch.example)
+data(Dilution)
+normalize.AffyBatch.scaling(Dilution)
 }
 \author{Ben Bolstad, \email{bmb@bmbolstad.com}}
 \seealso{\code{\link[affy]{normalize}}}

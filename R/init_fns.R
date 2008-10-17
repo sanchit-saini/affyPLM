@@ -415,11 +415,10 @@
   
   library.dynam("affyPLM",pkgname,libname,now=FALSE)
   
-  current.normmethods <- get("normalize.AffyBatch.methods",envir=as.environment("package:affy"))
+  current.normmethods <- affy::normalize.AffyBatch.methods()
   
-  assign("normalize.AffyBatch.methods",
-         c(current.normmethods,"quantiles.probeset","scaling"),
-         envir=as.environment(match("package:affy", search())))
+  upDate.normalize.AffyBatch.methods(
+         c(current.normmethods,"quantiles.probeset","scaling"))
 
   # load the Lapack library needed for some parts of fitPLM
   .C("Lapack_Init",PACKAGE="affyPLM")
