@@ -1,3 +1,8 @@
+1.19.1
+-------
+fitPLM() with the default model now returns values (coef, se) for the last probe in probeset
+
+
 1.17.1
 ------
 Fix typo in get.psi.code (Geman-McClure issue)

@@ -4,13 +4,13 @@
  **
  ** Aim: fit robust linear models for the PLMset object.
  **
- ** Copyright (C) 2003-2006 Ben Bolstad
+ ** Copyright (C) 2003-2008 Ben Bolstad
  **
- ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
+ ** created by: B. M. Bolstad <bmb@bmbolstad.com>
  ** 
  ** created on: Jan 17, 2003
  **
- ** Last modified: Jun 6, 2006
+ ** Last modified: Nov 1, 2008
  **
  ** the aim here will be to fit specified robust linear models
  ** to affy data. 
@@ -61,7 +61,8 @@
  ** Jun 6, 2006 - fix problem with space allocation when only one probe in probeset and trying to estimate
  **               probe-effects. (Example is Soybean chips).
  ** Oct 11, 2006 - make verbosity argument get passed to summarization function
- ** Nov 30, 2007 - remove code that was commented out for being defunct. This will help maintainability
+ ** Nov 30, 2007 - remove code that was commented out for being defunct. This will help maintainability.
+ ** Nov 1, 2008 - comment out some defunct code (should be removed at a later date)
  **
  **
  *********************************************************************/
@@ -97,92 +98,147 @@
  **
  ********************************************************************/
 
-static void rlmPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outputsettings *store,Datagroup *data, PLMmodelparam *model){
-  SEXP tmp;
+/* static void rlmPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outputsettings *store,Datagroup *data, PLMmodelparam *model){
+ **  SEXP tmp;
+ **
+ **  int i;
+  ** **  
+  ** Routput->nprotected = 0;
+ **
+ **  
+ **  output->outnames = (char **)Calloc(data->nprobesets,char *);
+ **
+ **  if (store->weights){
+ **    PROTECT(Routput->weights = allocMatrix(REALSXP, data->rows, data->cols));
+ **  } else {
+ **    PROTECT(Routput->weights = allocMatrix(REALSXP, 0, 0));
+ **  }
+ **  Routput->nprotected++;
+ **  output->out_weights = NUMERIC_POINTER(Routput->weights);
+ **
+ **
+  ** PROTECT(Routput->probe_coef = allocMatrix(REALSXP,data->rows,1));
+  ** Routput->nprotected++;
+ **  output->out_probeparams = NUMERIC_POINTER(Routput->probe_coef);
+ **
+ **
+ **  PROTECT(Routput->chip_coef = allocMatrix(REALSXP, data->nprobesets, model->nchipparams));
+ **  Routput->nprotected++;
+ **  output->out_chipparams = NUMERIC_POINTER(Routput->chip_coef);
+ **  
+ **  PROTECT(Routput->const_coef = allocMatrix(REALSXP, data->nprobesets, 1));
+  ** Routput->nprotected++;
+ **  output->out_constparams = NUMERIC_POINTER(Routput->const_coef);
+ **
+  ** PROTECT(Routput->chip_SE = allocMatrix(REALSXP, data->nprobesets, model->nchipparams));
+ **  Routput->nprotected++;
+ **  output->out_chip_SE = NUMERIC_POINTER(Routput->chip_SE);
+ **
+ **
+ **  PROTECT(Routput->probe_SE = allocMatrix(REALSXP,data->rows,1));
+  ** Routput->nprotected++;
+ **  output->out_probe_SE = NUMERIC_POINTER(Routput->probe_SE);
+ **
+ **
+  ** PROTECT(Routput->const_SE = allocMatrix(REALSXP, data->nprobesets, 1));
+  ** Routput->nprotected++;
+ **  output->out_const_SE = NUMERIC_POINTER(Routput->const_SE);
+ **
+ **
+  ** if (store->residuals){
+  **   PROTECT(Routput->residuals = allocMatrix(REALSXP, data->rows, data->cols));
+ **  } else {
+ **    PROTECT(Routput->residuals = allocMatrix(REALSXP, 0, 0));
+ **  }
+ **  Routput->nprotected++;
+ **  output->out_resids = NUMERIC_POINTER(Routput->residuals); 
+  ** 
+ **
+  ** if (store->residSE){
+ **    PROTECT(Routput->residSE = allocMatrix(REALSXP,data->nprobesets, 2));
+ **  } else {
+ **    PROTECT(Routput->residSE = allocMatrix(REALSXP,0,0));
+ **  }
+ **  Routput->nprotected++;
+ **  output->out_residSE = NUMERIC_POINTER(Routput->residSE);
+ **
+ **  
+ **  if (store->varcov == 0){
+ **    PROTECT(Routput->varcov = allocVector(VECSXP,0));
+ **    output->out_varcov= NULL;
+ **  } else if (store->varcov == 1){
+ **    PROTECT(Routput->varcov = allocVector(VECSXP,data->nprobesets));
+ **    output->out_varcov = Calloc(data->nprobesets,double*);
+ **    for (i =0; i < data->nprobesets; i++){
+ **      PROTECT(tmp = allocMatrix(REALSXP,model->nchipparams,model->nchipparams));
+ **      SET_VECTOR_ELT(Routput->varcov,i,tmp);
+ **      UNPROTECT(1);
+ **      output->out_varcov[i] = NUMERIC_POINTER(VECTOR_ELT(Routput->varcov,i));
+ **    }
+ **  }
+ **  Routput->nprotected++;
+ **  
+ **  
+ **  
+ **  
+ **
+ **
+ **  }  
+*/
+
+
+
+static int  checkDefaultModel(const PLM_model_parameters *model){
 
   int i;
-   
-  Routput->nprotected = 0;
+  int howmany=0;
 
-  
-  output->outnames = (char **)Calloc(data->nprobesets,char *);
-
-  if (store->weights){
-    PROTECT(Routput->weights = allocMatrix(REALSXP, data->rows, data->cols));
-  } else {
-    PROTECT(Routput->weights = allocMatrix(REALSXP, 0, 0));
+  for (i=0; i < 5; i++){
+    howmany+=model->which_parameter_types[i];
   }
-  Routput->nprotected++;
-  output->out_weights = NUMERIC_POINTER(Routput->weights);
-
-
-  PROTECT(Routput->probe_coef = allocMatrix(REALSXP,data->rows,1));
-  Routput->nprotected++;
-  output->out_probeparams = NUMERIC_POINTER(Routput->probe_coef);
-
-
-  PROTECT(Routput->chip_coef = allocMatrix(REALSXP, data->nprobesets, model->nchipparams));
-  Routput->nprotected++;
-  output->out_chipparams = NUMERIC_POINTER(Routput->chip_coef);
   
-  PROTECT(Routput->const_coef = allocMatrix(REALSXP, data->nprobesets, 1));
-  Routput->nprotected++;
-  output->out_constparams = NUMERIC_POINTER(Routput->const_coef);
-
-  PROTECT(Routput->chip_SE = allocMatrix(REALSXP, data->nprobesets, model->nchipparams));
-  Routput->nprotected++;
-  output->out_chip_SE = NUMERIC_POINTER(Routput->chip_SE);
-
-
-  PROTECT(Routput->probe_SE = allocMatrix(REALSXP,data->rows,1));
-  Routput->nprotected++;
-  output->out_probe_SE = NUMERIC_POINTER(Routput->probe_SE);
-
-
-  PROTECT(Routput->const_SE = allocMatrix(REALSXP, data->nprobesets, 1));
-  Routput->nprotected++;
-  output->out_const_SE = NUMERIC_POINTER(Routput->const_SE);
-
-
-  if (store->residuals){
-    PROTECT(Routput->residuals = allocMatrix(REALSXP, data->rows, data->cols));
-  } else {
-    PROTECT(Routput->residuals = allocMatrix(REALSXP, 0, 0));
+  if (howmany > 2 || howmany < 2){
+    return 0;
   }
-  Routput->nprotected++;
-  output->out_resids = NUMERIC_POINTER(Routput->residuals); 
-  
 
-  if (store->residSE){
-    PROTECT(Routput->residSE = allocMatrix(REALSXP,data->nprobesets, 2));
-  } else {
-    PROTECT(Routput->residSE = allocMatrix(REALSXP,0,0));
+  if (!(model->which_parameter_types[2] & model->which_parameter_types[4])){
+    return 0;
   }
-  Routput->nprotected++;
-  output->out_residSE = NUMERIC_POINTER(Routput->residSE);
 
-  
-  if (store->varcov == 0){
-    PROTECT(Routput->varcov = allocVector(VECSXP,0));
-    output->out_varcov= NULL;
-  } else if (store->varcov == 1){
-    PROTECT(Routput->varcov = allocVector(VECSXP,data->nprobesets));
-    output->out_varcov = Calloc(data->nprobesets,double*);
-    for (i =0; i < data->nprobesets; i++){
-      PROTECT(tmp = allocMatrix(REALSXP,model->nchipparams,model->nchipparams));
-      SET_VECTOR_ELT(Routput->varcov,i,tmp);
-      UNPROTECT(1);
-      output->out_varcov[i] = NUMERIC_POINTER(VECTOR_ELT(Routput->varcov,i));
-    }
+  if (model->constraints[4] == 1){
+    return 0;
   }
-  Routput->nprotected++;
-  
-  
-  
-  
+
+  if (model->strata[4] !=0){
+    return 0;
+  }
+
+  if (model->mmorpm_covariate != 0){
+    return 0;
+  }
 
 
+  if (model->response_variable == 0){
+    return 0;
+  }
+  
+  if (model->psi_code > 3){
+    return 0;
+  }
+
+
+  return 1;
+  
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -345,13 +401,15 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
   
     
   
-    
-    
-    if (model->which_parameter_types[4]){
-      if (model->constraints[4] !=0){
-	modifier = -1;
-      } else {
-	modifier =0;
+    if (checkDefaultModel(model)){
+      modifier =0;
+    } else {    
+      if (model->which_parameter_types[4]){
+	if (model->constraints[4] !=0){
+	  modifier = -1;
+	} else {
+	  modifier =0;
+	}
       }
     }
     for (i=0; i < data->n_probesets; i++){

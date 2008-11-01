@@ -79,6 +79,8 @@
  ** Mar 12, 2005 - changed the loop in do_PLMrlm
  ** Aug 23, 2006 - fix a bug in checkDefaultModel. It incorrectly said that PM ~ -1 + samples + treatment:probes was a valid default model.
  ** Nov 30, 2007 - comment out old unused code. Since it is defunct it will likely be removed in the future.
+ ** Nov 1, 2008 - remove old defunct code
+ **               return constrained probe coef and se for default model
  **
  *********************************************************************/
 
@@ -122,660 +124,6 @@ typedef struct{
   int nprobes;    /* number of probes in current probeset */
   
 } modelfit;
-
-
-
-
-
-
-
-
-/**********************************************************************
- **
- ** void rlm_design_matrix_realloc(double *X, int nprobes, int cols, int nchipparams, double *chipcovariates, int method)
- **
- ** double *X - on output contains new design matrix, should already allocated on entry
- ** int nprobes - number of probes 
- ** int cols - number of chips 
- ** int nchipparams - number of chip level factors/covariates
- ** double *chipcovariates - the chip covariates
- ** int method - an integer indicating what should be done to with the probe parameters
- **             we will code it so that 
- **              0 is no intercept with sum to zero constraint on probe effects.
- **              1 is intercept with sum to zero contraint on probe effects.
- **              10 is no intercept with the endpoint constraint on probe effects.
- **              11 is intercept with the endpoint constraint on probe effects.
- **              21 will fit model with no probe effects but an intercept
- **              20 or anything else will yield no probe effect, no intercept                   
- ** 
- ** this function sets the correct design matrix, it whould be called everytime
- ** the number of probes in the current probeset changes from the previous probeset.
- **
- **
- **********************************************************************/
-//
-//void rlm_design_matrix_realloc(double *X, int nprobes, int cols, int p, double *chipcovariates, int method){
-//
-//  int i, j, row,curcol,currow;
-//  int n = (nprobes*cols);
-//  /*int p = (nchipparams + (nprobes-1));
-//  
-//   printf("Reallocating %d %d matrix\n",n,p); */
-//
-//  
-//  /* Since we are reallocating the designmatrix we must also reintialize the entire matrix */
-//  for (i=0; i < n; i++){
-//    for (j=0; j < p; j++){
-//      X[j*n + i] = 0.0;
-//    }
-//  }
-//
-//  
-//  /*
-//    Now make an X matrix. First columns for probe effect then chip effect columns
-//    Calloc puts everything to zero, so need change only non zero elements.
-//    
-//    If none of the method codes are matched then a no intercept, no probecoef model is fit.
-//
-//  */
-//
-//  if (method == 0){
-//    for (row =0; row < n; row++){
-//      curcol = row%nprobes;
-//      if (curcol == nprobes -1){
-//	for (j=0; j < (nprobes-1); j++){
-//	  X[j*n + row] = -1.0;
-//	}
-//      } else {
-//	X[curcol*n + row] = 1.0;
-//      }
-//    }
-//     /* DO chip effects by copying across from chip covariate matrix */
-//    for (row = 0; row < n; row++){
-//      currow = row/nprobes;
-//      for (curcol= (nprobes-1); curcol < p; curcol++){
-//	X[curcol*n +row] = chipcovariates[(curcol-(nprobes-1))*cols + currow];
-//      }
-//    }
-//  } else if (method == 1){
-//    for (row =0; row < n; row++){
-//      X[row] = 1.0;  /* Intercept term */
-//      curcol = row%nprobes;
-//      if (curcol == nprobes -1){
-//	for (j=1; j < nprobes; j++){
-//	  X[j*n + row] = -1.0;
-//	}
-//      } else {
-//	X[(curcol+1)*n + row] = 1.0;
-//      }
-//    } 
-//
-//    /* DO chip effects by copying across from chip covariate matrix */
-//  
-//    for (row = 0; row < n; row++){
-//      currow = row/nprobes;
-//      for (curcol= (nprobes); curcol < p; curcol++){
-//	X[curcol*n +row] = chipcovariates[(curcol-(nprobes))*cols + currow];
-//      }
-//    }
-//    /* for (row =0; row < n; row++){
-//      for (curcol=0; curcol <p; curcol++){
-//	printf("%2.1f ",X[curcol*n + row]);
-//      }
-//      printf("\n");
-//      } */
-//  } else if (method == 10){
-//    
-//
-//     for (row =0; row < n; row++){
-//      curcol = row%nprobes;
-//      if (curcol == 0){
-//	for (j=0; j < (nprobes-1); j++){
-//	  X[j*n + row] = 0.0;
-//	}
-//      } else {
-//	X[(curcol-1)*n + row] = 1.0;
-//      }
-//    }
-//     /* DO chip effects by copying across from chip covariate matrix */
-//    for (row = 0; row < n; row++){
-//      currow = row/nprobes;
-//      for (curcol= (nprobes-1); curcol < p; curcol++){
-//	X[curcol*n +row] = chipcovariates[(curcol-(nprobes-1))*cols + currow];
-//      }
-//    }
-//    /*for (row =0; row < n; row++){
-//      for (curcol=0; curcol <p; curcol++){
-//	printf("%2.1f ",X[curcol*n + row]);
-//      }
-//      printf("\n");
-//      } */
-//
-//  } else if (method == 11){
-//    for (row =0; row < n; row++){
-//      X[row] = 1.0;  /* Intercept term */
-//      curcol = row%nprobes;
-//      if (curcol == 0){
-//	for (j=1; j < nprobes; j++){
-//	  X[j*n + row] = 0.0;
-//	}
-//      } else {
-//	X[(curcol)*n + row] = 1.0;
-//      }
-//    } 
-//
-//    /* DO chip effects by copying across from chip covariate matrix */
-//  
-//    for (row = 0; row < n; row++){
-//      currow = row/nprobes;
-//      for (curcol= (nprobes); curcol < p; curcol++){
-//	X[curcol*n +row] = chipcovariates[(curcol-(nprobes))*cols + currow];
-//      }
-//   }
-//    /* for (row =0; row < n; row++){
-//      for (curcol=0; curcol <p; curcol++){
-//	printf("%2.1f ",X[curcol*n + row]);
-//      }
-//      printf("\n");
-//      } */
-//    
-//  } else if (method == 21){
-//     for (row =0; row < n; row++){
-//      X[row] = 1.0;  /* Intercept term */
-//     } 
-//    for (row = 0; row < n; row++){
-//      currow = row/nprobes;
-//      for (curcol= 0; curcol < (p-1); curcol++){
-//	X[(curcol+1)*n +row] = chipcovariates[(curcol)*cols + currow];
-//      }
-//    }
-//
-//    /* for (row =0; row < n; row++){
-//      for (curcol=0; curcol <p; curcol++){
-//	printf("%2.1f ",X[curcol*n + row]);
-//      }
-//      printf("\n");
-//      } */ 
-//  } else if (method == 20){
-//    for (row = 0; row < n; row++){
-//      currow = row/nprobes;
-//      for (curcol= 0; curcol < p; curcol++){
-//	X[curcol*n +row] = chipcovariates[(curcol)*cols + currow];
-//      }
-//    }
-//  }
-//  
-//
-//
-//}
-
-
-
-/**********************************************************************
- ** 
- **  rlm_PLM_block(const Datagroup *data, const PLMmodelparam *model, modelfit *current)
- **
- **
- **********************************************************************
- **
- ** HERE AND BELOW IS OUTDATED. LEFT HERE FOR HISTORICAL INTEREST
- **
- ** void rlm_PLM_block(double *data, int rows, int cols, int *cur_rows, int nchipparams, double *chipcovariates, 
- **                      double *weights, double *params, double *se_estimates, int nprobes, int method,int se_method)
- **
- ** double *data - a matrix of preprocessed PM intensities: dimension rows * cols
- ** int rows - dimension matrix of *data (this will typically be the number of PM probes)
- ** int cols - dimension matrix of *data (this will typically be the number of chips)
- ** int *currows - a vector of row indices indicating which rows belong to the 
- **                current probeset: length nprobes
- ** int nchipparams - number of chip level parameters that will be fit by the model
- ** double *chipcovariates - a matrix of chip level covariates/factors (basically part 
- **                          of the designmatrix): dimension is cols*nchipparams
- ** double *weights - a matrix where the rlm weights based on the current fit will 
- **                   be stored: dimension nprobes*cols
- ** double *params - a vector where the parameter estimates are stored for the current 
- **                  fit are stored: length nchipparams + nprobes -1
- ** double *se_estimates - a vector where standard error estimates are to be 
- **                        stored:  length nchipparams + nprobes -1
- ** int nprobes - the number of probes in the current block
- ** int method - an integer code which will indicate what type of model the probe effects should follow
- ** int se_method - an integer code indicating with standard error method to use.
- **
- **
- ** this function fits a specified linear model to the probes from all chips for a particular probeset
- **
- **
- **
- **
- **
- *********************************************************************/
-//
-//void rlm_PLM_block(const Datagroup *data, const PLMmodelparam *model, modelfit *current){
-//  
-//  int i, j;
-//  /*  int n = (current->nprobes*data->cols); */
-//
-//  double *Y = Calloc(current->n,double);
-//  double lg2 = log(2.0); /* Cache hopefully for speed :) */
-//
-//  double *probeparam;
-//  double *chipparam;
-//  double constparam;
-//
-//
-//  /* log2 transform and create Y vector */
-//
-//  for (j = 0; j < data->cols; j++){
-//    for (i =0; i < current->nprobes; i++){
-//      Y[j*current->nprobes + i] = log(data->PM[j*data->rows + current->cur_rows[i]])/lg2;
-//    }
-//  }
-//
-//  if (model->init_method == 1){
-//    /* median polish */
-//    probeparam = Calloc(current->nprobes,double);
-//    chipparam = Calloc(data->cols,double);
-//    median_polishPLM(data->PM,data->rows, data->cols, current->cur_rows, probeparam, chipparam, &constparam, current->nprobes, current->cur_resids); 
-//    /*   if (model->method == 0){
-//    **  for (i =0; i < (current->nprobes-1); i++){
-//    **	current->cur_params[i] = probeparam[i];
-//    **  }
-//    **  for (i = 0; i < data->cols; i++){
-//    **	current->cur_params[i+(current->nprobes-1)] = constparam + chipparam[i];
-//    **  }
-//    ** } 
-//    */
-//    Free(probeparam);
-//    Free(chipparam);
-//  } else if (model->init_method ==2){
-//    /* fully iterated huber regression */
-//    
-//    rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(0),1.345,20,0);
-//
-//  }
-//  if (!model->default_model){
-//    
-//    /* Least Squares for general models */
-//    rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);  
-//    rlm_compute_se(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, current->cur_se_estimates,current->cur_varcov, current->cur_residSE, model->se_method, PsiFunc(model->psi_code),model->psi_k);
-//    
-//  } else {
-//    
-//    /* Optimized case for the RMA style model PM ~ -1 + samples + probes  with sum to zero constraint on probes */
- //   rlm_fit_anova(Y, current->nprobes, data->cols, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);
-//    rlm_compute_se_anova(Y, current->nprobes, data->cols, current->cur_params, current->cur_resids, current->cur_weights, current->cur_se_estimates,current->cur_varcov, current->cur_residSE, model->se_method, PsiFunc(model->psi_code),model->psi_k);
-//    
-//  }
-//  
-//    
-//  Free(Y);
-//}
-
-/*********************************************************************
- **
- ** void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,const PLMmodelparam *model, int j, int i)
- **
- ** This function should copy the results of the current fit into 
- ** the appropiate output areas.
- **
- ********************************************************************/
-//
-//void copy_PLM_results(modelfit *current, PLMoutput *output, Datagroup *data,const PLMmodelparam *model, const outputsettings *store, int j, int i){
-//
-//  int k,l;
-//  int offset;
-//
-//  /* depending on what model was fit copy the parameter estimates and standard errors to the appropriate places */
-// 
-//  
-//  if (model->method == 0){
-//    if (j == (data->rows -1)){
-//      output->out_probeparams[j] = 0.0;
-//      for (l=0; l < current->nprobes -1; l++){
-//	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l];
-//	output->out_probeparams[j]-=current->cur_params[l];
-//	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l];
-//      }
-//      output->out_probe_SE[j] = 0.0/0.0;
-//    } else {
-//      output->out_probeparams[j -1] = 0.0;
-//      for (l=0; l < current->nprobes -1; l++){
-//	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l];
-//	output->out_probeparams[j-1]-=current->cur_params[l];
-//	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l]; 
-//      }
-//      output->out_probe_SE[j-1] = 0.0/0.0;
-//    }
-//  
-//    for (k= 0; k < model->nchipparams ; k++){
-//      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+(current->nprobes-1)];
-//      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+(current->nprobes-1)];
-//    }
-//  } else if (model->method ==1){
-//    /* first element is  constcoef */
-//    
-//    if (j == (data->rows -1)){
-//      output->out_probeparams[j] = 0.0;
-//      for (l=0; l < current->nprobes -1; l++){
-//	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l+1];
-//	output->out_probeparams[j]-=current->cur_params[l+1];
-//	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l+1];
-//      }
-//      output->out_probe_SE[j] = 0.0/0.0;
-//    } else {
-//      output->out_probeparams[j -1] = 0.0;
-//      for (l=0; l < current->nprobes -1; l++){
-//	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l+1];
-//	output->out_probeparams[j-1]-=current->cur_params[l+1];
-//	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l+1]; 
-//      }
-//      output->out_probe_SE[j-1] = 0.0/0.0;
-//    }
-//    for (k= 0; k < model->nchipparams ; k++){
-//      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+(current->nprobes)];
-//      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+(current->nprobes)];
-//    }
-//    output->out_constparams[i] = current->cur_params[0];
-//    output->out_const_SE[i] = current->cur_se_estimates[0];
-//  } else if (model->method == 20){
-//    for (k= 0; k < model->nchipparams ; k++){
-//      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k];
-//      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k];
-//    }
-//  } else if (model->method == 21){
-//    output->out_constparams[i] = current->cur_params[0];
-//    output->out_const_SE[i] = current->cur_se_estimates[0];
-//    for (k= 0; k < model->nchipparams ; k++){
-//      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+1];
-//      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+1];
-//    }
-//  } else if (model->method == 10){
-//    
-//    if (j == (data->rows -1)){
-//      output->out_probeparams[j+1-current->nprobes] = 0.0;
-//      for (l=1; l < current->nprobes; l++){
-//	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l-1];
-//	/* out_probeparams[j]-=current->cur_params[l]; */
-//	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l-1];
-//      }
-//      output->out_probe_SE[j+1-current->nprobes] = 0.0;
-//    } else {
-//      output->out_probeparams[j-current->nprobes] = 0.0;
-//      for (l=1; l < current->nprobes; l++){
-//	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l-1];
-//	/* out_probeparams[j-1]-=current->cur_params[l];*/
-//	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l-1]; 
-//      }
-//      output->out_probe_SE[j-current->nprobes] = 0.0;
-//    }
-//    
-//    for (k= 0; k < model->nchipparams ; k++){
-//      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+(current->nprobes-1)];
-//      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+(current->nprobes-1)];
-//    }
-//    
-//    
-//  } else if (model->method == 11){
-//    /* first element is  constcoef */
-//    
-//    if (j == (data->rows -1)){
-//      output->out_probeparams[j+1-current->nprobes] = 0.0;
-//      for (l=1; l < current->nprobes; l++){
-//	output->out_probeparams[j +1 - (current->nprobes) + l] = current->cur_params[l];
-//	/*out_probeparams[j]-=current->cur_params[l+1]; */
-//	output->out_probe_SE[j +1 - (current->nprobes) + l] = current->cur_se_estimates[l];
-//      }
-//      output->out_probe_SE[j+1-current->nprobes] = 0.0;
-//    } else {
-//      output->out_probeparams[j -current->nprobes] = 0.0;
-//      for (l=1; l < current->nprobes; l++){
-//	output->out_probeparams[j - (current->nprobes) + l] = current->cur_params[l];
-//	/*out_probeparams[j-1]-=current->cur_params[l+1]; */
-//	output->out_probe_SE[j - (current->nprobes) + l] = current->cur_se_estimates[l]; 
-//      }
-//      output->out_probe_SE[j-current->nprobes] = 0.0;
-//    }
-//    for (k= 0; k < model->nchipparams ; k++){
-//      output->out_chipparams[k*data->nprobesets +i] = current->cur_params[k+(current->nprobes)];
-//      output->out_chip_SE[k*data->nprobesets +i] = current->cur_se_estimates[k+(current->nprobes)];
-//    }
-//    output->out_constparams[i] = current->cur_params[0];
-//    output->out_const_SE[i] = current->cur_se_estimates[0];
-//
-//  }
-//
-//
-//
-//  /* copy out the variance/covariance matrix (or parts thereof) if required */
-//
-//
-//  if (store->varcov){
-//    offset = current->p-model->nchipparams;
-//    if (store->varcov == 1){
-//      /**              0 is no intercept with sum to zero constraint on probe effects.
-//       **              1 is intercept with sum to zero contraint on probe effects.
-//       **              10 is no intercept with the endpoint constraint on probe effects.
-//      **              11 is intercept with the endpoint constraint on probe effects.
-//       **              21 will fit model with no probe effects but an intercept
-//       **              20 or anything else will yield no probe effect, no intercept  
-//       **/
-//      for (k = 0; k < model->nchipparams; k++){
-//	for (l = 0; l <= k ; l++){
-//	  output->out_varcov[i][k*model->nchipparams + l] = current->cur_varcov[(k+offset)*current->p + (l+offset)];
-//	  output->out_varcov[i][l*model->nchipparams + k] = output->out_varcov[i][k*model->nchipparams + l];
-//	}
-//      }
-//    } else {
-//      error("varcov option all not currently supported");
-//      
-//    }
-//  }
-//  
-//  /* copy the weights and residuals into output */
-//  /* note that we use the values in "store"
-//     to determine whether to save what has been returned
-//     for everything that follows                       */
-//
-//
-//  
-//  
-//  if (store->weights){
-//    if (j == (data->rows -1)){
-//      for(k=0; k < data->cols; k++){
-//	for (l=0; l < current->nprobes; l++){
-//	  output->out_weights[k*(data->rows) + (j+1 - (current->nprobes) + l)] = current->cur_weights[k*(current->nprobes) + l];
-//	}
-//	/* printf("\n"); */
-//      }
-//    } else {
-//      for(k=0; k < data->cols; k++){
-//	for (l=0; l < current->nprobes; l++){
-//	  output->out_weights[k*(data->rows) + (j - (current->nprobes) + l)] = current->cur_weights[k*(current->nprobes) + l];
-//	  /* printf("%d ",(j - (current->nprobes) + l));
-//	  **  printf("% f",current->cur_weights[k*(current->nprobes) + l]); */
-//	}
-//	/* printf("\n"); */
-//      }
-//    }
-//    
-//  }
-//
-//  if (store->residuals){
-//    if (j == (data->rows -1)){
-//      for(k=0; k < data->cols; k++){
-//	for (l=0; l < current->nprobes; l++){
-//	  output->out_resids[k*(data->rows) + (j+1 - (current->nprobes) + l)] = current->cur_resids[k*(current->nprobes) + l];
-//	}
-//      }
-//    } else {
-//      for(k=0; k < data->cols; k++){
-//	for (l=0; l < current->nprobes; l++){
-//	  output->out_resids[k*(data->rows) + (j - (current->nprobes) + l)] = current->cur_resids[k*(current->nprobes) + l];
-//	}
-//      }
-//    }
-//    
-//  }
-//
-//  if (store->residSE){
-//    output->out_residSE[i] = current->cur_residSE[0];
-//     output->out_residSE[data->nprobesets+i] = current->n - current->p;
-//  }
-//}
-
-
-
-
-
-
-
-
-
-
-/********************************************************************************************
- ** 
- ** void do_PLMrlm(Datagroup *data,  PLMmodelparam * model, PLMoutput *output, 
- **                outputsettings *store) 
- **
- ** Datagroup *data - the data to which we will be fitting models
- ** PLMmodelparam *model - information about the model to be fitted
- ** PLMoutput *output - places to store various model outputs
- ** outputsettings *store - certain items are optional and won't
- **                         be stored unless user desired.
- **
- **
- ********************************************************************************************
- **  ANYTHING BELOW THIS LINE IS OUTDATED AND SHOULD BE IGNORED. IT IS LEFT HERE FOR
- **  HISTORICAL INTEREST ONLY.
- **
- ** void do_PLMrlm(double *PM, char **ProbeNames, int *rows, int *cols, int nps, int method, 
- **                double *chipcovariates, char **outNames, double *out_weights, double *out_probeparams, 
- **                double *out_chipparams, double *out_constparams)
- **
- ** double *PM - a matrix of Preprocessed (N and B) PM probe intensities: dimension *rows by *cols
- ** char **ProbeNames - a vector of character strings, each element is the name of
- **                     the corresponding probeset that this element should belong to
- **                     ie if Probenames[i] = "ABCDEFG" then the PM values in row i of 
- **                     the PM matrix belong to probeset "ABCDEFG"
- ** int *rows - dimension of *PM
- ** int *cols - dimension of *PM
- ** int nps - number of probesets on chip
- ** int method - integer value indicating what method should be used to form the design matrix in particular in 
- **              relation to the probe effects
- ** double *chipcovariates - A matrix of chip level  factor/covariates, basically one part of the designmatrix
- ** char **outNames - a place to put the names of each probeset processed
- ** double *out_weights - a matrix into which one dumps fitted model rlm weights
- ** double *out_probeparams - a matrix to store probe effect coefficents
- ** double *out_chipparams - a matrix to store chip parameter estimates
- ** double *out_constparams - a matrix to store constant parameters (if fitted)
- ** double *out_probeSE, double *out_chipSE, double *out_constSE
- **
- **
- **
- **
- *******************************************************************************************/
-
-//void do_PLMrlm(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, outputsettings *store){
-//  int i = 0,j=0,k=0;
-//  int size;
-//  const char *first;
-//  int first_ind;
-//  int max_nrows = 1000;
-//  int old_nprobes =0;
-//  
-//
-//  modelfit *current = (modelfit *)Calloc(1,modelfit);
-//  
-//  current->cur_rows=Calloc(max_nrows,int);
-//  current->cur_weights = Calloc(data->cols,double);
-//  current->cur_params = Calloc(data->cols+100,double);
-//  current->cur_se_estimates = Calloc(data->cols+100,double);
-//  current->cur_resids = Calloc(data->cols,double);
-//  current->X = Calloc(10,double);
-//  current->p = 0;
-//  current->nprobes = 0;
-//  current->n = 0;
-//  current->cur_residSE = Calloc(2,double);
-//  current->cur_varcov = Calloc(4,double);
-//  
-//  first = data->ProbeNames[0];
-//  first_ind = 0;
-//  i =0;
-//  current->nprobes = 1;
-//  for (j = 1; j < data->rows; j++){
-//    if ((strcmp(first,data->ProbeNames[j]) != 0) | (j == (data->rows -1))){
-//      if (j == (data->rows -1)){
-//        current->nprobes++;
-//        for (k = 0; k < current->nprobes; k++){
-//	  if (k >= max_nrows){
-//	    max_nrows = 2*max_nrows;
-//	    current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
-//	  }
-//          current->cur_rows[k] = (j+1 - current->nprobes)+k;
-//        }
-//      } else {
-//        for (k = 0; k < current->nprobes; k++){
-//	  if (k >= max_nrows){
-//	    max_nrows = 2*max_nrows;
-//	    current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
-//	  }
-//          current->cur_rows[k] = (j - current->nprobes)+k;
-//	}
-//      }
-//      
-//      
-//      if (old_nprobes != current->nprobes){
-//	current->n = current->nprobes*(data->cols);
-//	if (model->method % 10 == 1){
-//	  if (model->method == 21){
-//	    current->p = model->nchipparams+1;
-//	  } else {
-//	    current->p = current->nprobes + model->nchipparams;
-//	  }
-//	} else {
-//	  if (model->method == 20){
-//	    current->p = model->nchipparams;
-//	  } else {
-//	    current->p = current->nprobes + model->nchipparams-1;
-//	  }
-//	} 
-//	current->cur_weights = Realloc(current->cur_weights,current->n,double);
-//	current->cur_resids = Realloc(current->cur_resids,current->n,double);
-//	current->cur_params  = Realloc(current->cur_params,current->p,double);
-//	current->cur_se_estimates  = Realloc(current->cur_se_estimates,current->p,double);
-//	current->cur_varcov = Realloc(current->cur_varcov,current->p*current->p, double);
-//	current->X = Realloc(current->X,current->n*current->p,double);
-//	rlm_design_matrix_realloc(current->X, current->nprobes, data->cols, current->p, model->input_chipcovariates, model->method);
-//	old_nprobes = current->nprobes;
- //     }
-//      
-//      
-//      rlm_PLM_block(data, model, current);      
-//      copy_PLM_results(current, output, data, model, store, j,i);
-//      
-//      
-//      size = strlen(first);
-//      output->outnames[i] = Calloc(size+1,char);
-//      strcpy(output->outnames[i],first);  
-//      i++;
-//      first = data->ProbeNames[j];
-//      first_ind = j;
-//      current->nprobes = 0;
-//    }
-//    current->nprobes++;
-//  }
-//
-//
-//  Free(current->X);
-//  Free(current->cur_varcov);
-//  Free(current->cur_resids);
-//  Free(current->cur_se_estimates);
-//  Free(current->cur_params);
-//  Free(current->cur_weights);
-//  Free(current->cur_rows);
-//  Free(current->cur_residSE);
-//  Free(current);
-//  }
 
 
 
@@ -879,9 +227,17 @@ static void  rlm_PLM_probeset(const PLM_model_parameters *model, const PLM_Datag
 
 
     if (isDefaultModel){
+      
+      current->cur_params = Realloc(current->cur_params,current->nprobes+data->n_arrays,double);
+      current->cur_se_estimates = Realloc(current->cur_se_estimates,current->nprobes+data->n_arrays,double);
+
       /* Optimized case for the RMA style model PM ~ -1 + samples + probes  with sum to zero constraint on probes */
       rlm_fit_anova(Y, current->nprobes, data->n_arrays, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);
       rlm_compute_se_anova(Y, current->nprobes, data->n_arrays, current->cur_params, current->cur_resids, current->cur_weights, current->cur_se_estimates,current->cur_varcov, current->cur_residSE, model->se_method, PsiFunc(model->psi_code),model->psi_k);
+      current->cur_params[current->nprobes+data->n_arrays - 1] = 0.0;
+      for (i = data->n_arrays; i <current->nprobes+data->n_arrays -1 ; i++)
+	current->cur_params[current->nprobes+data->n_arrays -1]-=current->cur_params[i];
+
     } else {
       /* Least Squares for general models */
       rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);  
@@ -994,6 +350,8 @@ static void copy_PLM_estimates(PLM_modelfit *current, PLM_output *output,PLM_Dat
   }
 
   /* Probe type effects */
+
+
   if (model->which_parameter_types[3]){
     if (model->constraints[3] == 0){
       if (model->strata[3]==0){
@@ -1046,70 +404,76 @@ static void copy_PLM_estimates(PLM_modelfit *current, PLM_output *output,PLM_Dat
   
   /* Probe effects */
 
-
-  if (model->which_parameter_types[4]){
-    /* probe effect parameter figure figure out which strata and constraints */ 
-    if (model->constraints[4] ==0){
-      /* Unconstrainted */
-      if (model->strata[4] == 0){
-	/* Overall probe effect */
-	for (i=0; i < current->nprobes;i++){
-	  output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
-	  output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+  if (checkDefaultModel(model)){
+    for (i=0; i < current->nprobes;i++){
+      output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+      output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+    }
+  } else {
+    if (model->which_parameter_types[4]){
+      /* probe effect parameter figure figure out which strata and constraints */ 
+      if (model->constraints[4] ==0){
+	/* Unconstrainted */
+	if (model->strata[4] == 0){
+	  /* Overall probe effect */
+	  for (i=0; i < current->nprobes;i++){
+	    output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+	    output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+	  }
+	  which_param+=current->nprobes;
+	} else if (model->strata[4] == 2){
+	  /* Probe effect within the levels of a treatment/covariate factor */
+	  for (i=0; i < current->nprobes*(model->max_probe_treatment_factor+1);i++){
+	    output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+	    output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+	  }
+	  which_param+=(current->nprobes*(model->max_probe_treatment_factor+1));
+	} else if (model->strata[4] == 3){
+	  /* Probe effect within probe type */
+	  for (i=0; i < 2*current->nprobes;i++){
+	    output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+	    output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+	  }
+	  which_param+=(2*current->nprobes);
+	} else if (model->strata[4] == 4){
+	  /* Probe effect within probe type within the levels of a treatment/covariate factor*/
+	  for (i=0; i < 2*current->nprobes*(model->max_probe_treatment_factor+1);i++){
+	    output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+	    output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+	  }
+	  which_param+=(2*current->nprobes*(model->max_probe_treatment_factor+1));
 	}
-	which_param+=current->nprobes;
-      } else if (model->strata[4] == 2){
-	/* Probe effect within the levels of a treatment/covariate factor */
-	for (i=0; i < current->nprobes*(model->max_probe_treatment_factor+1);i++){
-	  output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
-	  output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+      } else {
+	/* Constrained */
+	if (model->strata[4] == 0){
+	  /* Overall probe effect */
+	  for (i=0; i < current->nprobes-1;i++){
+	    output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+	    output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+	  }
+	  which_param+=current->nprobes-1;
+	} else if (model->strata[4] == 2){
+	  /* Probe effect within the levels of a treatment/covariate factor */
+	  for (i=0; i < ((current->nprobes-1)*(model->max_probe_treatment_factor+1));i++){
+	    output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+	    output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+	  }
+	  which_param+=((current->nprobes-1)*(model->max_probe_treatment_factor+1));
+	} else if (model->strata[4] == 3){
+	  /* Probe effect within probe type */
+	  for (i=0; i < (2*(current->nprobes-1));i++){
+	    output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+	    output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+	  }
+	  which_param+=(2*(current->nprobes-1));
+	} else if (model->strata[4] == 4){
+	  /* Probe effect within probe type within the levels of a treatment/covariate factor*/
+	  for (i=0; i <(2*(current->nprobes-1)*(model->max_probe_treatment_factor+1));i++){
+	    output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
+	    output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
+	  }
+	  which_param+=(2*(current->nprobes-1)*(model->max_probe_treatment_factor+1));
 	}
-	which_param+=(current->nprobes*(model->max_probe_treatment_factor+1));
-      } else if (model->strata[4] == 3){
-	/* Probe effect within probe type */
-	for (i=0; i < 2*current->nprobes;i++){
-	  output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
-	  output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
-	}
-	which_param+=(2*current->nprobes);
-      } else if (model->strata[4] == 4){
-	/* Probe effect within probe type within the levels of a treatment/covariate factor*/
-	for (i=0; i < 2*current->nprobes*(model->max_probe_treatment_factor+1);i++){
-	  output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
-	  output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
-	}
-	which_param+=(2*current->nprobes*(model->max_probe_treatment_factor+1));
-      }
-    } else {
-      /* Constrained */
-      if (model->strata[4] == 0){
-	/* Overall probe effect */
-	for (i=0; i < current->nprobes-1;i++){
-	  output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
-	  output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
-	}
-	which_param+=current->nprobes-1;
-      } else if (model->strata[4] == 2){
-	/* Probe effect within the levels of a treatment/covariate factor */
-	for (i=0; i < ((current->nprobes-1)*(model->max_probe_treatment_factor+1));i++){
-	  output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
-	  output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
-	}
-	which_param+=((current->nprobes-1)*(model->max_probe_treatment_factor+1));
-      } else if (model->strata[4] == 3){
-	/* Probe effect within probe type */
-	for (i=0; i < (2*(current->nprobes-1));i++){
-	  output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
-	  output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
-	}
-	which_param+=(2*(current->nprobes-1));
-      } else if (model->strata[4] == 4){
-	/* Probe effect within probe type within the levels of a treatment/covariate factor*/
-	for (i=0; i <(2*(current->nprobes-1)*(model->max_probe_treatment_factor+1));i++){
-	  output->out_probeparams[which_probeset][i] = current->cur_params[which_param+i];
-	  output->out_probe_SE[which_probeset][i] = current->cur_se_estimates[which_param+i];
-	}
-	which_param+=(2*(current->nprobes-1)*(model->max_probe_treatment_factor+1));
       }
     }
   }
