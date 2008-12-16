@@ -225,7 +225,7 @@ setMethod("weights",signature(object="PLMset"),
 			object@weights
 		} else{
 		 which <-indexProbesProcessed(object)[genenames]
-		 which <- do.call("c",which)
+		 which <- do.call(c,which)
                  if (object@model.description$R.model$response.variable == 0){
                    list(PM.weights=object@weights[[1]][which,],MM.weights=object@weights[[2]][which,])
                  } else if (object@model.description$R.model$response.variable == -1){
@@ -376,8 +376,8 @@ setMethod("indexProbesProcessed", signature("PLMset"),
 		pmindex <-indexProbes(object,which="pm")	
 		pmindex.length <- lapply(pmindex,length)
 
-		cs <- cumsum(do.call("c",pmindex.length)) 
-		cl  <- do.call("c",pmindex.length)
+		cs <- cumsum(do.call(c,pmindex.length)) 
+		cl  <- do.call(c,pmindex.length)
 		for (i in 1:length(pmindex)){
 			pmindex[[i]] <- cs[i] - (cl[i]:1)+1
 
@@ -940,7 +940,7 @@ setMethod("summary","PLMset",
                   cur.const.se <-  se.const(object)[grep(paste("^",probeset.names,sep=""),rownames(object@chip.coefs))]
                 }
                 inds <- allindexs[probeset.names]
-                inds <- do.call("c",inds)
+                inds <- do.call(c,inds)
                 cur.probe.coef <- object@probe.coefs[probeset.names][[1]]
                 cur.se.probe.coef <- object@se.probe.coefs[probeset.names][[1]]
                 
@@ -1013,7 +1013,7 @@ setMethod("resid",signature("PLMset"),
                 object@residuals
               } else {
                 which <-indexProbesProcessed(object)[genenames]
-                which <- do.call("c",which)
+                which <- do.call(c,which)
                 if (object@model.description$R.model$response.variable == 0){
                   list(PM.resid=object@residuals[[1]][which,],MM.resid=object@residuals[[2]][which,])
                 } else if (object@model.description$R.model$response.variable == -1){
@@ -1040,17 +1040,17 @@ setMethod("resid",signature("PLMset"),
                   results1[[i]] <- (results1[[i]]-cur.mean)/cur.sd
                   results2[[i]] <- (results2[[i]]-cur.mean)/cur.sd
                 }
-                return(list(PM.resid=do.call("rbind",results1),MM.resid=do.call("rbind",results2)))
+                return(list(PM.resid=do.call(rbind,results1),MM.resid=do.call("rbind",results2)))
               } else if (object@model.description$R.model$response.variable == -1){
                 results <- lapply(which,function(rowindex, x){
                   (x[rowindex,]- mean(as.vector(x[rowindex,])))/sd(as.vector(x[rowindex,]))
                 },object@residuals[[2]])
-                return(list(PM.resid=matrix(0,0,0),MM.resid=do.call("rbind",results)))
+                return(list(PM.resid=matrix(0,0,0),MM.resid=do.call(rbind,results)))
               } else if (object@model.description$R.model$response.variable == 1){
                 results <- lapply(which,function(rowindex, x){
                   (x[rowindex,]- mean(as.vector(x[rowindex,])))/sd(as.vector(x[rowindex,]))
                 },object@residuals[[1]])
-                return(list(PM.resid=do.call("rbind",results),MM.resid=matrix(0,0,0)))
+                return(list(PM.resid=do.call(rbind,results),MM.resid=matrix(0,0,0)))
 
               }
             }

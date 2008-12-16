@@ -47,7 +47,7 @@ normalize.AffyBatch.quantiles.chromosome <- function(abatch,type=c("separate","p
   
   chromo.name <- paste(which.annot,"CHR",sep="")
   
-  chromos <- do.call("c",as.list(eval(as.name(chromo.name))))
+  chromos <- do.call(c,as.list(eval(as.name(chromo.name))))
   
   which.chromos <- as.factor(chromos[probeNames(abatch)])
   

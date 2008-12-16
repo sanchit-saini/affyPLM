@@ -134,7 +134,7 @@ verify.constraint.types <- function(model,constraint.type){
   
 
   if (is.list(constraint.type)){
-    constraint.type <- do.call("c",constraint.type)
+    constraint.type <- do.call(c,constraint.type)
   }
   
 
@@ -166,7 +166,7 @@ verify.variable.types <- function(model,variable.type){
 
 
   if (is.list(variable.type)){
-    variable.type <- do.call("c",variable.type)
+    variable.type <- do.call(c,variable.type)
   }
 
   if (any(is.element("",names(variable.type)))){
