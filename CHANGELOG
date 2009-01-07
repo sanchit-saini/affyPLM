@@ -1,3 +1,10 @@
+1.19.2
+------
+change all relevant VECTOR_ELT/SET_VECTOR_ELT to STRING_ELT/SET_STRING_ELT. A number of functions are affected by this change (fitPLM() being a primary example)
+
+
+
+
 1.19.1
 -------
 fitPLM() with the default model now returns values (coef, se) for the last probe in probeset

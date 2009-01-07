@@ -46,6 +46,7 @@
  ** Oct 10, 2006 - add verbosity argument to functions. Higher levels of verbosity give more text output to the screen
  ** Oct 12, 2006 - add a function that does both background and normalization
  ** Mar 31, 2008 - make RMA background use preprocessCore implementation
+ ** Jan 6, 2009 - change SET_VECTOR_ELT to SET_STRING_ELT where relevant.
  **
  *********************************************************************/
 
@@ -97,7 +98,7 @@ SEXP GetParameter(SEXP alist, char *param_name){
   }
 
   for( i=0; i < length; i++){
-    if (strcmp(CHAR(VECTOR_ELT(Names,i)),param_name) == 0){
+    if (strcmp(CHAR(STRING_ELT(Names,i)),param_name) == 0){
       break;
     }
   }
@@ -181,26 +182,26 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
   verbosity_level = asInteger(verbosity);
 
 
-  if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"RMA.2") == 0){
+  if (strcmp(CHAR(STRING_ELT(bg_type,0)),"RMA.2") == 0){
     param = GetParameter(background_param,"type");
     PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
     MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
     
 
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){
       if (verbosity_level > 0){
 	Rprintf("Background correcting PM\n");
       }
       rma_bg_correct(PM, rows, cols);
 
     }
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){
       if (verbosity_level > 0){
 	Rprintf("Background correcting MM\n");
       }
       rma_bg_correct(MM, rows, cols);
     }
-    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){ 
+    if (strcmp(CHAR(STRING_ELT(param,0)),"together") == 0){ 
       if (verbosity_level > 0){
 	Rprintf("Background correcting PM and MM together\n");
       }
@@ -230,7 +231,7 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
       }
       UNPROTECT(1);
     }
-  } else if ((strcmp(CHAR(VECTOR_ELT(bg_type,0)),"IdealMM") == 0 )|| (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"MASIM") == 0)){
+  } else if ((strcmp(CHAR(STRING_ELT(bg_type,0)),"IdealMM") == 0 )|| (strcmp(CHAR(STRING_ELT(bg_type,0)),"MASIM") == 0)){
     if (verbosity_level > 0){
       Rprintf("Background correcting");
     }
@@ -243,9 +244,9 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
 
     ProbeNames =(const char **)Calloc(rows,const char *);
     for (i =0; i < rows; i++)
-      ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+      ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
     param = GetParameter(background_param,"ideal");
-    if (strcmp(CHAR(VECTOR_ELT(param,0)),"MM") == 0){
+    if (strcmp(CHAR(STRING_ELT(param,0)),"MM") == 0){
       if (verbosity_level > 0){
 	Rprintf(" PM using MM\n");
       }
@@ -261,14 +262,14 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
 
     Free(ProbeNames);
     UNPROTECT(1);
-  } else if (strncmp(CHAR(VECTOR_ELT(bg_type,0)),"LESN",4) == 0){
+  } else if (strncmp(CHAR(STRING_ELT(bg_type,0)),"LESN",4) == 0){
     LESN_param = GetParameter(background_param,"lesnparam");
 
-    if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"LESN2") == 0){
+    if (strcmp(CHAR(STRING_ELT(bg_type,0)),"LESN2") == 0){
       which_lesn =2;
-    } else  if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"LESN1") == 0){
+    } else  if (strcmp(CHAR(STRING_ELT(bg_type,0)),"LESN1") == 0){
       which_lesn=1;
-    } else if (strcmp(CHAR(VECTOR_ELT(bg_type,0)),"LESN0") == 0){
+    } else if (strcmp(CHAR(STRING_ELT(bg_type,0)),"LESN0") == 0){
       which_lesn=0;
     }
 
@@ -281,19 +282,19 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
     baseline = NUMERIC_POINTER(LESN_param)[0];
     theta = NUMERIC_POINTER(LESN_param)[1];
     param = GetParameter(background_param,"type");
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){ 
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){ 
       if (verbosity_level > 0){
 	Rprintf("Background correcting PM\n");
       }
       LESN_correct(PM, rows, cols, 2, baseline,theta);
     }
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){  
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){  
       if (verbosity_level > 0){
 	Rprintf("Background correcting MM\n");
       }
       LESN_correct(MM, rows, cols, 2, baseline,theta);
     }
-    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){ 
+    if (strcmp(CHAR(STRING_ELT(param,0)),"together") == 0){ 
       if (verbosity_level > 0){
 	Rprintf("Background correcting PM and MM together\n");
       }
@@ -415,21 +416,21 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 
 
 
-  if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"quantile") == 0){
+  if (strcmp(CHAR(STRING_ELT(norm_type,0)),"quantile") == 0){
     param = GetParameter(norm_parameters,"type");
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM\n");
       }
       qnorm_c(PM,&rows,&cols);
     } 
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0)|| (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"mmonly") == 0)|| (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){
        if (verbosity_level > 0){
 	 Rprintf("Normalizing MM\n");
        }
       qnorm_c(MM,&rows,&cols);
     }
-    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){  
+    if (strcmp(CHAR(STRING_ELT(param,0)),"together") == 0){  
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM and MM together\n");
       }
@@ -463,10 +464,10 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 
 
 
-  } else if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"quantile.probeset") == 0){
+  } else if (strcmp(CHAR(STRING_ELT(norm_type,0)),"quantile.probeset") == 0){
     ProbeNames = (const char **)Calloc(rows, const char *);
     for (i =0; i < rows; i++)
-      ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+      ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
     
     param = GetParameter(norm_parameters,"use.median");
     usemedian = asInteger(param);
@@ -474,19 +475,19 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
     uselog2 = asInteger(param);
 
     param = GetParameter(norm_parameters,"type");
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){   
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){   
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM\n");
       }
       qnorm_probeset_c(PM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
     } 
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){ 
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){ 
       if (verbosity_level > 0){
 	Rprintf("Normalizing MM\n");
       }
       qnorm_probeset_c(MM, rows, cols, nprobesets, ProbeNames, usemedian, uselog2);
     }
-    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){ 
+    if (strcmp(CHAR(STRING_ELT(param,0)),"together") == 0){ 
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM and MM together\n");
       }
@@ -504,7 +505,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       }
       ProbeNames = (const char **)Realloc(ProbeNames,2*rows,const char *);
       for (i =0; i < rows; i++)
-	ProbeNames[rows + i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+	ProbeNames[rows + i] = CHAR(STRING_ELT(ProbeNamesVec,i));
       qnorm_probeset_c(allPMMM, allrows, cols, 2*nprobesets, ProbeNames, usemedian, uselog2);
       for (i=0; i < rows; i++){
 	for (j=0; j < cols; j++){
@@ -524,7 +525,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 
     Free(ProbeNames);
 
-  } else if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"scaling") == 0){
+  } else if (strcmp(CHAR(STRING_ELT(norm_type,0)),"scaling") == 0){
     param = GetParameter(norm_parameters,"scaling.trim");
     trim = asReal(param);
     param = GetParameter(norm_parameters, "scaling.baseline");
@@ -534,19 +535,19 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
     logscale = asInteger(param); 
 
     param = GetParameter(norm_parameters,"type");
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM\n");
       }
       scaling_norm(PM, rows, cols,trim, baseline,logscale);
     }
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){
       if (verbosity_level > 0){
 	Rprintf("Normalizing MM\n");
       }
       scaling_norm(MM, rows, cols,trim, baseline,logscale);
     }
-    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
+    if (strcmp(CHAR(STRING_ELT(param,0)),"together") == 0){
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM and MM together\n");
       }
@@ -575,7 +576,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       }
       Free(allPMMM);
     }
-  } else if (strcmp(CHAR(VECTOR_ELT(norm_type,0)),"quantile.robust") == 0){      
+  } else if (strcmp(CHAR(STRING_ELT(norm_type,0)),"quantile.robust") == 0){      
 
     param = GetParameter(norm_parameters,"use.median");
     usemedian = asInteger(param);
@@ -590,7 +591,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 
     weightscheme = 0;
     if (isString(param)){
-      if (strcmp(CHAR(VECTOR_ELT(param,0)),"huber") == 0){
+      if (strcmp(CHAR(STRING_ELT(param,0)),"huber") == 0){
 	weightscheme = 1;
       } else {
 	weightscheme = 0;
@@ -607,7 +608,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
     }
 
     param = GetParameter(norm_parameters,"type");
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"pmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){
      if (verbosity_level > 0){
        Rprintf("Normalizing PM\n");
      }
@@ -618,7 +619,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       }
       qnorm_robust_c(PM,weights, &rows, &cols, &usemedian, &uselog2, &weightscheme);
     }
-    if ((strcmp(CHAR(VECTOR_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(VECTOR_ELT(param,0)),"separate") == 0)){ 
+    if ((strcmp(CHAR(STRING_ELT(param,0)),"mmonly") == 0) || (strcmp(CHAR(STRING_ELT(param,0)),"separate") == 0)){ 
       if (verbosity_level > 0){
 	Rprintf("Normalizing MM\n");
       }
@@ -628,7 +629,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       }
       qnorm_robust_c(MM,weights, &rows, &cols, &usemedian, &uselog2, &weightscheme);
     } 
-    if (strcmp(CHAR(VECTOR_ELT(param,0)),"together") == 0){
+    if (strcmp(CHAR(STRING_ELT(param,0)),"together") == 0){
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM and MM together\n");    
       }

@@ -17,7 +17,8 @@
  **
  ** Specific Modification History
  ** Apr 2, 2006 - Initial version
- ** May 1, 2006 - Add ability to read gzipped files
+ ** May 1, 2006 - Add ability to read gzipped files 
+ ** Jan 6, 2009 - change SET_VECTOR_ELT to SET_STRING_ELT where relevant.
  **
  ***************************************************************************/
 
@@ -203,7 +204,7 @@ SEXP read_rmaexpress(SEXP R_filename){
     fread_int32(&str_length,1,currentFile);
     buffer= Calloc(str_length,char);
     fread_char(buffer,str_length,currentFile);
-    SET_VECTOR_ELT(colnames,i,mkChar(buffer));
+    SET_STRING_ELT(colnames,i,mkChar(buffer));
     Free(buffer);
   }
 
@@ -212,7 +213,7 @@ SEXP read_rmaexpress(SEXP R_filename){
     fread_int32(&str_length,1,currentFile);
     buffer= Calloc(str_length,char);
     fread_char(buffer,str_length,currentFile);
-    SET_VECTOR_ELT(rownames,j,mkChar(buffer));
+    SET_STRING_ELT(rownames,j,mkChar(buffer));
     Free(buffer);
   }
   
@@ -316,7 +317,7 @@ SEXP read_rmaexpress_header(SEXP R_filename){
     fread_int32(&str_length,1,currentFile);
     buffer= Calloc(str_length,char);
     fread_char(buffer,str_length,currentFile);
-    SET_VECTOR_ELT(colnames,i,mkChar(buffer));
+    SET_STRING_ELT(colnames,i,mkChar(buffer));
     Free(buffer);
   }
 
@@ -325,20 +326,20 @@ SEXP read_rmaexpress_header(SEXP R_filename){
     fread_int32(&str_length,1,currentFile);
     buffer= Calloc(str_length,char);
     fread_char(buffer,str_length,currentFile);
-    SET_VECTOR_ELT(rownames,j,mkChar(buffer));
+    SET_STRING_ELT(rownames,j,mkChar(buffer));
     Free(buffer);
   }
   
   PROTECT(returnvalue = allocVector(VECSXP,4));
 
   PROTECT(tmpsxp=allocVector(STRSXP,1));
-  SET_VECTOR_ELT(tmpsxp,0,mkChar(rmaexpressversion));
+  SET_STRING_ELT(tmpsxp,0,mkChar(rmaexpressversion));
   Free(rmaexpressversion);
   SET_VECTOR_ELT(returnvalue,0,tmpsxp);
   UNPROTECT(1);
    
   PROTECT(tmpsxp=allocVector(STRSXP,1));
-  SET_VECTOR_ELT(tmpsxp,0,mkChar(cdfname));
+  SET_STRING_ELT(tmpsxp,0,mkChar(cdfname));
   Free(cdfname);
   SET_VECTOR_ELT(returnvalue,1,tmpsxp);
   UNPROTECT(1);
@@ -498,7 +499,7 @@ SEXP gz_read_rmaexpress_header(SEXP R_filename){
     gzfread_int32(&str_length,1,currentFile);
     buffer= Calloc(str_length,char);
     gzfread_char(buffer,str_length,currentFile);
-    SET_VECTOR_ELT(colnames,i,mkChar(buffer));
+    SET_STRING_ELT(colnames,i,mkChar(buffer));
     Free(buffer);
   }
 
@@ -507,20 +508,20 @@ SEXP gz_read_rmaexpress_header(SEXP R_filename){
     gzfread_int32(&str_length,1,currentFile);
     buffer= Calloc(str_length,char);
     gzfread_char(buffer,str_length,currentFile);
-    SET_VECTOR_ELT(rownames,j,mkChar(buffer));
+    SET_STRING_ELT(rownames,j,mkChar(buffer));
     Free(buffer);
   }
   
   PROTECT(returnvalue = allocVector(VECSXP,4));
 
   PROTECT(tmpsxp=allocVector(STRSXP,1));
-  SET_VECTOR_ELT(tmpsxp,0,mkChar(rmaexpressversion));
+  SET_STRING_ELT(tmpsxp,0,mkChar(rmaexpressversion));
   Free(rmaexpressversion);
   SET_VECTOR_ELT(returnvalue,0,tmpsxp);
   UNPROTECT(1);
    
   PROTECT(tmpsxp=allocVector(STRSXP,1));
-  SET_VECTOR_ELT(tmpsxp,0,mkChar(cdfname));
+  SET_STRING_ELT(tmpsxp,0,mkChar(cdfname));
   Free(cdfname);
   SET_VECTOR_ELT(returnvalue,1,tmpsxp);
   UNPROTECT(1);
@@ -621,7 +622,7 @@ SEXP gz_read_rmaexpress(SEXP R_filename){
     gzfread_int32(&str_length,1,currentFile);
     buffer= Calloc(str_length,char);
     gzfread_char(buffer,str_length,currentFile);
-    SET_VECTOR_ELT(colnames,i,mkChar(buffer));
+    SET_STRING_ELT(colnames,i,mkChar(buffer));
     Free(buffer);
   }
 
@@ -630,7 +631,7 @@ SEXP gz_read_rmaexpress(SEXP R_filename){
     gzfread_int32(&str_length,1,currentFile);
     buffer= Calloc(str_length,char);
     gzfread_char(buffer,str_length,currentFile);
-    SET_VECTOR_ELT(rownames,j,mkChar(buffer));
+    SET_STRING_ELT(rownames,j,mkChar(buffer));
     Free(buffer);
   }
   
@@ -752,19 +753,19 @@ SEXP check_rmaexpress_format(SEXP R_filename){
  
   if (isUncompressedRMAExpress(filename)){
     PROTECT(file_type = allocVector(STRSXP,1));
-    SET_VECTOR_ELT(file_type,0,mkChar("Uncompressed"));
+    SET_STRING_ELT(file_type,0,mkChar("Uncompressed"));
     UNPROTECT(1);
     return file_type;
   } else if (isCompressedRMAExpress(filename)){
 
     PROTECT(file_type = allocVector(STRSXP,1));
-    SET_VECTOR_ELT(file_type,0,mkChar("Compressed"));
+    SET_STRING_ELT(file_type,0,mkChar("Compressed"));
     UNPROTECT(1);
     return file_type;
 
   } else {
     PROTECT(file_type = allocVector(STRSXP,1));
-    SET_VECTOR_ELT(file_type,0,mkChar("Unknown"));
+    SET_STRING_ELT(file_type,0,mkChar("Unknown"));
     UNPROTECT(1);
     return file_type;
   }

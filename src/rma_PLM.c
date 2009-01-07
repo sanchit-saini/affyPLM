@@ -6,7 +6,7 @@
  **
  ** Copyright (C) 2003 Ben Bolstad
  **
- ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
+ ** created by: B. M. Bolstad <bmb@bmbolstad.com>
  ** 
  ** created on: Sep 14, 2003
  **
@@ -17,7 +17,8 @@
  ** May 3, 2004   - Fixed a subtle and small memory leak.
  ** March 1, 2006 - change all comments to ansi c standard
  ** Oct 10, 2006 - add verbosity arguments to pp_* calls
- ** Oct 11, 2006 - make verbosity argument get passed to summarization function
+ ** Oct 11, 2006 - make verbosity argument get passed to summarization function 
+ ** Jan 6, 2009 - change SET_VECTOR_ELT to SET_STRING_ELT where relevant.
  **
  *********************************************************************/
 
@@ -165,7 +166,7 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
     
   data->ProbeNames = (const char **)Calloc(data->rows,const char *);
   for (i =0; i < data->rows; i++){
-    data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+    data->ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
   }
   
 
@@ -232,7 +233,7 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   PROTECT(dimnames = allocVector(VECSXP,2));
   PROTECT(names = allocVector(STRSXP,data->nprobesets));
   for ( i =0; i < data->nprobesets; i++)
-    SET_VECTOR_ELT(names,i,mkChar(output->outnames[i]));
+    SET_STRING_ELT(names,i,mkChar(output->outnames[i]));
   SET_VECTOR_ELT(dimnames,0,names);
   setAttrib(Routput->chip_coef, R_DimNamesSymbol, dimnames); 
   setAttrib(Routput->chip_SE,R_DimNamesSymbol, dimnames);

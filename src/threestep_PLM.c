@@ -6,7 +6,7 @@
  **
  ** Copyright (C) 2003 Ben Bolstad
  **
- ** created by: B. M. Bolstad <bolstad@stat.berkeley.edu>
+ ** created by: B. M. Bolstad <bmb@bmbolstad.com>
  ** 
  ** created on: Oct 9, 2003
  **
@@ -17,6 +17,7 @@
  ** Apr 5, 2004 - all malloc/free are now Calloc/Free
  ** May 3, 2004   - Fixed a subtle and small memory leak.
  ** Oct 11, 2006 - add verbosity argument to functions
+ ** Jan 6, 2009 - change SET_VECTOR_ELT to SET_STRING_ELT where relevant.
  **
  *********************************************************************/
 
@@ -160,7 +161,7 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
     
   data->ProbeNames = (const char **)Calloc(data->rows,const char *);
   for (i =0; i < data->rows; i++){
-    data->ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+    data->ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
   }
   
 
@@ -235,7 +236,7 @@ SEXP threestepPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, S
   PROTECT(dimnames = allocVector(VECSXP,2));
   PROTECT(names = allocVector(STRSXP,data->nprobesets));
   for ( i =0; i < data->nprobesets; i++)
-    SET_VECTOR_ELT(names,i,mkChar(output->outnames[i]));
+    SET_STRING_ELT(names,i,mkChar(output->outnames[i]));
   SET_VECTOR_ELT(dimnames,0,names);
   setAttrib(Routput->chip_coef, R_DimNamesSymbol, dimnames); 
   setAttrib(Routput->chip_SE,R_DimNamesSymbol, dimnames);

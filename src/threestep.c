@@ -32,7 +32,8 @@
  ** Apr 5, 2004 - all malloc/free should now be Calloc/Free
  ** Sep 13, 2005 - fix a possible gc() situation
  ** March 1, 2006 - change comments to ansi c style
- ** Oct 10, 2006 - add verbosity arguments
+ ** Oct 10, 2006 - add verbosity arguments 
+ ** Jan 6, 2009 - change SET_VECTOR_ELT to SET_STRING_ELT where relevant.
  **
  ************************************************************************/
 
@@ -113,7 +114,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   
   ProbeNames = (const char **)Calloc(rows,const char *);
   for (i =0; i < rows; i++)
-    ProbeNames[i] = CHAR(VECTOR_ELT(ProbeNamesVec,i));
+    ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
   outnames = (char **)Calloc(nprobesets,char *);
 
   /* PROTECT(outvec = NEW_NUMERIC(nprobesets*cols)); */
@@ -146,7 +147,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   PROTECT(dimnames = allocVector(VECSXP,2));
   PROTECT(names = allocVector(STRSXP,nprobesets));
   for ( i =0; i < nprobesets; i++)
-    SET_VECTOR_ELT(names,i,mkChar(outnames[i]));
+    SET_STRING_ELT(names,i,mkChar(outnames[i]));
   SET_VECTOR_ELT(dimnames,0,names);
   setAttrib(outvec, R_DimNamesSymbol, dimnames);
   setAttrib(outSEvec, R_DimNamesSymbol, dimnames);
