@@ -1,3 +1,9 @@
+1.19.3
+------
+Added a NAMESPACE
+
+
+
 1.19.2
 ------
 change all relevant VECTOR_ELT/SET_VECTOR_ELT to STRING_ELT/SET_STRING_ELT. A number of functions are affected by this change (fitPLM() being a primary example)

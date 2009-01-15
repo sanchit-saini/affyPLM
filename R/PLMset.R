@@ -218,6 +218,13 @@ setMethod("cdfName", "PLMset", function(object)
 ###                     object
 ###                 })
 
+
+if (!isGeneric("weights"))
+  setGeneric("weights",function(object,...)
+             standardGeneric("weights"))
+
+
+
 ###access weights
 setMethod("weights",signature(object="PLMset"),
           function(object,genenames=NULL){ 
@@ -795,6 +802,9 @@ setMethod("image",signature(x="PLMset"),
           })
 
 
+if( !isGeneric("boxplot") )
+    setGeneric("boxplot", function(x,...)
+               standardGeneric("boxplot"))
  
 
 setMethod("boxplot",signature(x="PLMset"),
@@ -1004,6 +1014,10 @@ setReplaceMethod("resid",signature(object="PLMset"),
                  })
 
 
+if (!isGeneric("resid"))
+  setGeneric("resid",function(object,...)
+             standardGeneric("resid"))
+
 
 
 setMethod("resid",signature("PLMset"),
@@ -1068,6 +1082,10 @@ setReplaceMethod("residuals",signature(object="PLMset"),
                    object
                  })
 
+
+if (!isGeneric("residuals"))
+  setGeneric("residuals",function(object,...)
+             standardGeneric("residuals"))
 
 setMethod("residuals",signature("PLMset"),
             function(object,genenames=NULL,standardize=FALSE){
@@ -1510,7 +1528,7 @@ setMethod("nuse",signature(x="PLMset"),
 
             type <- match.arg(type)
             model <- x@model.description$modelsettings$model
-            if (type == "values" || type == "stats" || type == "density"){
+           ## if (type == "values" || type == "stats" || type == "density"){
               
               if (x@model.description$R.model$which.parameter.types[3] == 1 & x@model.description$R.model$which.parameter.types[1] == 0 ){
                 grp.rma.se1.median <- apply(se(x), 1,median,na.rm=TRUE)
@@ -1538,9 +1556,13 @@ setMethod("nuse",signature(x="PLMset"),
                 rownames(nuse.stats) <- c("median","IQR")
                 return(nuse.stats)
               }
-            } else {
-               boxplot(x,ylim=ylim,...)
-            }
+	      if (type == "plot"){	
+	      	  boxplot(data.frame(grp.rma.rel.se1.mtx),range=range,...)
+	      }
+
+          ##  } else {
+          ##     affyPLM::boxplot(x,ylim=ylim,...)
+          ##  }
           })
 
 if (!isGeneric("NUSE"))

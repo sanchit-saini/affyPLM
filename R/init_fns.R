@@ -28,23 +28,29 @@
 ############################################################
 
 
-.initNormfunctions <- function(where){
-  all.affy <- ls(where)
-  
-  start <- nchar("normalize.ExpressionSet.")
-  assign("normalize.ExpressionSet.methods",
-         substr(all.affy[grep("normalize\\.ExpressionSet\\.*", all.affy)], start+1, 100),
-         envir=as.environment(where))
- 
+
+ normalize.ExpressionSet.methods <- function() 
+            .affyPLMInternalEnv[["normalize.ExpressionSet.methods"]]
+
+
   setMethod("normalize", signature(object="ExpressionSet"),
             function(object, method=getOption("BioC")$affy$normalize.method, ...) {
-              method <- match.arg(method, normalize.ExpressionSet.methods)
+              method <- match.arg(method, normalize.ExpressionSet.methods())
               if (is.na(method))
                 stop("unknown method")
               method <- paste("normalize.ExpressionSet", method, sep=".")
               object <- do.call(method, alist(object, ...))
               return(object)
             })
+
+.initNormfunctions <- function(where){
+  all.affy <- ls(environment(sys.function()))    #ls(where)
+  
+  start <- nchar("normalize.ExpressionSet.")
+  assign("normalize.ExpressionSet.methods",
+         substr(all.affy[grep("normalize\\.ExpressionSet\\.*", all.affy)], start+1, 100),
+         envir=as.environment(where))
+ 
 }
 
 
@@ -397,23 +403,26 @@
 
 
 
-.First.lib <- function(libname, pkgname) {
+##.First.lib
+.onLoad <- function(libname, pkgname) {
   s <- search() 
   
-  require(affy,quietly = FALSE, warn.conflicts = FALSE)
+  #require(affy,quietly = FALSE, warn.conflicts = FALSE)
   #require(affydata,quietly = FALSE, warn.conflicts = FALSE)
-  require(gcrma,quietly = FALSE, warn.conflicts = FALSE)
-  .initNormfunctions(match(paste("package:",pkgname,sep=""),search()))
-  .initExprSetFunctions(match(paste("package:",pkgname,sep=""),search()))
-  .initAffyBatchFunctions(match(paste("package:",pkgname,sep=""),search()))
-  
-  #if (length(search()) > length(s)) {
-  #  detach("package:affyPLM")
-  #  library(affyPLM,warn.conflicts=FALSE,verbose=FALSE)
-  #} 	
+  #require(gcrma,quietly = FALSE, warn.conflicts = FALSE)
 
+
+    .affyPLMInternalEnv <- new.env(parent=emptyenv())
+
+   assign(".affyPLMInternalEnv", .affyPLMInternalEnv, 
+     envir=topenv(parent.frame()))
+
+  .initNormfunctions(.affyPLMInternalEnv)   ##match(paste("package:",pkgname,sep=""),search()))
+  .initExprSetFunctions(.affyPLMInternalEnv)  ##match(paste("package:",pkgname,sep=""),search()))
+  .initAffyBatchFunctions(.affyPLMInternalEnv) ###match(paste("package:",pkgname,sep=""),search()))
   
-  library.dynam("affyPLM",pkgname,libname,now=FALSE)
+  
+  ##library.dynam("affyPLM",pkgname,libname,now=FALSE)
   
   current.normmethods <- affy::normalize.AffyBatch.methods()
   
