@@ -1549,7 +1549,7 @@ setMethod("nuse",signature(x="PLMset"),
                 return(grp.rma.rel.se1.mtx)
               } else if (type == "density"){
                 plotDensity(grp.rma.rel.se1.mtx,xlim=ylim,...)
-              } else {
+              } else if (type=="stats"){
                 Medians <- apply(grp.rma.rel.se1.mtx,2,median)
                 Quantiles <- apply(grp.rma.rel.se1.mtx,2,quantile,prob=c(0.25,0.75))
                 nuse.stats <- rbind(Medians,Quantiles[2,] - Quantiles[1,])

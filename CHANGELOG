@@ -1,3 +1,8 @@
+1.19.5
+------
+Fix issue with quality assessment vignette not building correctly due to internal changes in NUSE() function
+
+
 1.19.4
 ------
 Fix additional NAMESPACE issue
