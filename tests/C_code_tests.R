@@ -291,7 +291,8 @@ if (test.c.code){
   library(affyPLM)
   output <- verify.output.param(list(weights = FALSE, residuals = FALSE, varcov = "none", resid.SE = TRUE))
   modelparam <- list(trans.fn="log2", se.type = 4, psi.type = 0, psi.k =1.345,max.its = 20, init.method = "ls",weights.chip=NULL,weights.probe=NULL)
-  
+
+  library(affydata)
   data(Dilution)
 
   # fit a PM ~ samples model

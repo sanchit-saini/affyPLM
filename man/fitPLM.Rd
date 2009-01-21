@@ -64,30 +64,30 @@ background=TRUE, normalize=TRUE, background.method = "RMA.2",normalize.method = 
   \code{\link[affy]{rma}}, \code{\link{threestep}}}
 
 \examples{
-data(Dilution)
-Pset <- fitPLM(Dilution, model=PM ~ -1 + probes + samples)
-se(Pset)[1:5,]
+if (require(affydata)) {
+  data(Dilution)
+  Pset <- fitPLM(Dilution, model=PM ~ -1 + probes + samples)
+  se(Pset)[1:5,]
 
-image(Pset)
-NUSE(Pset) 
+  image(Pset)
+  NUSE(Pset) 
 
-#now lets try a wider class of models
-\dontrun{Pset <- fitPLM(Dilution,model=PM ~ -1 + probes +liver,normalize=FALSE,background=FALSE)}
-\dontrun{coefs(Pset)[1:10,]}
+  #now lets try a wider class of models
+  \dontrun{Pset <- fitPLM(Dilution,model=PM ~ -1 + probes +liver,normalize=FALSE,background=FALSE)}
+  \dontrun{coefs(Pset)[1:10,]}
 
-\dontrun{Pset <- fitPLM(Dilution,model=PM ~ -1 + probes + liver + scanner,normalize=FALSE,background=FALSE)}
-coefs(Pset)[1:10,]
+  \dontrun{Pset <- fitPLM(Dilution,model=PM ~ -1 + probes + liver + scanner,normalize=FALSE,background=FALSE)}
+  coefs(Pset)[1:10,]
 
-#try liver as a covariate
-logliver <- log2(c(20,20,10,10))
-\dontrun{Pset <- fitPLM(Dilution,model=PM~-1+probes+logliver+scanner,normalize=FALSE,background=FALSE,variable.type=c(logliver="covariate"))}
-coefs(Pset)[1:10,]
+  #try liver as a covariate
+  logliver <- log2(c(20,20,10,10))
+  \dontrun{Pset <- fitPLM(Dilution,model=PM~-1+probes+logliver+scanner,normalize=FALSE,background=FALSE,variable.type=c(logliver="covariate"))}
+  coefs(Pset)[1:10,]
 
-
-#try a different se.type
-\dontrun{Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,model.param=list(se.type=2))}
-se(Pset)[1:10,]
-
+  #try a different se.type
+  \dontrun{Pset <- fitPLM(Dilution,model=PM~-1+probes+scanner,normalize=FALSE,background=FALSE,model.param=list(se.type=2))}
+  se(Pset)[1:10,]
+}
 }
 
 \keyword{manip}

@@ -1,6 +1,7 @@
 #test the preprocessing functionality
 
 library(affyPLM)
+library(affydata)
 data(Dilution)
 
 

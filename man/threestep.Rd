@@ -38,34 +38,36 @@ An \code{\link[Biobase]{ExpressionSet}}
     Summarization}. PhD Dissertation. University of California, Berkeley.}
 \seealso{\code{\link[affy]{expresso}}, \code{\link[affy]{rma}}}
 \examples{
-data(Dilution)
+if (require(affydata)) {
+  data(Dilution)
 
-# should be equivalent to rma()
-eset <- threestep(Dilution)
+  # should be equivalent to rma()
+  eset <- threestep(Dilution)
 
-# Using Tukey Biweight summarization
-eset <- threestep(Dilution, summary.method="tukey.biweight")
+  # Using Tukey Biweight summarization
+  eset <- threestep(Dilution, summary.method="tukey.biweight")
 
-# Using Average Log2 summarization
-eset <- threestep(Dilution, summary.method="average.log")
+  # Using Average Log2 summarization
+  eset <- threestep(Dilution, summary.method="average.log")
 
-# Using IdealMismatch background and Tukey Biweight and no normalization.
-eset <- threestep(Dilution, normalize=FALSE,background.method="IdealMM",
-            summary.method="tukey.biweight")
+  # Using IdealMismatch background and Tukey Biweight and no normalization.
+  eset <- threestep(Dilution, normalize=FALSE,background.method="IdealMM",
+                    summary.method="tukey.biweight")
 
-# Using average.log summarization and no background or normalization.
-eset <- threestep(Dilution, background=FALSE, normalize=FALSE,
-            background.method="IdealMM",summary.method="tukey.biweight")
+  # Using average.log summarization and no background or normalization.
+  eset <- threestep(Dilution, background=FALSE, normalize=FALSE,
+                    background.method="IdealMM",summary.method="tukey.biweight")
 
-# Use threestep methodology with the rlm model fit
-eset <- threestep(Dilution, summary.method="rlm")
+  # Use threestep methodology with the rlm model fit
+  eset <- threestep(Dilution, summary.method="rlm")
 
-# Use threestep methodology with the log of the average
-eset <- threestep(Dilution, summary.method="log.average")
+  # Use threestep methodology with the log of the average
+  eset <- threestep(Dilution, summary.method="log.average")
 
-# Use threestep methodology with log 2nd largest method
-eset <- threestep(Dilution, summary.method="log.2nd.largest")
+  # Use threestep methodology with log 2nd largest method
+  eset <- threestep(Dilution, summary.method="log.2nd.largest")
 
-eset <- threestep(Dilution, background.method="LESN2")
+  eset <- threestep(Dilution, background.method="LESN2")
+}
 }
 \keyword{manip}

@@ -6,19 +6,18 @@ library(affyPLM)
 
 check.coefs <- function(Pset,Pset2){
   if (any(abs(coefs(Pset) - exprs(Pset2)) > 1e-14)){
-   stop("No agreement between threestepPLM and threestep in coefs")
+    stop("No agreement between threestepPLM and threestep in coefs")
   }	
 }
 
 check.resids <- function(Pset,Pset2){
- if (any(resid(Pset) != resid(Pset2))){
-   stop("No agreement between threestepPLM and rmaPLM/threestep in residuals")
+  if (any(resid(Pset) != resid(Pset2))){
+    stop("No agreement between threestepPLM and rmaPLM/threestep in residuals")
+  }
 }
 
-}
 
-
-
+library(affydata)
 data(Dilution)
 
 Pset <- threestepPLM(Dilution)

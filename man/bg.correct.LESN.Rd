@@ -38,8 +38,10 @@ An \code{\link[affy]{AffyBatch}}
 \author{Ben Bolstad \email{bmb@bmbolstad.com}}
 
 \examples{
-data(Dilution)
-Dilution.example.bgcorrect <- bg.correct.LESN(Dilution)
+if (require(affydata)) {
+  data(Dilution)
+  Dilution.example.bgcorrect <- bg.correct.LESN(Dilution)
+}
 }
 \keyword{manip}
 

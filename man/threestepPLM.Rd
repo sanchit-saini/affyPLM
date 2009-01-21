@@ -51,10 +51,12 @@ An \code{\link{PLMset}}
 }
 
 \examples{
-data(Dilution)
+if (require(affydata)) {
+  data(Dilution)
 
-# should be equivalent to rma()
-\dontrun{eset <- threestepPLM(Dilution)}
+  # should be equivalent to rma()
+  \dontrun{eset <- threestepPLM(Dilution)}
+}
 }
 \keyword{manip}
 

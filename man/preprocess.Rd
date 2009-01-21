@@ -43,11 +43,12 @@ An \code{\link[affy]{AffyBatch}}
 \seealso{\code{\link[affy]{expresso}}, \code{\link[affy]{rma}}}
 
 \examples{
-data(Dilution)
+if (require(affydata)) {
+  data(Dilution)
 
-# should be equivalent to the bg and norm of rma()
-abatch.preprocessed <- preprocess(Dilution)
-
+  # should be equivalent to the bg and norm of rma()
+  abatch.preprocessed <- preprocess(Dilution)
+}
 }
 \keyword{manip}
 

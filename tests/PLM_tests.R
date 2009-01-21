@@ -5,6 +5,7 @@ if (do.all.tests){
 
 library(affyPLM)
 
+library(affydata)
 data(Dilution)
 
 

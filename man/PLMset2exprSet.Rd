@@ -25,8 +25,10 @@ pset2eset(pset)
 \author{Ben Bolstad \email{bmb@bmbolstad.com}}
 \seealso{\code{\link[Biobase]{ExpressionSet}}}
 \examples{
-data(Dilution)
-Pset <- fitPLM(Dilution)
-eset <- pset2eset(Pset)
+if (require(affydata)) {
+  data(Dilution)
+  Pset <- fitPLM(Dilution)
+  eset <- pset2eset(Pset)
+}
 }
 \keyword{manip}
