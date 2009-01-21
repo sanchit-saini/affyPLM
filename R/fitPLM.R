@@ -95,6 +95,7 @@
 ## Aug 10, 2007 - replace error with stop
 ## Dec 1, 2007 - comment out fitPLM.old, PLM.designmatrix, PLM.designmatrix2 (will be removed in later version and all are long defunct)
 ## Feb 3, 2007 - remove all commented out code. Make sure fitPLM stored narrays in PLMset object
+## Jan 20, 2009 - Fix issue where factor variable not coerced to integer
 ## 
 ###########################################################
 
@@ -753,7 +754,8 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
               # now build what we need for the output
               max.probe.trt.factor <- nlevels(in.levels)-1
               probe.trt.factor <- NULL
-              for (level in in.levels){
+	      in.levels.2 <- as.numeric(in.levels)
+              for (level in in.levels.2){
                 probe.trt.factor <- c(probe.trt.factor,level-1)
               }
               probe.trt.levels <- list(in.term=levels(in.levels))
@@ -790,7 +792,8 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
                 }
                 max.probe.trt.factor <- nlevels(in.levels)-1
                 probe.trt.factor <- NULL
-                for (level in in.levels){
+		in.levels.2 <- as.numeric(in.levels)
+                for (level in in.levels.2){
                   probe.trt.factor <- c(probe.trt.factor,level-1)
                 }
                 probe.trt.levels <- list(levels(in.levels))
@@ -842,7 +845,8 @@ PLM.designmatrix3 <- function(object,model=PM ~ -1 + probes + samples,variable.t
               probe.type.levels <- list(levels(in.levels))
               names(probe.type.levels) <- in.term
               probe.type.trt.factor <- NULL
-              for (level in in.levels){
+	      in.levels.2 <- as.numeric(in.levels)
+              for (level in in.levels.2){
                 probe.type.trt.factor <- c(probe.type.trt.factor,level-1)
               }
             }

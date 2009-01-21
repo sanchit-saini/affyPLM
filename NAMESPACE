@@ -1,0 +1,39 @@
+ useDynLib("affyPLM")
+
+
+importClassesFrom(methods,
+                  ANY,
+                  character,
+                  environment,
+                  integer,
+                  matrix,
+                  missing,
+                  numeric)
+
+
+
+
+  importFrom("Biobase", "annotation")
+  importFrom("graphics", "boxplot")
+  importFrom("affy", "cdfName")
+  importFrom("Biobase", "description")
+  importFrom("graphics", "image")
+  importFrom("affy", "indexProbes")
+  importFrom("affy", "MAplot")
+  importFrom("affy", "Mbox")
+  importFrom("Biobase", "pData<-")
+  importFrom("Biobase", "pData")
+  importFrom("Biobase", "phenoData<-")
+  importFrom("Biobase", "phenoData")
+  importFrom("Biobase", "sampleNames<-")
+  importFrom("Biobase", "sampleNames")
+
+  importFrom("graphics", "hist")
+  importFrom("affy","normalize")
+
+  importFrom("affy", "upDate.normalize.AffyBatch.methods")
+
+
+
+ ##export everything that does not start with a .
+ exportPattern("^[^\\.]")

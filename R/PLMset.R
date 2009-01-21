@@ -1557,7 +1557,7 @@ setMethod("nuse",signature(x="PLMset"),
                 return(nuse.stats)
               }
 	      if (type == "plot"){	
-	      	  boxplot(data.frame(grp.rma.rel.se1.mtx),range=range,...)
+	      	  boxplot(data.frame(grp.rma.rel.se1.mtx),ylim=ylim,range=0,...)
 	      }
 
           ##  } else {
