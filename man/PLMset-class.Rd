@@ -2,6 +2,7 @@
 \docType{class}
 \alias{PLMset-class}
 \alias{PLMset}
+\alias{weights}
 \alias{weights<-}
 \alias{coefs}
 \alias{coefs<-}
@@ -15,6 +16,8 @@
 \alias{normvec}
 \alias{varcov}
 \alias{residSE}
+\alias{resid}
+\alias{residuals}
 \alias{resid<-}
 \alias{residuals<-}
 \alias{indexProbesProcessed}
