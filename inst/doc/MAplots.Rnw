@@ -78,7 +78,7 @@ This produces the set of MA-plots shown in Figure \ref{First Use}. The MA-plots 
 
 \section{Gaining greater control over the function}
 
-There are a number of optional parameters that can be provided to a call to \Rfunction{MAplot}. The first is \Rfunarg{plot.method="smoothScatter"} which gives an alternative method of drawing the MA-plot. It requires that you have the \Rpackage{geneplotter} package installed and internally it uses the \Rfunction{smoothScatter} function to do the plotting. MA-plots can be created in this manner for the  \Robject{eset.Dilution} dataset using:
+There are a number of optional parameters that can be provided to a call to \Rfunction{MAplot}. The first is \Rfunarg{plot.method="smoothScatter"} which gives an alternative method of drawing the MA-plot. It internally uses the \Rfunction{smoothScatter} function to do the plotting. MA-plots can be created in this manner for the  \Robject{eset.Dilution} dataset using:
 <<smoothScatterShow,eval=FALSE>>=
 par(mfrow=c(2,2))
 MAplot(eset.Dilution,plot.method="smoothScatter")
