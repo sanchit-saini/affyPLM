@@ -1,5 +1,5 @@
 Package: affyPLM
-Version: 1.21.0
+Version: 1.21.1
 Date: 2009-04-14
 Title: Methods for fitting probe-level models
 Author: Ben Bolstad <bmb@bmbolstad.com>
@@ -12,7 +12,7 @@ Description: A package that extends and improves the functionality of
         compiled code for speed. Central focus is on implementation of
         methods for fitting probe-level models and tools using these
         models. PLM based quality assessment tools.
-License: GPL version 2 or newer
+License: GPL (>= 2)
 URL: http://bmbolstad.com
 biocViews: Microarray, OneChannel, Preprocessing, QualityControl
 LazyLoad: yes
