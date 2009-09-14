@@ -6,11 +6,11 @@
   Signal is Noise concepts.
 }
 \usage{
-bg.correct.LESN(object,method = 2,baseline = 0.25, theta=4)
+bg.correct.LESN(object, method=2, baseline=0.25, theta=4)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
-  \item{object}{an \code{\link[affy]{AffyBatch}}}
+  \item{object}{an \code{\link[affy:AffyBatch-class]{AffyBatch}}}
   \item{method}{an integer code specifying which method to use}
   \item{baseline}{A baseline value to use}
   \item{theta}{A parameter used in the background correction process}
@@ -25,7 +25,7 @@ bg.correct.LESN(object,method = 2,baseline = 0.25, theta=4)
   signals get less adjustment relative adjustment.
 }
 \value{
-An \code{\link[affy]{AffyBatch}}
+An \code{\link[affy:AffyBatch-class]{AffyBatch}}
 }
 
 

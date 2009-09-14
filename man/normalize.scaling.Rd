@@ -7,8 +7,10 @@
   Allows the user to apply scaling normalization.
 }
 \usage{
-normalize.scaling(X,trim=0.02,baseline=-1,log.scalefactors=FALSE)
-normalize.AffyBatch.scaling(abatch,type=c("together","pmonly","mmonly","separate"),trim=0.02,baseline=-1,log.scalefactors=FALSE)
+normalize.scaling(X,trim=0.02, baseline=-1, log.scalefactors=FALSE)
+normalize.AffyBatch.scaling(abatch,
+    type=c("together","pmonly","mmonly","separate"),
+    trim=0.02, baseline=-1, log.scalefactors=FALSE) 
 }
 \arguments{
   \item{X}{A matrix. The columns of which are to be normalized.}
@@ -27,7 +29,7 @@ normalize.AffyBatch.scaling(abatch,type=c("together","pmonly","mmonly","separate
   These function carries out scaling normalization of expression values.
 }
 \value{
-  A normalized \code{\link[Biobase:ExpressionSet-class]{ExpressionSet}}.
+  A normalized \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}.
 }
 \examples{
 if (require(affydata)) {

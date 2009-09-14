@@ -2,11 +2,16 @@
 \alias{threestep}
 \title{Three Step expression measures}
 \description{
-  This function converts an \code{\link[affy]{AffyBatch}} into an
-  \code{\link[Biobase]{ExpressionSet}} using a three step expression measure.
+  This function converts an
+  \code{\link[affy:AffyBatch-class]{AffyBatch}} into an 
+  \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}} using a three
+  step expression measure. 
 }
 \usage{
-threestep(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),summary.param=list(),verbosity.level=0)
+threestep(object, subset=NULL, normalize=TRUE, background=TRUE,
+          background.method="RMA.2", normalize.method="quantile",
+          summary.method="median.polish", background.param=list(),
+          normalize.param=list(), summary.param=list(), verbosity.level=0)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -30,7 +35,7 @@ threestep(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="
   This function computes the expression measure using threestep
   methods. Greater details can be found in a vignette.}
 \value{
-An \code{\link[Biobase]{ExpressionSet}}
+An \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}
 }
 \author{Ben Bolstad \email{bmb@bmbolstad.com}}
 \references{Bolstad, BM (2004) \emph{Low Level Analysis of High-density

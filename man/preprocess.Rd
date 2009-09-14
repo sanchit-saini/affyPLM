@@ -2,10 +2,13 @@
 \alias{preprocess}
 \title{Background correct and Normalize}
 \description{
-  This function pre-processes an \code{\link[affy]{AffyBatch}}.
+  This function pre-processes an \code{\link[affy:AffyBatch-class]{AffyBatch}}.
 }
 \usage{
-preprocess(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",background.param = list(),normalize.param=list(),verbosity.level=0)
+preprocess(object, subset=NULL, normalize=TRUE, background=TRUE,
+           background.method="RMA.2", normalize.method="quantile",
+           background.param=list(), normalize.param=list(),
+           verbosity.level=0)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{
@@ -31,7 +34,7 @@ preprocess(object,subset=NULL, normalize=TRUE,background=TRUE,background.method=
   \code{\link{threestep}} are supported by this function.
 }
 \value{
-An \code{\link[affy]{AffyBatch}}
+An \code{\link[affy:AffyBatch-class]{AffyBatch}}
 }
 
 \author{Ben Bolstad \email{bmb@bmbolstad.com}}

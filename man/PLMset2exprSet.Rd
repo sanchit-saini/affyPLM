@@ -11,7 +11,8 @@ PLMset2exprSet(pset)
 pset2eset(pset)
 }
 \arguments{
-  \item{pset}{The \code{\link{PLMset}} to convert to \code{\link[Biobase]{ExpressionSet}}.}
+  \item{pset}{The \code{\link{PLMset}} to convert to
+    \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}.} 
 }
 \details{
   These functions convert PLMset objects to \code{ExpressionSet} objects.
@@ -20,10 +21,10 @@ pset2eset(pset)
   is a wrapper for \code{PLMset2exprSet}.
 }
 \value{
-  returns a \code{\link[Biobase]{ExpressionSet}}
+  returns a \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}
 }
 \author{Ben Bolstad \email{bmb@bmbolstad.com}}
-\seealso{\code{\link[Biobase]{ExpressionSet}}}
+\seealso{\code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}}
 \examples{
 if (require(affydata)) {
   data(Dilution)

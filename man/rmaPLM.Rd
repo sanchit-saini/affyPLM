@@ -2,16 +2,20 @@
 \alias{rmaPLM}
 \title{Fit a RMA to Affymetrix Genechip Data as a PLMset}
 \description{
-  This function converts an \code{\link[affy]{AffyBatch}} into an
+  This function converts an
+  \code{\link[affy:AffyBatch-class]{AffyBatch}} into an 
   \code{\link{PLMset}} by fitting a multichip model. In particular we
   concentrate on the RMA model.
 }
 \usage{
-rmaPLM(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",background.param = list(),normalize.param=list(),output.param=list(),model.param=list(),verbosity.level=0)
+rmaPLM(object, subset=NULL, normalize=TRUE, background=TRUE,
+       background.method="RMA.2", normalize.method="quantile",
+       background.param=list(), normalize.param=list(), output.param=list(),
+       model.param=list(), verbosity.level=0)
 }
 
 \arguments{
-  \item{object}{an \code{\link[affy]{AffyBatch}}}
+  \item{object}{an \code{\link[affy:AffyBatch-class]{AffyBatch}}}
   \item{subset}{a vector with the names of probesets to be used. If NULL
   then all probesets are used.}
   \item{normalize}{logical value. If \code{TRUE} normalize data using
@@ -30,8 +34,8 @@ rmaPLM(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.
     out. Higher values indicate more verbose. A value of 0 will print nothing}
 }
 \details{
-  This function fits the RMA as a Probe Level Linear models to all the probesets in
-  an \code{\link[affy]{AffyBatch}}.
+  This function fits the RMA as a Probe Level Linear models to all the
+  probesets in an \code{\link[affy:AffyBatch-class]{AffyBatch}}.
 }
 \value{
   An \code{\link{PLMset}}
@@ -51,7 +55,8 @@ rmaPLM(object,subset=NULL,normalize=TRUE,background=TRUE,background.method="RMA.
   Bioinformatics 19(2):185-193}
 
 \seealso{\code{\link[affy]{expresso}},
-  \code{\link[affy]{rma}}, \code{\link{threestep}},\code{\link{fitPLM}}, \code{\link{threestepPLM}}
+  \code{\link[affy]{rma}}, \code{\link{threestep}},\code{\link{fitPLM}},
+  \code{\link{threestepPLM}} 
 }
 
 

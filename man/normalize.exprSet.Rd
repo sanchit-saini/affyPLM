@@ -12,21 +12,27 @@
   Allows the user to apply normalization routines to ExpressionSets.
 }
 \usage{
-  normalize.ExpressionSet.quantiles(eset,transfn=c("none","log","antilog"))
-  normalize.ExpressionSet.loess(eset,transfn=c("none","log","antilog"),...)
-  normalize.ExpressionSet.contrasts(eset, span = 2/3, choose.subset = TRUE, subset.size = 5000, verbose = TRUE, family = "symmetric",transfn=c("none","log","antilog"))
-  normalize.ExpressionSet.qspline(eset,transfn=c("none","log","antilog"),...)
-  normalize.ExpressionSet.invariantset(eset,prd.td = c(0.003, 0.007),verbose=FALSE,transfn=c("none","log","antilog"),baseline.type=c("mean","median","pseudo-mean","pseudo-median"))
-normalize.ExpressionSet.scaling(eset,trim=0.02,baseline=-1,transfn=c("none","log","antilog"))
+  normalize.ExpressionSet.quantiles(eset, transfn=c("none","log","antilog"))
+  normalize.ExpressionSet.loess(eset, transfn=c("none","log","antilog"),...)
+  normalize.ExpressionSet.contrasts(eset, span = 2/3,
+      choose.subset=TRUE, subset.size=5000, verbose=TRUE, family="symmetric",
+      transfn=c("none","log","antilog")) 
+  normalize.ExpressionSet.qspline(eset, transfn=c("none","log","antilog"),...)
+  normalize.ExpressionSet.invariantset(eset,prd.td=c(0.003, 0.007),
+      verbose=FALSE, transfn=c("none","log","antilog"),
+      baseline.type=c("mean","median","pseudo-mean","pseudo-median")) 
+  normalize.ExpressionSet.scaling(eset, trim=0.02, baseline=-1,
+      transfn=c("none","log","antilog"))
 }
 \arguments{
-  \item{eset}{An \code{\link[Biobase:ExpressionSet-class]{ExpressionSet}}}
-  \item{span}{parameter to be passed to the function \code{\link[modreg]{loess}}.}
+  \item{eset}{An \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}}
+  \item{span}{parameter to be passed to the function
+    \code{\link[stats]{loess}}.} 
   \item{choose.subset}{}
   \item{subset.size}{}
   \item{verbose}{verbosity flag}
   \item{family}{parameter to be passed to the function
-    \code{\link[modreg]{loess}}.}
+    \code{\link[stats]{loess}}.}
   \item{prd.td}{cutoff parameter (details in the bibliographic
     reference)}
   \item{trim}{How much to trim from the top and bottom before computing
@@ -52,7 +58,7 @@ normalize.ExpressionSet.scaling(eset,trim=0.02,baseline=-1,transfn=c("none","log
 }
 
 \value{
-  A normalized \code{\link[Biobase:ExpressionSet-class]{ExpressionSet}}.
+  A normalized \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}.
 }
 
 \examples{

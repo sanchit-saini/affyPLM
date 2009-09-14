@@ -5,15 +5,17 @@
   or ExpressionSet
 }
 \usage{
-ReadRMAExpress(filename,return.value=c("ExpressionSet","matrix"))
+ReadRMAExpress(filename, return.value=c("ExpressionSet","matrix"))
 }
 \arguments{
   \item{filename}{The name of the file containing RMAExpress output to
     be read in}
-  \item{return.value}{should a \code{\link{matrix}} or an \code{\link[Biobase:ExpressionSet-class]{ExpressionSet}} be returned}
+  \item{return.value}{should a \code{\link{matrix}} or an
+    \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}} be
+    returned} 
 }
 \value{
-  returns an \code{\link[Biobase:ExpressionSet-class]{ExpressionSet}}
+  returns an \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}
 }
 \references{
   \url{http://rmaexpress.bmbolstad.com}

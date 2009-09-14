@@ -2,11 +2,16 @@
 \alias{threestepPLM}
 \title{Three Step expression measures returned as a PLMset}
 \description{
-  This function converts an \code{\link[affy]{AffyBatch}} into an
+  This function converts an
+  \code{\link[affy:AffyBatch-class]{AffyBatch}} into an 
   \code{\link{PLMset}} using a three step expression measure.
 }
 \usage{
-threestepPLM(object,subset=NULL, normalize=TRUE,background=TRUE,background.method="RMA.2",normalize.method="quantile",summary.method="median.polish",background.param = list(),normalize.param=list(),output.param=list(), model.param=list(),verbosity.level=0)
+threestepPLM(object,subset=NULL, normalize=TRUE, background=TRUE,
+             background.method="RMA.2", normalize.method="quantile",
+             summary.method="median.polish", background.param = list(),
+             normalize.param=list(), output.param=list(),
+             model.param=list(), verbosity.level=0)
 }
 %- maybe also `usage' for other objects documented here.
 \arguments{

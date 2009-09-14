@@ -7,9 +7,9 @@
   Create boxplots of M or M vs A plots. Where M is determined relative
   to a specified chip or to a pseudo-median reference chip.
 }
-%#MAplot(object,ref=NULL,...)
-\usage{
 
+\usage{
+%#MAplot(object,ref=NULL,...)
 }
  
 \arguments{
@@ -22,7 +22,7 @@
     are drawn}
   \item{span}{span to be used for loess fit.}
   \item{family.loess}{\code{"guassian"} or \code{"symmetric"} as in
-    \code{\link[modreg]{loess}}.}
+    \code{\link[stats]{loess}}.}
   \item{cex}{Size of text when writing summary statistics on plot}
   }
 
