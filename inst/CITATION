@@ -19,6 +19,7 @@ citEntry(entry="inbook",
         publisher="Springer",
         address="New York",
     year = 2005,
+    chaper = 3,
     pages ="33--47",
 
     textVersion = paste("Bolstad BM, Collin F, Brettschneider J, Simpson K, Cope L, Irizarry RA, and Speed TP. (2005) Quality Assessment of Affymetrix GeneChip Data in Bioinformatics and Computational Biology Solutions Using R and Bioconductor. Gentleman R, Carey V, Huber W, Irizarry R, and Dudoit S. (Eds.), Springer, New York."),
