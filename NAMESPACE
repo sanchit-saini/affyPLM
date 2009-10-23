@@ -37,3 +37,4 @@ importClassesFrom(methods,
 
  ##export everything that does not start with a .
  exportPattern("^[^\\.]")
+ exportClasses(PLMset)
