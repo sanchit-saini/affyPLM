@@ -27,7 +27,7 @@ ReadRMAExpress <- function(filename,return.value=c("ExpressionSet","matrix")){
       preproc(description)$filenames <- header[[3]]
       preproc(description)$rmaexpressversion <- paste("RMAExpress",header[[1]])
       
-      samplenames <- sub("^/?([^/]*/)*", "", header[[3]],extended = TRUE)
+      samplenames <- sub("^/?([^/]*/)*", "", header[[3]])
       pdata <- data.frame(sample = 1:length(samplenames), row.names = samplenames)
       phenoData <- new("AnnotatedDataFrame", data = pdata, 
           varMetadata = data.frame(labelDescription= "arbitrary numbering"))

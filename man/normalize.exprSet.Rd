@@ -28,8 +28,9 @@
   \item{eset}{An \code{\link[Biobase:class.ExpressionSet]{ExpressionSet}}}
   \item{span}{parameter to be passed to the function
     \code{\link[stats]{loess}}.} 
-  \item{choose.subset}{}
-  \item{subset.size}{}
+  \item{choose.subset}{use a subset of values to establish the
+    normalization relationship}
+  \item{subset.size}{number to use for subset}
   \item{verbose}{verbosity flag}
   \item{family}{parameter to be passed to the function
     \code{\link[stats]{loess}}.}

@@ -80,6 +80,10 @@
       coefficients related to chip (or chip level) effects for each fit.}
     \item{\code{se.chip.coefs}:}{Object of class "matrix". Contains
       standard error estimates for the chip coefficients.}
+    \item{\code{const.coefs}:}{Object of class "matrix". Contains model
+      coefficients related to intercept effects for each fit.}
+    \item{\code{se.const.coefs}:}{Object of class "matrix". Contains
+      standard error estimates for the intercept estimates}
     \item{\code{model.description}:}{Object of class "character". This
       string describes the probe level model fitted.}
     \item{\code{weights}:}{List of objects of class "matrix". Contains probe
@@ -95,18 +99,26 @@
       compatibility with previous version of this class description can
       also be a "character". The class \code{characterOrMIAME} has been
       defined just for this.}
+    \item{\code{experimentData}:}{Object of class "MIAME". For
+      compatibility with previous version of this class description can
+      also be a "character". The class \code{characterOrMIAME} has been
+      defined just for this.}
     \item{\code{cdfName}:}{A character string giving the name of the
       cdfFile.}
     \item{\code{nrow}:}{Object of class "numeric". Number of rows in chip.}
-    \item{\code{ncol}:}{Object of class "numeric". Number of cols in chip.}
-    \item{\code{notes}:}{Object of class "character" Vector of
-      explanatory text.}
-    \item{\code{varcov}:}{Object of class "list". A list of
+    \item{\code{ncol}:}{Object of class "numeric". Number of cols in
+chip.}
+      \item{\code{narrays}:}{Object of class "numeric". Number of arrays
+	used in model fit.}
+      \item{\code{normvec}:}{Object of class "matrix". For storing
+	normalization vector(s). Not currentl used}
+     \item{\code{varcov}:}{Object of class "list". A list of
       variance/covariance matrices.}
     \item{\code{residualSE}:}{Object of class "matrix". Contains residual
       standard error and df.}
     \item{\code{residuals}:}{List of objects of class "matrix". Contains
       residuals from model fit (if stored).}
+    \item{\code{model.call}:}{Object of class "call"}
   }
 }
 \section{Methods}{
