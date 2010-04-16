@@ -95,10 +95,6 @@
       entity represent variables and the rows represent patients or cases.}
     \item{\code{annotation}}{A character string identifying the
       annotation that may be used for the \code{ExpressionSet} instance.}
-    \item{\code{description}:}{Object of class "MIAME". For
-      compatibility with previous version of this class description can
-      also be a "character". The class \code{characterOrMIAME} has been
-      defined just for this.}
     \item{\code{experimentData}:}{Object of class "MIAME". For
       compatibility with previous version of this class description can
       also be a "character". The class \code{characterOrMIAME} has been
@@ -110,7 +106,7 @@
 chip.}
       \item{\code{narrays}:}{Object of class "numeric". Number of arrays
 	used in model fit.}
-      \item{\code{normvec}:}{Object of class "matrix". For storing
+      \item{\code{normVec}:}{Object of class "matrix". For storing
 	normalization vector(s). Not currentl used}
      \item{\code{varcov}:}{Object of class "list". A list of
       variance/covariance matrices.}
