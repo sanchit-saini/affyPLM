@@ -435,8 +435,17 @@ setMethod("image",signature(x="PLMset"),
             pm.x.locs[pm.x.locs == 0] <- rows
             pm.y.locs <- pm.index%/%rows + 1
             xycoor <- matrix(cbind(pm.x.locs,pm.y.locs),ncol=2)
-            xycoor2 <- matrix(cbind(pm.x.locs,pm.y.locs+1),ncol=2)
+
+            mm.index <-  unique(unlist(indexProbes(x, "mm",row.names(coefs(x)))))
+            mm.x.locs <- mm.index%%rows
+            mm.x.locs[mm.x.locs == 0] <- rows
+            mm.y.locs <- mm.index%/%rows + 1
             
+            xycoor2 <-matrix(cbind(mm.x.locs,mm.y.locs),ncol=2) ##xycoor## matrix(cbind(pm.x.locs,pm.y.locs+1),ncol=2)
+
+            if (any(is.na(xycoor2))){
+              xycoor2 <-xycoor
+            }
             
             if (is.element(type,c("weights"))){
               if (any(dim(x@weights[[1]]) ==0) & any(dim(x@weights[[2]]) ==0)){
