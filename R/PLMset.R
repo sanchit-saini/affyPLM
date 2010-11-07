@@ -422,15 +422,15 @@ setMethod("image",signature(x="PLMset"),
             }
 
 
-       
+            browser()
 
             
             
             type <- match.arg(type)
             
-            pm.index <- unique(unlist(indexProbes(x, "pm",row.names(coefs(x)))))
-            rows <- x@nrow
-            cols <- x@ncol
+            pm.index <- unlist(indexProbes(x, "pm",row.names(coefs(x))))  ##unique(unlist(indexProbes(x, "pm",row.names(coefs(x)))))
+            rows <-  x@nrow
+            cols <-  x@ncol
             pm.x.locs <- pm.index%%rows
             pm.x.locs[pm.x.locs == 0] <- rows
             pm.y.locs <- pm.index%/%rows + 1
@@ -442,11 +442,12 @@ setMethod("image",signature(x="PLMset"),
             mm.y.locs <- mm.index%/%rows + 1
             
             xycoor2 <-matrix(cbind(mm.x.locs,mm.y.locs),ncol=2) ##xycoor## matrix(cbind(pm.x.locs,pm.y.locs+1),ncol=2)
-
+	 browser()	
             if (any(is.na(xycoor2))){
               xycoor2 <-xycoor
             }
             
+         
             if (is.element(type,c("weights"))){
               if (any(dim(x@weights[[1]]) ==0) & any(dim(x@weights[[2]]) ==0)){
                 stop("Sorry this PLMset does not appear to have weights\n");
