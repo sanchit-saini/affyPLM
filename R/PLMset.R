@@ -422,7 +422,7 @@ setMethod("image",signature(x="PLMset"),
             }
 
 
-            browser()
+
 
             
             
@@ -442,7 +442,7 @@ setMethod("image",signature(x="PLMset"),
             mm.y.locs <- mm.index%/%rows + 1
             
             xycoor2 <-matrix(cbind(mm.x.locs,mm.y.locs),ncol=2) ##xycoor## matrix(cbind(pm.x.locs,pm.y.locs+1),ncol=2)
-	 browser()	
+
             if (any(is.na(xycoor2))){
               xycoor2 <-xycoor
             }
