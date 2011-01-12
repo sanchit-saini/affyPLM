@@ -10,29 +10,19 @@ importClassesFrom(methods,
                   missing,
                   numeric)
 
+importFrom("Biobase", "annotation", "description", "experimentData")
+importFrom("Biobase", "pData", "pData<-")
+importFrom("Biobase", "phenoData", "phenoData<-")
+importFrom("Biobase", "sampleNames", "sampleNames<-")
+importFrom("Biobase", "geneNames")
 
+importFrom("graphics", "boxplot", "image", "hist")
 
-
-  importFrom("Biobase", "annotation")
-  importFrom("graphics", "boxplot")
-  importFrom("affy", "cdfName")
-  importFrom("Biobase", "description")
-  importFrom("graphics", "image")
-  importFrom("affy", "indexProbes")
-  importFrom("affy", "MAplot")
-  importFrom("affy", "Mbox")
-  importFrom("Biobase", "pData<-")
-  importFrom("Biobase", "pData")
-  importFrom("Biobase", "phenoData<-")
-  importFrom("Biobase", "phenoData")
-  importFrom("Biobase", "sampleNames<-")
-  importFrom("Biobase", "sampleNames")
-  importFrom("Biobase", "geneNames")
-
-  importFrom("graphics", "hist")
-  importFrom("affy","normalize")
-
-  importFrom("affy", "upDate.normalize.AffyBatch.methods")
+importFrom("affy", "cdfName")
+importFrom("affy", "indexProbes", "probeNames", "intensity", "pm", "pm<-", "mm", "mm<-")
+importFrom("affy", "MAplot", "Mbox")
+importFrom("affy", "normalize")
+importFrom("affy", "upDate.normalize.AffyBatch.methods")
 
 
 
