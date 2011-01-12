@@ -27,6 +27,7 @@ importClassesFrom(methods,
   importFrom("Biobase", "phenoData")
   importFrom("Biobase", "sampleNames<-")
   importFrom("Biobase", "sampleNames")
+  importFrom("Biobase", "geneNames")
 
   importFrom("graphics", "hist")
   importFrom("affy","normalize")
