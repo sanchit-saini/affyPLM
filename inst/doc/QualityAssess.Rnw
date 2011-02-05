@@ -64,7 +64,7 @@ image(Pset,which=2)
 Note that the \Rfunarg{which} argument is used to control which array is drawn. Its value should be between $1$ and $n$, where $n$ is the number of arrays in the dataset. If \Rfunarg{which} is not supplied, then images for all chips are drawn, one by one in succession. Figure \ref{weights} shows the resultant chip pseudo image. Areas of low weight are greener, high weights (ie weight of 1) are light grey. 
 
 <<weightsImageDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("Quality-weightimage1a.png",height=4,width=4,pointsize=10,res=300)
+png("Quality-weightimage1a.png",height=4,width=4,pointsize=10,res=300,units="in")
 par(mar=c(2.0,2.1,1.6,1.1),oma=c(1,1,0,0))
 image(Pset,which=2)
 dev.off()
@@ -118,19 +118,19 @@ image(Pset,which=2, type="sign.resids")
 @
 
 <<residualImageDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("Quality-residualimages1.png",height=4,width=4,res=300)
+png("Quality-residualimages1.png",height=4,width=4,res=300,units="in")
 par(mar=c(2.0,2.1,1.6,1.1),oma=c(1,1,0,0))
 image(Pset,which=2, type="resids")
 dev.off()
-bitmap("Quality-residualimages2.png",height=4,width=4,res=300)
+png("Quality-residualimages2.png",height=4,width=4,res=300,units="in")
 par(mar=c(2.0,2.1,1.6,1.1),oma=c(1,1,0,0))
 image(Pset,which=2, type="pos.resids")
 dev.off()
-bitmap("Quality-residualimages3.png",height=4,width=4,res=300)
+png("Quality-residualimages3.png",height=4,width=4,res=300,units="in")
 par(mar=c(2.0,2.1,1.6,1.1),oma=c(1,1,0,0))
 image(Pset,which=2, type="neg.resids")
 dev.off()
-bitmap("Quality-residualimages4.png",height=4,width=4,res=300)
+png("Quality-residualimages4.png",height=4,width=4,res=300,units="in")
 par(mar=c(2.0,2.1,1.6,1.1),oma=c(1,1,0,0))
 image(Pset,which=2, type="sign.resids")
 dev.off()
@@ -190,7 +190,7 @@ RLE(Pset,main="RLE for Dilution dataset")
 @
 with the resulting plot shown in Figure \ref{RLE}. When examining this plot focus should be on the shape and position of each of the boxes. Typically arrays with poorer quality show up with boxes that are not centered about 0 and/or are more spread out. For this particular dataset there is no such array.
 <<RLEDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("Quality-RLE.png",height=4,width=4,pointsize=10,res=300)
+png("Quality-RLE.png",height=4,width=4,pointsize=10,res=300,units="in")
 par(mar=c(2.0,2.1,1.6,1.1),oma=c(1,1,0,0))
 RLE(Pset,main="RLE for Dilution dataset")
 dev.off()
@@ -220,7 +220,7 @@ NUSE(Pset,main="NUSE for Dilution dataset")
 @
 
 <<NUSEDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("Quality-NUSE.png",height=4,width=4,pointsize=10,res=300)
+png("Quality-NUSE.png",height=4,width=4,pointsize=10,res=300,units="in")
 par(mar=c(2.0,2.1,1.6,1.1),oma=c(1,1,0,0))
 NUSE(Pset,main="NUSE for Dilution dataset")
 dev.off()
@@ -247,6 +247,10 @@ the median and IQR of the NUSE values for each array is returned. Note that call
 
 The tools discussed here are most useful for assessing relative quality within a dataset. A typical use of these tools would be to decide whether or not any arrays should be excluded from down-stream data analysis. Some users might find it useful to see the results of these quality assessment procedures on other datasets. Such information can be found on the PLM Image Gallery website \url{http://plmimagegallery.bmbolstad.com}.
 
+<<echo=FALSE>>=
+## give ghostscript on Windows a few seconds to catch up (UGLY HACK)
+Sys.sleep(10)
+@ 
 
 \end{document}
 
