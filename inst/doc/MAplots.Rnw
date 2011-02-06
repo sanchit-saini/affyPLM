@@ -60,7 +60,7 @@ MAplot(eset.Dilution)
 @ 
 
 <<FirstUsageDo, results=hide, echo=FALSE, fig=FALSE>>=
-bitmap("MAplotFirstUse.png",height=8,width=8,pointsize=10,res=300)
+png("MAplotFirstUse.png",height=8,width=8,pointsize=10,res=300,units="in")
 par(mfrow=c(2,2))
 MAplot(eset.Dilution)
 dev.off()
