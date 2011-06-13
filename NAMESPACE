@@ -1,5 +1,6 @@
- useDynLib("affyPLM")
+useDynLib("affyPLM")
 
+import(zlibbioc)
 
 importClassesFrom(methods,
                   ANY,
