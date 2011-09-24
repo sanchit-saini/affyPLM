@@ -1,15 +1,7 @@
 useDynLib("affyPLM")
 
 import(zlibbioc)
-
-importClassesFrom(methods,
-                  ANY,
-                  character,
-                  environment,
-                  integer,
-                  matrix,
-                  missing,
-                  numeric)
+import(methods)
 
 importFrom("Biobase", "annotation", "description", "experimentData")
 importFrom("Biobase", "pData", "pData<-")
