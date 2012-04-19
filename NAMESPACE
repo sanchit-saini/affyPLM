@@ -7,7 +7,7 @@ importFrom("Biobase", "annotation", "description", "experimentData")
 importFrom("Biobase", "pData", "pData<-")
 importFrom("Biobase", "phenoData", "phenoData<-")
 importFrom("Biobase", "sampleNames", "sampleNames<-")
-importFrom("Biobase", "geneNames")
+importFrom("Biobase", "featureNames")
 
 importFrom("graphics", "boxplot", "image", "hist")
 
@@ -16,7 +16,7 @@ importFrom("affy", "indexProbes", "probeNames", "intensity", "pm", "pm<-", "mm",
 importFrom("affy", "MAplot", "Mbox")
 importFrom("affy", "normalize")
 importFrom("affy", "upDate.normalize.AffyBatch.methods")
-
+importMethodsFrom("affy", "geneNames")
 
 
  ##export everything that does not start with a .
