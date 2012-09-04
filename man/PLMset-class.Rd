@@ -168,6 +168,4 @@ chip.}
     Oligonucleotide Array Data: Background, Normalization and
     Summarization}. PhD Dissertation. University of California,
   Berkeley.}
-\examples{
-}
 \keyword{classes}

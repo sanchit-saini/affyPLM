@@ -1,10 +1,10 @@
 Package: affyPLM
-Version: 1.33.1
+Version: 1.33.2
 Title: Methods for fitting probe-level models
 Author: Ben Bolstad <bmb@bmbolstad.com>
 Maintainer: Ben Bolstad <bmb@bmbolstad.com>
 Depends: R (>= 2.6.0), affy (>= 1.11.0), Biobase, gcrma, stats, preprocessCore (>= 1.5.1)
-Imports: zlibbioc, methods
+Imports: zlibbioc, BiocGenerics, graphics, grDevices, methods
 Suggests: affydata, MASS
 LinkingTo: preprocessCore
 Description: A package that extends and improves the functionality of

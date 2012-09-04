@@ -34,7 +34,4 @@
 
 \seealso{\code{\link[affy:AffyBatch-class]{AffyBatch}}, \code{\link[affy:read.affybatch]{read.affybatch}}}
 
-\examples{
-
-}
 \keyword{manip}
