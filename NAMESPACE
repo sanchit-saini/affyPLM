@@ -9,7 +9,7 @@ import(methods)
 #Imports: affy, Biobase, BiocGenerics, gcrma, graphics, grDevices,
 #         methods, preprocessCore, stats
 
-importFrom(BiocGenerics, annotation, "annotation<-")
+importFrom(BiocGenerics, annotation, "annotation<-", normalize)
 importMethodsFrom(BiocGenerics, cbind, colnames, density, eval, lapply,
                   mget, ncol, nrow, paste, pmax, pmin, rbind,
                   residuals, rownames, unique, weights)
@@ -18,7 +18,7 @@ importClassesFrom(Biobase, AnnotatedDataFrame, ExpressionSet, MIAME)
 
 importMethodsFrom(affy, cdfName, exprs, geneNames, indexProbes,
                   intensity, "intensity<-", MAplot, Mbox, mm, "mm<-",
-                  mmindex, normalize, pm, "pm<-", pmindex, probeNames)
+                  mmindex, pm, "pm<-", pmindex, probeNames)
 
 importMethodsFrom(Biobase, annotation, description, experimentData,
                   "exprs<-", pData, "pData<-", phenoData,
