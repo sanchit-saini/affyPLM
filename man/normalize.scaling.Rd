@@ -38,5 +38,4 @@ if (require(affydata)) {
 }
 }
 \author{Ben Bolstad, \email{bmb@bmbolstad.com}}
-\seealso{\code{\link[affy]{normalize}}}
 \keyword{manip}

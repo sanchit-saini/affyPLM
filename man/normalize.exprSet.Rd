@@ -79,6 +79,6 @@ if (require(affydata)) {
   Berkeley.}
 
 
-\seealso{\code{\link[affy]{normalize}}}
+
 
 \keyword{manip}
