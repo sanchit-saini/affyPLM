@@ -1,0 +1,340 @@
+1.19.5
+------
+Fix issue with quality assessment vignette not building correctly due to internal changes in NUSE() function
+
+
+1.19.4
+------
+Fix additional NAMESPACE issue
+
+1.19.3
+------
+Added a NAMESPACE
+
+
+
+1.19.2
+------
+change all relevant VECTOR_ELT/SET_VECTOR_ELT to STRING_ELT/SET_STRING_ELT. A number of functions are affected by this change (fitPLM() being a primary example)
+
+
+
+
+1.19.1
+-------
+fitPLM() with the default model now returns values (coef, se) for the last probe in probeset
+
+
+1.17.1
+------
+Fix typo in get.psi.code (Geman-McClure issue)
+(see http://article.gmane.org/gmane.science.biology.informatics.conductor/19075)
+
+
+
+1.15.9
+------
+rma background correction code from preprocessCore is now used
+rma_background2.c and rma_background2.h are now removed
+
+
+1.15.8
+------
+remove weightedkerneldensity.c which was not used anywhere.
+
+
+1.15.6
+------
+Replaced usage of soon to be defunct class exprSet with ExpressionSet.
+
+
+1.15.5
+------
+Add narrays to PLMset-class, to ensure that show(Pset) works right. Fix summary(Pset)
+
+
+1.15.4
+------
+Removed fitPLM.old, PLM.designmatrix, PLM.designmatrix2 which were all legacy defuct functions.
+
+
+1.15.3
+------
+Fixed very minor typo in vignette
+
+
+1.15.2
+------
+Remove some legacy C code from do_PLMrlm.c. This code was not part of the workflow for any user constructed fitPLM call. Removing it should help improve maintainability.
+
+
+1.15.1
+------
+Add a CITATION
+
+
+
+1.13.16
+-------
+Resync with changes in preprocessCore
+
+
+
+
+1.13.13
+-------
+commit the deletion of a file that should have been removed from
+the repository
+
+1.13.12
+-------
+restructure medianlogPM and logmedianPM code
+
+
+
+1.13.10
+-------
+
+Continue clean up with code that had previously been moved to preprocessCore
+
+
+
+
+1.13.9
+------
+Remove R_rlm_interfaces.c from affyPLM (it has been moved to preprocessCore 
+
+
+1.13.8
+------
+Fix so vignettes build
+
+
+
+1.13.7
+------
+move affydata from Depends to Suggest:
+
+
+
+1.13.6
+------
+change MAplot vignette to refer to ExpressionSet rather than exprSet objects
+
+
+1.13.4
+------
+core rlm code is now in preprocessCore. Also moved AvgLog, LogAvg and lm code there.
+
+
+
+1.13.3
+------
+
+The core medianpolish algorithm is now from preprocessCore
+
+
+1.13.2
+------
+fix a compiler warning
+
+
+
+1.13.1
+------
+remove the qnorm.c code. This has been moved to preprocessCore, along with normalize.quantiles.determine.target(), normalize.quantiles.use.target() and a few related things.
+
+
+
+
+
+1.11.13
+-------
+PLMset no longer contains an eSet object and has no direct dependencies on ExpressionSets etc
+all the exprSet functions/methods have been replaced with equivalent ExpressionSet methods
+
+
+
+
+1.11.12
+-------
+Additional fixes to get it to pass R CMD check (which it now does). MAplot for ExpressionSet.
+PLMSet will no longer "contain" an eset object from next version (1.11.13)
+All exprSet methods/functions will be removed in next version (1.11.13)
+
+
+1.11.11
+-------
+
+Some fixes to make it pass R CMD check. changes how const.coefs are stored.
+
+
+1.11.9-1.11.10
+--------------
+These versions where done by people at FHCRC. Basically modernizing the package. Try to make some things that were exprSet dependent instead be eset/ExpressionSet based.
+
+
+1.11.8
+------
+Small optimization for RMA background C code.
+
+
+
+1.11.7
+------
+Some small memory/speed optimizations in some of the C code
+
+
+1.11.6
+------
+Add SE output to raw rlm function (for direct calling).
+
+
+
+1.11.5
+------
+Fixed an unbalanced UNPROTECT
+
+
+
+1.11.4
+------
+
+instances of "\." in a pattern were changed to "\\."
+
+
+1.11.3
+------
+fix minor verbosity problem in pre-process
+
+
+
+1.11.2
+------
+
+Introduce preprocess() for general pre-processing (ie normalize and background correcting)
+
+
+
+1.11.1
+------
+
+Make functions less verbose (this can be controlled with verbosity.level parameter). This applies to fitPLM, threestep, threestepPLM, rmaPLM.
+change a few apply(x,1,median) to rowMedians
+
+
+
+
+
+
+1.9.17
+------
+Fix R_moduleCdynload on windows so it should now build
+
+
+1.9.16
+------
+Fix a makevars problem.
+
+
+1.9.15
+------
+Change moduleCdynload to R_moduleCdynload
+
+
+1.9.14
+------
+The model PM ~ -1 + samples + treatment:probes was being misidentified in C code and the default model fitted instead.
+
+1.9.13
+------
+a small fix to boxplot() when applied to a PLMset containing a non-default model
+
+1.9.12
+------
+A .Call() at the C level for accessing the optimized rlm for the rma type model.
+
+
+1.9.11
+------
+Fix small qnorm find/apply target bug
+
+
+1.9.10
+------
+Added hist() for exprSet
+
+
+1.9.9
+-----
+Added an additional vignette explaining various ways to use the MAplot function.
+Removed the subset argument from MAplot (for exprSet, PLMset)
+Added groups argument to MAplot
+
+
+1.9.8
+-----
+add ability to calculate scaling factors for scaling normalizations on the log2 scale. This modification of the scaling
+normalization method was recommended by   Lu, Chao (2004) Improving the scaling normalization for high-density oligonucleotide GeneChip expression microarrays. BMC Bioinformatics 5:103
+
+
+1.9.7
+-----
+Modify MAplot for exprSet, PLMset objects for changes in ma.plot from affy.
+
+
+1.9.6
+-----
+Added normalize.AffyBatch.quantiles.chromosome
+
+
+
+1.9.3-1.9.5
+-----------
+
+Small fix to fitPLM for soybean arrays.
+A number of quantile normalization variants.
+
+
+
+
+1.9.2   May 1, 2006
+-----
+
+ReadRMAExpress() can deal with gzipped files.
+
+
+
+1.9.1   Apr 27-28, 2006
+-----
+
+Better checking of validity of normalization method and normalization parameteres supplied to fitPLM, threestep etc.
+quantiles.robust is now a supported normalization option (to match with normalize.quantiles.robust in the affy function)
+
+
+
+
+
+
+
+very OLD CHANGELOG is below:
+
+
+1.4.1
+-----
+
+Fix for bug in fitPLM when model is PM ~ -1 + samples + probes (ie default model) when there are probesets with only single probeset
+Changed default setting of varcov from "all" to "none" in output.param in fitPLM ) this reduces memory over head.
+
+
+1.4.2
+-----
+
+Boxplot on a exprSet by now uses range=0 by default
+
+
+1.4.3
+-----
+
+Fix a potential gc() problem in threestep
+Fix threestepPLM() so it works on Windows.

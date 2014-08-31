@@ -1,0 +1,117 @@
+%\VignetteIndexEntry{affyPLM: the threestep function}
+%\VignettePackage{affyPLM}
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+
+\newcommand\Rpackage[1]{{\textsf{#1}\index{#1 (package)}}}
+\newcommand\dataset[1]{{\textit{#1}\index{#1 (data set)}}}
+\newcommand\Rclass[1]{{\textit{#1}\index{#1 (class)}}}
+\newcommand\Rfunction[1]{{{\small\texttt{#1}}\index{#1 (function)}}}
+\newcommand\Rfunarg[1]{{\small\texttt{#1}}}
+\newcommand\Robject[1]{{\small\texttt{#1}}}
+
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\author{Ben Bolstad \\ {\tt bmb@bmbolstad.com} \\ \url{http://bmbolstad.com}}
+\begin{document}
+\title{affyPLM: the \Rfunction{threestep} function}
+\maketitle
+\tableofcontents
+\section{Introduction}
+
+This document describes the \Rfunction{threestep} function which is part of the \Rpackage{affyPLM} package. The \Rfunction{threestep} function is an alternative method of computing expression measures (which can also be generated using \Rfunction{expresso}, \Rfunction{rma} and other functions from the \Rpackage{affy} package). In the \Rfunction{threestep} framework an expression measure consists of three steps: background/signal adjustment, normalization and then summarization. One important thing to notice is that all expression measures returned by \Rfunction{threestep} are all in the $\log_2$ scale.
+
+After starting R, the package should be loaded using
+<<echo=F,results=hide>>=
+library(affyPLM)
+@
+this will load \Rpackage{affyPLM} as well as the \Rpackage{affy} package and its dependencies.
+
+\section{Using the threestep function}
+
+The simplest method  of calling the \Rfunction{threestep} function is to call it with no arguments beyond an \Rclass{AffyBatch}.
+<<eval=FALSE>>=
+require(affydata)
+data(Dilution)
+##FIXME: remove the next line
+Dilution = updateObject(Dilution)
+eset <- threestep(Dilution)
+@
+this will compute the conventional RMA expression measure. 
+
+But we can go beyond this by altering any of the three steps. This can be done using the three parameters \Rfunarg{background.method}, \Rfunarg{normalize.method} and \Rfunarg{summary.method}. For example
+<<eval=FALSE>>=
+eset <- threestep(Dilution, background.method = "MASIM",
+	normalize.method="quantile",summary.method="tukey.biweight")
+@
+computes an expression measure where we background correct/signal adjust by breaking the array into grids doing a location dependent adjustment, then subtracting the "ideal mismatch" from the perfect match. Normalization is done using the quantile normalization method and then summarization using a 1-step Tukey Biweight.
+
+An even more unconventional expression measure is to background correct/signal adjust by subtracting the ideal mismatch, carry out no normalization, then summarize by taking the 2nd largest PM (which in this case will really be the largest PM after subtracting the ideal mismatch).
+
+<<eval=FALSE>>=
+eset <- threestep(Dilution, background.method = "IdealMM",
+	normalize="quantile",summary.method="log.2nd.largest")
+@
+
+
+\section{Methods available in {\it threestep}}
+
+The following tables outline the methods that are available for each of the threesteps.
+\begin{center}
+\begin{tabular}{ll} \hline
+\multicolumn{2}{c}{Background methods} \\ \hline
+Option & Name  \\ \hline
+{\tt RMA.2} (default) & RMA convolution model background  \\
+{\tt RMA.1} & RMA convolution model background  \\
+{\tt MAS} & MAS 5.0 location dependent background  \\
+{\tt IdealMM} & Ideal Mismatch \\
+{\tt MASIM} & MAS 5 and Ideal Mismatch \\
+{\tt GCRMA} & GCRMA background  \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{lll} \hline
+\multicolumn{2}{c}{Normalization methods} \\ \hline
+Option & Name  \\  \hline
+{\tt quantile} (default)& Quantile normalization  \\ 
+{\tt scaling} & scaling normalization  \\ \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{ll} \hline
+\multicolumn{2}{c}{Summarization methods} \\ \hline
+Option & Name  \\  \hline
+{\tt median.polish} (default)& Median polish \\
+{\tt tukey.biweight} & 1 step tukey biweight \\
+{\tt average.log} & Average of Logs \\
+{\tt log.average} & Log of Average  \\
+{\tt median.log} & Median of Logs \\
+{\tt log.median} & Log of Median  \\
+{\tt log.2nd.largest} & 2nd largest PM \\
+{\tt lm} & Linear Model \\
+{\tt rlm} & Robust Linear Model \\ \hline
+\end{tabular}
+\end{center}
+
+
+
+
+
+%\bibliographystyle{plainnat}
+%\bibliography{AffyExtensions}
+
+\end{document}
+

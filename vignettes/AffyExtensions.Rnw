@@ -1,0 +1,591 @@
+%\VignetteIndexEntry{affyPLM: Fitting Probe Level Models}
+%\VignettePackage{affyPLM}
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage[authoryear,round]{natbib}
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+
+\newcommand\Rpackage[1]{{\textsf{#1}\index{#1 (package)}}}
+\newcommand\dataset[1]{{\textit{#1}\index{#1 (data set)}}}
+\newcommand\Rclass[1]{{\textit{#1}\index{#1 (class)}}}
+\newcommand\Rfunction[1]{{{\small\texttt{#1}}\index{#1 (function)}}}
+\newcommand\Rfunarg[1]{{\small\texttt{#1}}}
+\newcommand\Robject[1]{{\small\texttt{#1}}}
+
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\author{Ben Bolstad \\ {\tt bmb@bmbolstad.com} \\ \url{http://bmbolstad.com}}
+\begin{document}
+\title{affyPLM: Fitting Probe Level Models}
+\maketitle
+\tableofcontents
+\section{Introduction}
+
+This majority of this document describes the \Rfunction{fitPLM} function. Other vignettes for \Rpackage{affyPLM} describe quality assessment tools and the \Rfunction{threestep} function for computing expression measures. After starting R, the package should be loaded using:
+<<loadData,results=hide>>=
+library(affyPLM)
+require(affydata)
+data(Dilution)   # an example dataset provided by the affydata package
+##FIXME: drop this after Dilution is updated
+Dilution = updateObject(Dilution)
+options(width=36)
+@
+this will load \Rpackage{affyPLM} as well as the \Rpackage{affy} package and its dependencies. The \dataset{Dilution} dataset will serve as an example dataset for this document.
+
+\section{Fitting Probe Level Models}
+
+\subsection{What is a Probe Level Model and What is a \Robject{PLMset?}}
+
+A probe level model (PLM) is a model that is fit to probe-intensity data. More specifically, it is where we fit a model with probe level and chip level parameters on a probeset by probeset basis. It is easy to arrange the probe-intensity data for a probeset so that the rows are probes and the columns are chips. In this case, our probe level parameters could be factor variable for each probe. The chip level parameters might be a factor variable with a level for each array, factor variables grouping the chips into treatment groups or perhaps some sort of covariate variable (pH, temperature, etc). 
+
+A \Rclass{PLMset} is an R object that holds the results of a fitted probe level model. Among the items stored are parameter estimates and corresponding standard errors, weights and residuals.
+
+\subsection{Getting Started with the Default Model}
+
+The main function for fitting PLM is the function \Rfunction{fitPLM}. The easiest way to call the function is to call it by passing an \Rclass{AffyBatch} object without any other arguments, this will fit a linear model with an effect estimated for each chip and an effect for each probe. This can be accomplished using:
+<<defaultModel>>=
+Pset <- fitPLM(Dilution)
+@
+Once you have a fitted model stored in a \Rclass{PLMset} object the chip level parameter estimates and the corresponding standard errors can be examined using the accessor functions \Rfunction{coefs} and \Rfunction{se} respectively. For example, to examine the parameter estimates for the first 5 probesets and their corresponding standard error estimates use:
+<<accessors>>=
+coefs(Pset)[1:5,]
+se(Pset)[1:5,]
+@
+Note that the default model is the RMA expression measure model. Specifically, the default model is
+\begin{equation*}
+\log_2 \mathrm{PM}_{kij} = \beta_{kj} + \alpha_{ki} + \epsilon_{kij} 
+\end{equation*}
+where $\beta_{kj}$ is the $\log_2$ gene expression value on array $j$ for probeset $k$ and $\alpha_{ki}$ are probe effects. Note that to make the model identifiable the constraint $\sum_{i=1}^{I} \alpha_{ki} = 0$ is used. Thus, for this default model, the parameter estimates given are gene expression values.
+
+\subsection{Getting Full Control over \Rfunction{fitPLM}}
+
+While the default model is very useful and simple to use, the \Rfunction{fitPLM} function also provides the user with a great deal of control. Specifically, the user has the ability to change the preprocessing, how the model is fitted and what output is returned.
+
+\subsubsection{Pre-processing}
+
+By default, the \Rfunction{fitPLM} function will preprocess the data using the RMA preprocessing steps. In particular, it uses the same background and normalization as the \Rfunction{rma} function of the \Rpackage{affy} package. It is possible to turn off either of these preprocessing steps by specifying that \Rfunarg{background} and/or \Rfunarg{normalize} are \Rfunarg{FALSE} in the call to \Rfunction{fitPLM}. The arguments \Rfunarg{background.method} and \Rfunarg{normalize.method} can be used to control which pre-processing methods are used. The same preprocessing methods, as described in the \Rfunction{threestep} vignette, may be used with the \Rfunction{fitPLM} function.
+
+
+\subsubsection{Controlling what is Returned in the \Rclass{PLMset}}
+
+The \Rclass{PLMset} that the \Rfunction{fitPLM} function returns contains a number of different quantities, some of which are always returned such as parameter estimates and standard error estimates and others which are more optional. The user can control whether weights, residuals, variance-covariance matrices and residual standard deviations are returned. By default, all of these items are returned, but in certain situations a user might find it useful to exclude certain items to save memory. Control is via the \Rfunarg{output.param} argument which should be provided as a list. The default settings can be seen by typing
+<<seeDefaultOutput>>=
+verify.output.param()
+@ 
+Control of whether weights, residuals and residual standard deviations are returned is via logical variables. There are three options \Rfunarg{varcov = "none"}, \Rfunarg{varcov = "chiplevel"} and \Rfunarg{varcov = "all"} for variance covariance matrices. These correspond to, not returning any variance estimates, only the portion of the variance covariance matrix related to the chiplevel parameters or the entire variance covariance matrix respectively. When each probeset has a large number of probes (or there are large numbers of parameters in the model) the last option will return many large variance covariance matrices. The following code returns a \Robject{PLMset} with no weights or residuals stored:
+<<noResidNoWeights,results=hide>>=
+Pset <- fitPLM(Dilution,output.param=list(residuals=FALSE,weights=FALSE))
+@
+
+
+
+\subsubsection{Controlling how the model is fit}
+
+\Rfunction{fitPLM} implements  iteratively re-weighted least squares M-estimation regression. Control over how \Rfunction{fitPLM} carries out the model fitting procedure is given by the \Rfunarg{model.param} argument. This value of this parameter should be a \Robject{list} of settings. In particular, these settings are the following:
+\begin{itemize}
+\item \Rfunarg{trans.fn} which controls how the response variable is transformed. This value should be a string. By default \Rfunarg{trans.fn="log2"}, but other possible options include: \Rfunarg{"loge"} or \Rfunarg{"ln"} to use the natural logarithm, \Rfunarg{"log10"} for logarithm base 10, \Rfunarg{"sqrt"} for square root and \Rfunarg{"cuberoot"} to use a cubic root transformation.
+%%"log2","loge","ln","log10","sqrt","cuberoot"
+\item \Rfunarg{se.type} which controls how the variance-covariance matrix is estimated in the M-estimation procedure. Possible values are \Rfunarg{1}, \Rfunarg{2}, \Rfunarg{3} or \Rfunarg{4}. See the Appendix for more details.
+\item \Rfunarg{psi.type} is a string which selects how the weights are computed in the robust regression. By default \Rfunarg{psi.type="Huber"}. Other possible options include \Rfunarg{"fair"}, \Rfunarg{"Cauchy"}, \Rfunarg{"Geman-McClure"}, \Rfunarg{"Welsch"}, \Rfunarg{"Tukey"}, and \Rfunarg{"Andrews"}. More details can be found in the Appendix.
+\item \Rfunarg{psi.k} is a numerical tuning constant used by \Rfunarg{psi.type}. The default values are dependent on the option chosen by \Rfunarg{psi.type}. More details can be found in the Appendix.
+\item \Rfunarg{max.its} controls the maximum number of iterations of IRLS that will be used in the model fitting procedure. By default \Rfunarg{max.its=20}. Note, that this many iterations may not be needed if convergence occurs.
+\item \Rfunarg{init.method} controls how the initial parameter estimates are derived. By default \Rfunarg{init.method="ls"} ordinary least squares is used although \Rfunarg{"Huber"} is also a possibility.
+\item \Rfunarg{weights.chip} are input weights for each chip in the dataset. This parameter should be a vector of length number of arrays in the dataset. By default, every chip is given equal weight.
+\item \Rfunarg{weights.probe} are input weights for each probe in the dataset. This parameter should be a vector of length number of probes in dataset (this length depends on the response variable in the model). By default, every probe has equal weight.
+\end{itemize}
+
+As an example, we use \Rfunarg{model.param} to control the fitting procedure so that it is fit as a standard linear regression model (ie without robustness). This is accomplished by:
+<<noRobustness,results=hide>>=
+Pset <- fitPLM(Dilution,model.param=list(max.its=0))
+@ 
+
+\subsection{Specifying models in \Rfunction{fitPLM}}
+
+Although the default model is very useful, it is by no means the only model that can be fitted using \Rfunction{fitPLM}. In this section we describe many, but certainly not all the different types of models which may be fitted. In the example code presented here we will use the \Rfunarg{subset} argument to restrict model fitting to the first 100 probesets for speed. In any real analysis model fitting would be carried out to all probesets on a particular array type.
+
+\subsubsection{Notation}
+
+\begin{tabular}{ll}
+$i$ & Index for probes $i=1,\dots,I_k$ \\
+$j$ & Index for arrays $j=1,\dots,J$ \\
+$k$ & Index for probeset $k=1,\dots,K$ \\
+$l$ & Index for probe type $l=1,2$ where $1$ is PM and $2$ is MM.\\
+$m$ & Index for level of primary treatment factor variable $m=1,\dots,M$ \\
+$\alpha_{ki}$ & probe effect parameter for probe $i$ \\
+& Included in the model by using {\tt probes}\\
+$\alpha_{kim}$ & probe effect parameter for probe $i$ estimated only for arrays where \\
+& primary treatment factor variable is level $m$ \\
+& Included in the model by using {\tt treatment:probes}\\
+$\alpha_{kil}$ &  probe effect parameter for probe $i$ estimated only for probes of \\
+& type $l$ \\
+& Included in the model by using {\tt probe.type:probes}\\
+$\alpha_{kilm}$ &  probe effect parameter for probe $i$ estimated only for probes of \\
+& type $l$ where  primary treatment factor variable is level $m$  \\
+& Included in the model by using {\tt treatment:probe.type:probes}\\
+$\beta_{kj}$ & array (chip) effect. \\
+& Included in the model by using {\tt samples}\\
+$\phi_{kl}$ & probe-type effect \\
+& Included in the model by using {\tt probe.types}\\
+$\phi_{klm}$ & probe-type effect for probe type $l$ estimated only for arrays where \\
+& primary treatment factor variable is level $m$ \\
+& Included in the model by using {\tt treatment:probe.types}\\
+$\phi_{klj}$ & probe-type effect for probe type $l$ estimated only for array $j$\\
+& Included in the model by using {\tt samples:probe.types}\\
+$\theta$ & a vector of chip-level parameters \\
+$\mu_k$ & an intercept parameter \\
+$\gamma_k$ & a slope parameter \\
+$y_{kijl}$ & a processed probe-intensity. Typically on $\log_2$ scale. \\
+$\epsilon_{kijl}$ & an error term \\
+$x_{j}$ & measurements of chip-level factor and covariate variables for chip $j$ \\
+&  In the model descriptions below we will use {\tt  treatment, trt.cov} for these terms. \\
+&  In practice these would be replaced with names of variables in the current \\
+&  R environment or the \Rclass{phenoData} of the supplied \Rclass{AffyBatch}.
+\end{tabular}
+\\ \\
+\noindent Since we are focusing on models that are fitted in a probeset by probeset manner for brevity the subscript $k$ will be omitted from further discussion. Note the terms {\tt probes}, {\tt samples} and {\tt probe.types} are considered reserved words when specifying a model to \Rfunction{fitPLM}.
+
+
+\subsubsection{RMA style PLM}
+
+These are variations of the RMA model each consisting of models with chip and probe-effects . The first, {\tt PM $\sim$ -1 + samples + probes}, is the default model used when no model is specified in the \Rfunction{fitPLM} call.
+\\ \\
+{\small
+\begin{tabular}{ll} \hline
+Model &{\tt fitPLM} syntax \\ \hline
+$y_{ij1} = \beta_j + \alpha_i + \epsilon_{ij}$ & {\tt PM $\sim$ -1 + samples + probes} \\
+$y_{ij1} = \mu + \beta_j + \alpha_i + \epsilon_{ij}$ &  {\tt PM $\sim$  samples + probes} \\
+$y_{ij1} = \beta_j + \epsilon_{ij}$ &{\tt PM $\sim$ -1 + samples} \\
+$y_{ij1} = \mu + \beta_j +  \epsilon_{ij}$ & {\tt PM $\sim$  samples} \\
+$y_{ij2} = \beta_j + \alpha_i + \epsilon_{ij}$ & {\tt MM $\sim$ -1 + samples + probes} \\
+$y_{ij2} = \mu + \beta_j + \alpha_i + \epsilon_{ij}$ & {\tt MM $\sim$  samples + probes} \\
+$y_{ij2} = \beta_j + \epsilon_{ij}$ & {\tt MM $\sim$ -1 + samples} \\
+$y_{ij2} = \mu + \beta_j +  \epsilon_{ij}$ & {\tt MM $\sim$  samples} \\ \hline
+\end{tabular}
+}
+
+\subsubsection{PLM with chip-level factor and covariate variables}
+
+These models use treatment variables as an alternative to sample effects for the chip level factors.
+\\ \\
+{\small
+\begin{tabular}{ll} \hline
+Model &{\tt fitPLM} syntax \\ \hline
+$y_{ij1} = x_j^{T}\theta + \alpha_i + \epsilon_{ij}$ &{\tt PM $\sim$ -1 + treatment + trt.cov + probes} \\
+$y_{ij1} = x_j^{T}\theta + \epsilon_{ij}$ &{\tt PM $\sim$ -1 + treatment + trt.cov} \\
+$y_{ij2} = x_j^{T}\theta + \alpha_i + \epsilon_{ij}$ &{\tt MM $\sim$ -1 + treatment + trt.cov + probes} \\
+$y_{ij2} = x_j^{T}\theta + \epsilon_{ij}$ &{\tt MM $\sim$ -1 + treatment + trt.cov} \\ \hline
+\end{tabular}
+}
+\\
+\\
+For example to fit, a model with effects for both liver tissue concentration and scanner along with probe effects with MM as the response variable to the first 100 probesets of the Dilution dataset the following code would be used:
+<<treatmenteffect>>=
+Pset <- fitPLM(Dilution,  MM ~ -1 + liver + scanner + probes,subset = geneNames(Dilution)[1:100])
+@ 
+Examining the fitted chip-level parameter estimates for the first probeset via:
+<<treatmenteffectexamine>>=
+coefs(Pset)[1,]
+@ 
+shows that the treatment effect for scanner was constrained to make the model identifiable. \Rfunction{fitPLM} always leaves the first factor variable unconstrained if there is no intercept term. All other chip level factor variables are constrained. The parameter estimates for the probe effects can be examined as follows: 
+<<treatmenteffectexamine2>>=
+coefs.probe(Pset)[1]
+@ 
+
+To make a treat a variable as a covariate rather than a factor variable the \Rfunarg{variable.type} argument may be used. For example, to fit a model with the logarithm of liver concentration treated as a covariate we could do the following:
+<<treatmenteffectcovariate>>=
+logliver <- log2(c(20,20,10,10))
+Pset <- fitPLM(Dilution,model=PM~-1+probes+logliver+scanner, variable.type=c(logliver="covariate"),subset = geneNames(Dilution)[1:100])
+coefs(Pset)[1,]
+@
+
+\subsubsection{Probe intensity covariate PLM}
+
+This class of models allows the inclusion of PM or MM probe intensities as covariate variables in the model. Note that the fitting methods currently used by \Rfunction{fitPLM} are robust, but not resistant (ie outliers in the response variable are dealt with, but outliers in explanatory variables are not). 
+\\
+\\
+{\small
+\begin{tabular}{ll} \hline
+Model &{\tt fitPLM} syntax \\ \hline
+$y_{ij1} = \gamma y_{ij2} + \beta_j + \alpha_i + \epsilon_{ij}$ & {\tt PM $\sim$ -1 + MM + samples + probes} \\
+$y_{ij1} = \gamma y_{ij2} + \mu + \beta_j + \alpha_i + \epsilon_{ij}$ & {\tt PM $\sim$  MM + samples + probes} \\
+$y_{ij1} = \gamma y_{ij2} + \beta_j + \epsilon_{ij}$ & {\tt PM $\sim$ -1 + MM +samples} \\
+$y_{ij1} = \gamma y_{ij2} + \mu + \beta_j +  \epsilon_{ij}$ & {\tt PM $\sim$ MM + samples} \\
+$y_{ij2} = \gamma y_{ij1} + \beta_j + \alpha_i + \epsilon_{ij}$ & {\tt MM $\sim$ -1 + PM + samples + probes} \\
+$y_{ij2} = \gamma y_{ij1} + \mu + \beta_j + \alpha_i + \epsilon_{ij}$ & {\tt MM $\sim$  PM + samples + probes} \\
+$y_{ij2} = \gamma y_{ij1} + \beta_j + \epsilon_{ij}$ & {\tt MM $\sim$ -1 + PM +samples} \\
+$y_{ij2} = \gamma y_{ij1} + \mu + \beta_j +  \epsilon_{ij}$ & {\tt MM $\sim$ PM + samples} \\
+$y_{ij1} = x_j^{T}\theta + \gamma y_{ij2} + \alpha_i + \epsilon_{ij}$ &{\tt PM $\sim$  MM + treatment + trt.cov + probes} \\
+$y_{ij1} = x_j^{T}\theta + \gamma y_{ij2} + \epsilon_{ij}$ &{\tt PM $\sim$ MM + treatment + trt.cov} \\
+$y_{ij2} = x_j^{T}\theta + \gamma y_{ij1} + \alpha_i + \epsilon_{ij}$ &{\tt MM $\sim$ PM + treatment + trt.cov + probes} \\
+$y_{ij2} = x_j^{T}\theta + \gamma y_{ij1} + \epsilon_{ij}$ &{\tt MM $\sim$ PM + treatment + trt.cov} \\ \hline
+\end{tabular}
+}
+\\
+\\
+To fit a model with an intercept term, MM covariate variable, sample and probe effects use the following code:
+<<MMcovariate>>=
+Pset <- fitPLM(Dilution,  PM ~ MM + samples + probes,subset = geneNames(Dilution)[1:100])
+@ 
+
+We can examine the various parameter estimates for the model fit to the first probeset using:
+<<MMcovariateexamine>>=
+coefs(Pset)[1,]
+coefs.const(Pset)[1,]
+coefs.probe(Pset)[1]
+@ 
+As can be seen by this example code intercept and covariate parameters are accessed using \Rfunarg{coefs.const}.
+
+\subsubsection{PLM with both probe types as response variables}
+
+It is possible to fit a model that uses both PM and MM intensities as the response variable. This is done by specifying {\tt PMMM} as the response term in the model. When both PM and MM intensities are used as the response, there is a special reserved term {\it probe.type} which may (optionally) be used as part of the model specification. This term designates that a probe type effect (ie whether PM or MM) should be included in the model.
+\\
+\\
+{\small
+\begin{tabular}{ll} \hline
+Model &{\tt fitPLM} syntax \\ \hline
+$y_{ijl} = \beta_j + \phi_{j} + \alpha_i + \epsilon_{ijl}$ & {\tt PMMM $\sim$ -1 + samples + probe.type + probes} \\
+$y_{ijl} = \mu + \beta_j + \phi_{j} + \alpha_i + \epsilon_{ijl}$ & {\tt PMMM $\sim$  samples + probe.type + probes} \\
+$y_{ijl} = \beta_j  +\phi_{j} + \epsilon_{ijl}$ & {\tt PMMM $\sim$ -1 + samples+ probe.type} \\
+$y_{ijl} = \mu + \beta_j  +\phi_{j} +  \epsilon_{ijl}$ & {\tt PMMM $\sim$ samples+ probe.type} \\
+$y_{ijl} = x_j^{T}\theta + \phi_{j} + \alpha_i + \epsilon_{ijl}$ &{\tt PMMM $\sim$  treatment + trt.cov + probe.type + probes} \\
+$y_{ijl} = x_j^{T}\theta + \phi_{j} + \epsilon_{ijl}$ &{\tt PMMM $\sim$  treatment + trt.cov + probe.types} \\
+$y_{ijl} = x_j^{T}\theta + \phi_{j} + \alpha_i+ \epsilon_{ijl}$ &{\tt PMMM $\sim$  treatment + trt.cov + probe.type + probes} \\
+$y_{ijl} = x_j^{T}\theta + \phi_{j} + \epsilon_{ijl}$ &{\tt PMMM $\sim$  treatment + trt.cov + probe.type} \\ \hline
+\end{tabular}
+}
+\\
+\\
+For example to fit such a model with factor variables for liver RNA concentration, probe type and probe effects use:
+<<probetype>>=
+Pset <- fitPLM(Dilution,  PMMM ~ liver + probe.type + probes,subset = geneNames(Dilution)[1:100])
+@ 
+
+Examining the parameter estimates:
+<<probetypeexamine>>=
+coefs(Pset)[1,]
+coefs.const(Pset)[1,]
+coefs.probe(Pset)[1]
+@ 
+shows that probe type estimates are also accessed by using \Rfunarg{coefs.const}.
+
+\subsubsection{PLM with probe-effects estimated within levels of a chip-level factor variable}
+
+It is also possible to estimate separate probe-effects for each level of a chip-level factor variable.
+\\
+\\
+{\small
+\begin{tabular}{ll}\hline
+Model & {\tt fitPLM} syntax \\ \hline
+$y_{ij1} = x_j^{T}\theta + \alpha_{im} + \epsilon_{ij1}$ & {\tt PM $\sim$ treatment:probes + treatment + trt.cov} \\
+$y_{ij1} = y_{ij2}\gamma  + x_j^{T}\theta + \alpha_{im} + \epsilon_{ij1}$ & {\tt PM $\sim$ MM + treatment + treatment:probes + trt.cov} \\
+$y_{ijl} =  x_j^{T}\theta + \phi_{j} +  \alpha_{im} + \epsilon_{ijl}$ & {\tt PMMM $\sim$  treatment + trt.cov + treatment:probes} \\ \hline
+\end{tabular}
+}
+\\
+\\
+Fitting such a model with probe effects estimated within the levels of the liver variable is done with:
+<<probesInTreatment>>=
+Pset <- fitPLM(Dilution,  PM ~ -1 + liver + liver:probes,subset = geneNames(Dilution)[1:100])
+@ 
+
+Examining the estimated probe-effects for the first probeset can be done via:
+<<probesInTreatmentexamine>>=
+coefs.probe(Pset)[1]
+@ 
+
+\subsubsection{PLM with probe-effect estimated within probe.type}
+
+Probe effects can also be estimated within probe type or within probe type for each level of the primary treatment factor variable.
+\\
+\\
+{\small
+\begin{tabular}{ll}\hline
+Model & {\tt fitPLM} syntax \\ \hline
+$y_{ijl} = x_j^{T}\theta + \alpha_{il} + \epsilon_{ij1}$ & {\tt PMMM $\sim$ treatment + trt.cov + probe.type:probes} \\
+$y_{ijl} = x_j^{T}\theta + \alpha_{ilm} + \epsilon_{ij1}$ & {\tt PMMM $\sim$ treatment + trt.cov + treatment:probe.type:probes} \\ \hline
+\end{tabular}
+}
+\\
+\\
+As an example, use the following code to fit such models and then examine  the possible
+<<probesInProbetype,results=hide>>=
+Pset <- fitPLM(Dilution,   PMMM ~ -1 + liver + probe.type:probes,subset = geneNames(Dilution)[1:100])
+coefs.probe(Pset)[1]
+@ 
+<<probesInProbetypeInTreatment,results=hide>>=
+Pset <- fitPLM(Dilution,   PMMM ~ -1 + liver + liver:probe.type:probes,subset = geneNames(Dilution)[1:100])
+coefs.probe(Pset)[1]
+@ 
+
+
+\subsubsection{PLM without chip level effects}
+
+
+It is possible to fit models which do not have any chip-level variables at all. If this is the case, then the probe type effect takes precedence over any probe effects in the model. That is it will be unconstrained.
+\\
+\\
+{\small
+\begin{tabular}{ll}\hline
+Model & {\tt fitPLM} syntax \\ \hline
+$y_{ijl} =  \alpha_{i} + \phi_{jl}+\epsilon_{ijl}$&  {\tt PMMM $\sim$ -1 + probe.type + probes}  \\
+$y_{ijl} =  \mu + \phi_{jl} + \alpha_{i} + \epsilon_{ijl}$ &  {\tt PMMM $\sim$  probe.type + probes}   \\
+$y_{ijl} =   \phi_{l} + \alpha_{im} + \epsilon_{ijl}$ & {\tt PMMM $\sim$ -1 + probe.type + treatment:probes} \\
+$y_{ijl} = \mu + \phi_{l} + \alpha_{im} + \epsilon_{ijl}$ & {\tt PMMM $\sim$  probe.type + treatment:probes} \\ 
+$y_{ijl} = \mu + \phi_{lj} + \alpha_{im} + \epsilon_{ijl}$ & {\tt PMMM $\sim$  samples:probe.type + treatment:probes} \\ \
+$y_{ijl} = \mu + \phi_{lm} + \alpha_{im} + \epsilon_{ijl}$ & {\tt PMMM $\sim$  treatment:probe.type + treatment:probes} \\ \hline
+\end{tabular}
+}
+
+
+\subsubsection{PLM with only probe-effects}
+
+It is also possible to fit models where only probe effects alone are estimated.
+\\
+\\
+{\small
+\begin{tabular}{ll}\hline
+Model & {\tt fitPLM} syntax \\ \hline
+$y_{ij1} =  \alpha_{i} + \epsilon_{ij1}$ & {\tt PM $\sim$ -1 + probes} \\
+$y_{ij1} = \mu +\alpha_{i} + \epsilon_{ij1}$ & {\tt PM $\sim$  probes} \\
+$y_{ij1} =  alpha_{im} + \epsilon_{ij1}$ & {\tt PM $\sim$ -1 + treatment:probes} \\
+$y_{ij1} = \mu + \left(\theta\alpha\right)_{im_j} + \epsilon_{ij1}$ & {\tt PM $\sim$  treatment:probes} \\
+$y_{ij2} =  \alpha_{i} + \epsilon_{ij2}$ & {\tt MM $\sim$ -1 + probes} \\
+$y_{ij2} = \mu +\alpha_{i} + \epsilon_{ij2}$ & {\tt MM $\sim$  probes} \\
+$y_{ij2} = \alpha_{im} + \epsilon_{ij2}$ & {\tt MM $\sim$ -1 + treatment:probes} \\
+$y_{ij2} = \mu + \alpha_{im} + \epsilon_{ij2}$ & {\tt MM $\sim$  treatment:probes}  \\
+$y_{ijl} =  \alpha_{i} + \epsilon_{ijl}$&  {\tt PMMM $\sim$ -1 + probes}  \\
+$y_{ijl} =  \mu + \alpha_{i} + \epsilon_{ijl}$ &  {\tt PMMM $\sim$  probes}   \\
+$y_{ijl} =  \alpha_{im} + \epsilon_{ijl}$ & {\tt PMMM $\sim$ -1 + treatment:probes} \\
+$y_{ijl} = \mu + \alpha_{im} + \epsilon_{ijl}$ & {\tt PMMM $\sim$  treatment:probes} \\   \hline
+\end{tabular}
+}
+
+
+\subsubsection{Constraints}
+
+These are the constraints that will be imposed to make the models identifiable (when needed):
+\\  \\ 
+{\small
+\begin{tabular}{lll} \hline
+Parameter & Constraints  & Default \\ \hline
+$\beta_i$ & $\sum_{j=0}^{J}\beta_i = 0$ or $\beta_1=0$ & $\beta_1=0$\\
+$\phi_{l}$ & $\sum_{l=1}^{2}\phi_{l} = 0$ or $\phi_{1}=0$& $\phi_{1}=0$ \\
+$\phi_{lj}$ & $\sum_{l=1}^{2}\phi_{lj} = 0$ or $\phi_{1j}=0$& $\phi_{1j}=0$ \\ 
+$\phi_{lm}$ & $\sum_{l=1}^{2}\phi_{lm} = 0$ or $\phi_{1m}=0$& $\phi_{1m}=0$\\ 
+$\alpha_i$ & $\sum_{i=0}^{I}\alpha_i = 0$ or $\alpha_1=0$ & $\sum_{i=0}^{I}\alpha_i = 0$\\
+$\alpha_{im}$ & $\sum_{i=0}^{I}\alpha_{im} = 0$ or $\alpha_{1m} = 0$ & $\sum_{i=0}^{I}\alpha_{im} = 0$ \\
+$\alpha_{il}$ & $\sum_{i=0}^{I}\alpha_{il} = 0$ or $\alpha_{1l} = 0$ & $\sum_{i=0}^{I}\alpha_{il} = 0$ \\
+$\alpha_{ilm}$ & $\sum_{i=0}^{I}\alpha_{ilm} = 0$ or $\alpha_{1lm} = 0$ & $\sum_{i=0}^{I}\alpha_{ilm} = 0$ \\ \hline
+\end{tabular}
+}
+
+In general, there is a general hierarchy by which items are left unconstrained:
+\\
+\\
+\begin{tabular}{l}
+intercept $>$ {\tt treatment} $>$ {\tt sample} $>$ {\tt probe.type} $>$ {\tt probes}
+\end{tabular}
+\\
+\\
+the highest term in this hierarchy that is in a particular model is always left unconstrained, everything else will be constrained. So for example a model containing probe.type and probe effects will have the probe.type effects unconstrained and the probe effects constrained.
+
+Constraints are controlled using the \Rfunarg{constraint.type} argument which is a vector with named items should be either \Rfunarg{"contr.sum"} or \Rfunarg{"contr.treatment"}. The names for this vector should be names of items in the model. 
+<<constraintExample>>=
+data(Dilution)
+##FIXME: remove next line
+Dilution = updateObject(Dilution)
+Pset <- fitPLM(Dilution, model = PM ~ probes + samples,constraint.type=c(samples="contr.sum"),subset = geneNames(Dilution)[1:100])
+coefs.const(Pset)[1:2]
+coefs(Pset)[1:2,]
+@
+
+
+\section{How long will it take to run the model fitting procedures?}
+
+It may take considerable time to run the \Rfunction{fitPLM} function. The length of time it is going to take to run the model fitting procedure will depend on a number of factors including:
+\begin{enumerate}
+\item CPU speed
+\item Memory size of the machine (RAM and VM)
+\item Array type
+\item Number of arrays
+\item Number of parameters in model
+\end{enumerate}
+
+It is recommended that you run the \Rfunction{fitPLM} function only on machines with large amounts of RAM. If you have a large number of arrays the number of parameters in your model will have the greatest effect on runtime.
+
+%%%The \verb+fitPLM+ function has been tested using the \verb+system.time+ function. The specifications of the test machine are given in figure \ref{MachineSpec}. The results are given in \ref{runtimes}.
+%%%\begin{figure}
+%%%\begin{tabular}{ll} \hline
+%%%Component       & Specs \\ \hline
+%%%OS      & Red Hat Linux 8.0 \\
+%%%kernel & 2.4.20-ac2 with preemptive patch applied \\
+%%%processor & AMD Athlon Thunderbird 1.2 Ghz \\
+%%%RAM     & 1 GB \\
+%%%Swap & 6 GB \\
+%%%R       & R-1.7.0 (Development) \\
+%%%affy    & 1.1.8 \\ 
+%%%affyPLM & 0.4-14 \\ \hline
+%%%\end{tabular}
+%%%\caption{Benchmarking Machine Specifications} \label{MachineSpec}
+%%%\end{figure}
+
+
+%%%\begin{figure}
+%%%\begin{tabular}{lrrrr}\hline
+%%%Number of Arrays & Number of Chip level parameters  & Run time (seconds) \\ \hline
+%%%5       & 5  &  85 \\                        
+%%%10      & 10 & 176 \\
+%%%10      & 5  & 134 \\
+%%%10      & 2  & 117 \\
+%%%20      & 20 & 483   \\
+%%%20      & 10 &  278 \\
+%%%20      & 5  & 223 \\
+%%%20      & 2  & 200 \\
+%%%30      & 30 & 1099 \\
+%%%30      & 10 &  407  \\
+%%%30      & 5  & 322 \\
+%%%30      & 2  &  272 \\
+%%%40      & 40 &  2079 \\
+%%%40      & 10 &  553 \\
+%%%40      &  5 &  422 \\
+%%%40      &  2 &  399 \\
+%%%50      & 50 &    6112 (about 102 Minutes)\\
+%%%50      & 10 &   745  \\
+%%%50      &  5 &   567  \\
+%%%50      &  2 &  483  \\ \hline
+%%%\end{tabular}
+%%%\caption{Runtimes in seconds} \label{runtimes}
+%%%\end{figure}
+
+%%%\subsection{Why is it so much slower than the {\tt rma} function?}
+
+%%%The robust linear model fitting procedure uses IRLS (iteratively re-weighted least squares) which is going to be inherently slower than the median polish algorithm. In addition the \verb+fitPLM+ procedure produces standard error and weight estimates where as the \verb+rma+ function focuses only on producing expression estimates. If your goal is to compute expression estimates one for each probeset, each array it is probably better to use \verb+rma+ function. When you wish to fit a more general model \verb+fitPLM+ is the more appropriate choice.
+
+\section{Dealing with the \Robject{PLMset} object}
+
+As previously mentioned, the results of a call to \Rfunction{fitPLM} are stored in a \Robject{PLMset} object. There are a number of accessor functions that can be used to access values stored in a \Robject{PLMset} including:
+\begin{itemize}
+\item \Rfunction{coefs} and \Rfunction{se}: access chip-level factor/covariate parameter and standard error estimates.
+\item \Rfunction{coefs.probe} and \Rfunction{se.probe}: access probe effect parameter and standard error estimates.
+\item \Rfunction{coefs.const} and \Rfunction{se.const}: access intercept, MM covariate and probe type effect parameter and standard error estimates.
+\item \Rfunction{weights}: access final weights from M-estimation procedure. Note that you may optionally supply a vector of probeset names as a second parameter to get weights for only a subset of probes.
+\item \Rfunction{resids}: access residuals. Note that you may optionally supply a vector of probeset names as a second parameter to get residuals for only a subset of probes.
+\item \Rfunction{varcov}: access variance matrices.
+\end{itemize}
+
+
+
+\appendix
+
+
+
+\section{M-estimation: How \Rfunction{fitPLM} fits models}
+
+
+Suppose we wish to fit the following model
+\begin{equation}
+y_i = f(\mathbf{x}_i,\mathbf{\theta}) + \epsilon_i
+\end{equation}
+where $y_i$ is a response variable, $\mathbf{x}_i$ is a vector of explanatory variables, and $\mathbf{\theta}$ is a vector of parameters to be estimated. An estimator of $\theta$ is given by
+\begin{equation}
+\mathrm{min}_{\theta}\sum_{i=1}^{N} \left(y_i -  f(\mathbf{x}_i,\mathbf{\theta})  \right)^2
+\end{equation} 
+which is the known least squares estimator. In some situations, outliers in the response variable can have significant effect on the estimates of the parameters. To deal with potential problem we need a robust method of fitting the model. One such method is known as $M$-estimation. An $M$-estimator for this regression, taking into account scale, is the solution of
+\begin{equation}
+\mathrm{min}_{\theta}\sum_{i=1}^{N} \rho\left(\frac{y_i -  f(\mathbf{x}_i,\mathbf{\theta})}{s}  \right)
+\end{equation}
+where $\rho$ is a suitable function. Reasonable properties for $\rho$ include symmetry $\rho(x) = \rho(-x)$, a minimum at $\rho(0) = 0$, positive $\rho(x) \geq 0$ $\forall x$ and increasing as the absolute value of $x$ increases, i.e. $\rho(x_i) \geq \rho(x_j)$ if $\lvert x_i \rvert > \lvert x_j \rvert$. Furthermore, there the need to estimate $s$, where $s$ is a scale estimate. One approach is to estimate both $s$ and $\theta$ using a system of equations. The approach that we use is to estimate $s$ using the median absolute deviation (MAD) which provides a robust estimate of scale. The above equation leads to solving
+\begin{equation}
+\sum_{i=1}^{N} \psi\left(\frac{y_i -  f(\mathbf{x}_i,\mathbf{\theta})}{s}\right) = 0.
+\end{equation}
+where $\psi$ is the derivative of $\rho$. Note that strictly speaking, for robustness, $\psi$ should be bounded. Now define $r_i = \frac{y_i -  f(x_i,\theta)}{s}$ and a weight function $w\left(r_i\right) = \frac{\psi\left(r_i\right)}{r_i}$. Then the previous equation can be rewritten as
+\begin{equation}
+\sum_{i=1}^{N} w\left(r_i\right)r_i = 0
+\end{equation}
+which is the same as the set of equations that would be obtained if we were solving the iteratively re-weighted least squares problem
+\begin{equation}
+\mathrm{min} \sum_i^{N} w\left(r_i^{(n-1)}\right){r_i^{(n)}}^2
+\end{equation}
+where the superscript $(n)$ represents the iteration number. More details about M-estimation can be found in \cite{Huber:1981}. Tables \ref{Psifunctions} and \ref{Psifunctions:tuningconstants} describe the various different weight functions and associated default constants provided by \Rfunction{fitPLM}.
+
+
+
+
+
+
+\begin{table}
+\begin{center}
+{\small \begin{tabular}{lcccc} \hline
+{\bf Method} & $\rho(x)$ & $\psi(x)$ & $w(x)$ \\ \hline\hline
+\Rfunarg{Huber} $\begin{cases}\text{if }\lvert x \lvert \leq k \\ \text{if }\lvert x \lvert > k\end{cases}$ &  $\begin{cases}x^2/2 \\ k\left(\lvert x \lvert - k/2\right)\end{cases}$ &  $\begin{cases}x \\ k\mathrm{sgn}(x)\end{cases}$ &  $\begin{cases}1 \\ \frac{k}{\lvert x \lvert}\end{cases}$ \\
+\Rfunarg{fair}  & $c^{2}\left( \frac{\lvert x \lvert}{c} - \log\left(1 + \frac{\lvert
+x \lvert }{c}\right)\right)$ & $\frac{x}{1 + \frac{\lvert x \lvert }{c}}$ &  $\frac{1}{1 + \frac{\lvert x \lvert }{c}}$\\
+\Rfunarg{Cauchy} & $\frac{c^2}{2}\log\left(1 + (x/c)^2\right)$ & $\frac{x}{1+(x/c)^2}$ & $\frac{1}{1+(x/c)^2}$ \\
+\Rfunarg{Geman-McClure} & $\frac{x^2/2}{1+ x^2}$ & $\frac{x}{\left(1+ x^2\right)^2}$ & $\frac{1}{\left(1+ x^2\right)^2}$\\
+\Rfunarg{Welsch} &  $\frac{c^2}{2}\left(1 - \exp\left(-\left(\frac{x}{c}\right)^2\right)\right)$ & $x\exp\left(-(x/c)^2\right)$ & $\exp\left(-(x/c)^2\right)$ \\
+\Rfunarg{Tukey} $\begin{cases}\text{if }\lvert x \lvert \leq c \\ \text{if }\lvert x \lvert > c\end{cases}$ & $\begin{cases} \frac{c^2}{6}\left(1-\left(1-(x/c)^2\right)^3\right) \\ \frac{c^2}{6} \end{cases}$ & $\begin{cases} x\left(1-(x/c)^2\right)^2 \\ 0 \end{cases}$ & $\begin{cases} \left(1-(x/c)^2\right)^2 \\ 0 \end{cases}$ \\
+\Rfunarg{Andrews} $\begin{cases}\text{if }\lvert x \lvert \leq k\pi \\ \text{if }\lvert x
+\lvert > k \pi\end{cases}$ &  $\begin{cases}k^2 (1-\cos(x/k)) \\ 2k^2\end{cases}$ &$\begin{cases}k\sin(x/k) \\  0 \end{cases}$ & $\begin{cases}\frac{\sin(x/k)}{x/k} \\  0 \end{cases}$ \\ \hline
+\end{tabular}}
+\end{center}
+\caption{$\rho$, $\psi$ and weight functions for some common M-estimators.} \label{Psifunctions}
+\end{table}
+
+
+\begin{table}
+\begin{center}
+{\small \begin{tabular}{lr} \hline
+{\bf Method} & {\bf Tuning Constant}  \\ \hline\hline
+\Rfunarg{Huber} & 1.345 \\
+\Rfunarg{fair} & 1.3998 \\
+\Rfunarg{Cauchy} & 2.3849 \\
+\Rfunarg{Welsch} & 2.9846 \\
+\Rfunarg{Tukey} & 4.6851 \\
+\Rfunarg{Andrews} & 1.339 \\ \hline
+\end{tabular}}
+\end{center}
+\caption{Default tuning constants ($k$ or $c$) for M-estimation $\rho$, $\psi$ and weight functions.} \label{Psifunctions:tuningconstants}
+\end{table}
+
+\section{Variance Matrix and Standard error estimates for \Rfunction{fitPLM}}
+
+\cite{Huber:1981} gives three forms of asymptotic estimators for the variance-covariance matrix of parameter estimates $\hat b$.
+\begin{equation}
+\kappa^2  \frac{\sum \psi^2/(n-p)}{(\sum \psi'/n)^2} (X^T X)^{-1} \label{eqn:mestimation:covariance1}
+\end{equation}
+\begin{equation}
+\kappa \frac{\sum \psi^2/(n-p)}{\sum \psi'/n} V^{-1}  \label{eqn:mestimation:covariance2}
+\end{equation}
+\begin{equation}
+\frac{1}{\kappa}\frac{\sum \psi^2}{n-p} V^{-1} \left(X^T X\right) V^{-1} \label{eqn:mestimation:covariance3}
+\end{equation}
+where
+\begin{equation}
+\kappa = 1 + \frac{p}{n}\frac{\mathrm{Var}\left(\psi'\right)}{E \psi'}
+\end{equation}
+\begin{equation}
+V = X^T \Psi'  X
+\end{equation}
+and $\Psi'$ is a diagonal matrix of $\psi'$ values. When using \Rfunction{fitPLM} these are selected using \Rfunarg{se.type=1}, \Rfunarg{se.type=2}, or \Rfunarg{se.type=3} respectively. Treating the regression as a weighted least squares problem would give 
+\begin{equation}
+\frac{\sum w(r_i) r_i^2}{n-p} \left(X^T W  X\right)^{-1}
+\end{equation}
+as the estimator for variance covariance matrix, where $W$ is a diagonal matrix of weight values. This option is selected by using \Rfunarg{se.type=4}.
+
+
+\nocite{*}
+
+\bibliographystyle{plainnat}
+\bibliography{AffyExtensions}
+
+\end{document}
+
