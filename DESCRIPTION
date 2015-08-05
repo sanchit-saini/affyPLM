@@ -14,6 +14,6 @@ Description: A package that extends and improves the functionality of
         methods for fitting probe-level models and tools using these
         models. PLM based quality assessment tools.
 License: GPL (>= 2)
-URL: http://bmbolstad.com
+URL: https://github.com/bmbolstad/affyPLM
 biocViews: Microarray, OneChannel, Preprocessing, QualityControl
 LazyLoad: yes
