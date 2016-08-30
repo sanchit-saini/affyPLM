@@ -509,7 +509,7 @@ setMethod("image",signature(x="PLMset"),
                                         #this line flips the matrix around so it is correct
                 weightmatrix <-as.matrix(rev(as.data.frame(weightmatrix)))
                 if (add.legend){
-                  layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                  layout(matrix(c(1, 2), 1, 2), widths = c(9, 1))
                   par(mar = c(4, 4, 5, 3))
                 }
                 if( missing(main) ){
@@ -581,7 +581,7 @@ setMethod("image",signature(x="PLMset"),
               ##  }
                 if (use.log){
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                    layout(matrix(c(1, 2), 1, 2), widths = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix)+1)
@@ -605,7 +605,7 @@ setMethod("image",signature(x="PLMset"),
                 } else {
                   
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                    layout(matrix(c(1, 2), 1, 2), widths = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   if(missing(main)){
@@ -658,7 +658,7 @@ setMethod("image",signature(x="PLMset"),
 
                 if (use.log){
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                    layout(matrix(c(1, 2), 1, 2), widths = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix) +1)
@@ -677,7 +677,7 @@ setMethod("image",signature(x="PLMset"),
                   } 
                 } else {
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                    layout(matrix(c(1, 2), 1, 2), widths = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   if (missing(main)){
@@ -728,7 +728,7 @@ setMethod("image",signature(x="PLMset"),
 
                 if(use.log){
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                    layout(matrix(c(1, 2), 1, 2), widths = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   residsmatrix <- sign(residsmatrix)*log2(abs(residsmatrix) +1)
@@ -748,7 +748,7 @@ setMethod("image",signature(x="PLMset"),
                   
                 } else {
                   if (add.legend){
-                    layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                    layout(matrix(c(1, 2), 1, 2), widths = c(9, 1))
                     par(mar = c(4, 4, 5, 3))
                   }
                   if(missing(main)){
@@ -785,7 +785,7 @@ setMethod("image",signature(x="PLMset"),
                 residsmatrix <- as.matrix(rev(as.data.frame(residsmatrix)))
 
                 if (add.legend){
-                  layout(matrix(c(1, 2), 1, 2), width = c(9, 1))
+                  layout(matrix(c(1, 2), 1, 2), widths = c(9, 1))
                   par(mar = c(4, 4, 5, 3))
                 }
                 if(missing(main)){
@@ -884,7 +884,7 @@ setMethod("show", "PLMset",
             ## Location from cdf env
             try( cdf.env <- getCdfInfo(object) )
             if (! inherits(cdf.env, "try-error")) {
-              num.ids <- length(ls(env=cdf.env))
+              num.ids <- length(ls(envir=cdf.env))
             } else {
               warning("missing cdf environment !")
               num.ids <- "???"

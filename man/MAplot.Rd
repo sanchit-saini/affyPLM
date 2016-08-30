@@ -8,9 +8,9 @@
   to a specified chip or to a pseudo-median reference chip.
 }
 
-\usage{
+%% \usage{
 %#MAplot(object,ref=NULL,...)
-}
+%% }
  
 \arguments{
 %z  \item{object}{An \code{\link{PLMset-class}}}

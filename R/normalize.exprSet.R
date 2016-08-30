@@ -137,7 +137,6 @@ normalize.ExpressionSet.invariantset <- function(eset,prd.td = c(0.003, 0.007), 
   transfn <- match.arg(transfn)
   baseline.type <- match.arg(baseline.type) 
   
-  require(stats, quietly = TRUE)
   nc <- length(sampleNames(eset))
  
 
