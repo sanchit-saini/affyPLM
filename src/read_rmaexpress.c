@@ -368,7 +368,7 @@ SEXP read_rmaexpress_header(SEXP R_filename){
  ************************************************************************/
 
 
-static size_t gzfread_int32(int *destination, int n, gzFile *instream){
+static size_t gzfread_int32(int *destination, int n, gzFile instream){
 
   size_t result;
   
@@ -387,7 +387,7 @@ static size_t gzfread_int32(int *destination, int n, gzFile *instream){
 }
 
 
-static size_t gzfread_float64(double *destination, int n, gzFile *instream){
+static size_t gzfread_float64(double *destination, int n, gzFile instream){
 
   size_t result;
 
@@ -405,7 +405,7 @@ static size_t gzfread_float64(double *destination, int n, gzFile *instream){
   return result;
 }
 
-static size_t gzfread_char(char *destination, int n, gzFile *instream){
+static size_t gzfread_char(char *destination, int n, gzFile instream){
 
   size_t result;
   
@@ -441,7 +441,7 @@ SEXP gz_read_rmaexpress_header(SEXP R_filename){
   char *rmaexpressversion;
   char *cdfname;
 
-  gzFile *currentFile;
+  gzFile currentFile;
   
 
   int version_number;
@@ -559,7 +559,7 @@ SEXP gz_read_rmaexpress(SEXP R_filename){
   char *rmaexpressversion;
   char *cdfname;
 
-  gzFile *currentFile;
+  gzFile currentFile;
   
   double *DataMatrix;
  
@@ -711,7 +711,7 @@ int isCompressedRMAExpress(const char *filename){
   const char *mode = "rb";
   
   char *header;
-  gzFile *currentFile;
+  gzFile currentFile;
   
   int str_length;
    
