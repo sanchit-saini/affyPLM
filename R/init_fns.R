@@ -400,7 +400,7 @@
 
 
 
-
+.affyPLMInternalEnv <- NULL
 
 
 ##.First.lib
@@ -412,10 +412,9 @@
   #require(gcrma,quietly = FALSE, warn.conflicts = FALSE)
 
 
-    .affyPLMInternalEnv <- new.env(parent=emptyenv())
+  .affyPLMInternalEnv <<- new.env(parent=emptyenv())
 
-   assign(".affyPLMInternalEnv", .affyPLMInternalEnv, 
-     envir=topenv(parent.frame()))
+  ##assign(".affyPLMInternalEnv", .affyPLMInternalEnv, envir=topenv(parent.frame()))
 
   .initNormfunctions(.affyPLMInternalEnv)   ##match(paste("package:",pkgname,sep=""),search()))
   .initExprSetFunctions(.affyPLMInternalEnv)  ##match(paste("package:",pkgname,sep=""),search()))
