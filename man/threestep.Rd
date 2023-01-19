@@ -67,7 +67,7 @@ if (require(affydata)) {
   eset <- threestep(Dilution, summary.method="rlm")
 
   # Use threestep methodology with the log of the average
-  eset <- threestep(Dilution, summary.method="log.average")
+  # eset <- threestep(Dilution, summary.method="log.average")
 
   # Use threestep methodology with log 2nd largest method
   eset <- threestep(Dilution, summary.method="log.2nd.largest")
