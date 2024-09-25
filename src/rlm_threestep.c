@@ -80,13 +80,13 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
   int n = (nprobes*cols);
   int p = (cols+(nprobes-1));
   
-  double *Y = Calloc(n,double);
-  double *X = Calloc(n*p,double);
-  double *out_beta=Calloc(p,double);
-  double *out_se_estimates=Calloc(p,double);
-  double *out_resids=Calloc(n,double);
-  double *out_weights=Calloc(n,double);
-  double *residSE = Calloc(2,double);
+  double *Y = R_Calloc(n,double);
+  double *X = R_Calloc(n*p,double);
+  double *out_beta=R_Calloc(p,double);
+  double *out_se_estimates=R_Calloc(p,double);
+  double *out_resids=R_Calloc(n,double);
+  double *out_weights=R_Calloc(n,double);
+  double *residSE = R_Calloc(2,double);
 
 
   /* log2 transform and create Y vector */
@@ -99,7 +99,7 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
 
   /* 
      now make an X matrix. First columns for probe effect then chip effect columns 
-     Calloc puts everything to zero, so need change only non zero elements.
+     R_Calloc puts everything to zero, so need change only non zero elements.
      
   */
 
@@ -140,13 +140,13 @@ void rlm_threestep(double *data, int rows, int cols, int *cur_rows, double *resu
 
 
 
-  Free(out_se_estimates);
-  Free(out_beta);
-  Free(out_resids);
-  Free(out_weights);
-  Free(residSE);
-  Free(X);
-  Free(Y);
+  R_Free(out_se_estimates);
+  R_Free(out_beta);
+  R_Free(out_resids);
+  R_Free(out_weights);
+  R_Free(residSE);
+  R_Free(X);
+  R_Free(Y);
 }
 
 
@@ -157,13 +157,13 @@ void rlm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *
   int n = (nprobes*cols);
   int p = (cols+(nprobes-1));
   
-  double *Y = Calloc(n,double);
-  double *X = Calloc(n*p,double);
-  double *out_beta=Calloc(p,double);
-  double *out_se_estimates=Calloc(p,double);
+  double *Y = R_Calloc(n,double);
+  double *X = R_Calloc(n*p,double);
+  double *out_beta=R_Calloc(p,double);
+  double *out_se_estimates=R_Calloc(p,double);
 
-  double *out_weights=Calloc(n,double);
-  double *residSE = Calloc(2,double);
+  double *out_weights=R_Calloc(n,double);
+  double *residSE = R_Calloc(2,double);
 
 
   /* log2 transform and create Y vector */
@@ -176,7 +176,7 @@ void rlm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *
 
   /* 
      now make an X matrix. First columns for probe effect then chip effect columns 
-     Calloc puts everything to zero, so need change only non zero elements.
+     R_Calloc puts everything to zero, so need change only non zero elements.
      
   */
   
@@ -215,12 +215,12 @@ void rlm_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *
 
 
 
-  Free(out_se_estimates);
-  Free(out_beta);
-  Free(out_weights);
-  Free(residSE);
-  Free(X);
-  Free(Y);
+  R_Free(out_se_estimates);
+  R_Free(out_beta);
+  R_Free(out_weights);
+  R_Free(residSE);
+  R_Free(X);
+  R_Free(Y);
 }
 
 
@@ -243,7 +243,7 @@ static void model_matrix_test(int *rows_in,int *cols_in, int *nprobes_in){
 
 
 
-  double *X = Calloc(nprobes*cols*((nprobes-1)+cols),double);
+  double *X = R_Calloc(nprobes*cols*((nprobes-1)+cols),double);
   
 
 

@@ -74,11 +74,11 @@ void do_3summary(double *PM, const char **ProbeNames, int *rows, int *cols, doub
   int max_nrows = 1000;
   /* buffers of size 1000 should be enough. */
 
-  int *cur_rows=Calloc(max_nrows,int);
+  int *cur_rows=R_Calloc(max_nrows,int);
   int nprobes=0;
 
-  double *cur_exprs = Calloc(*cols,double);
-  double *cur_se = Calloc(*cols,double);
+  double *cur_exprs = R_Calloc(*cols,double);
+  double *cur_se = R_Calloc(*cols,double);
   /* double *OLDPM = NULL;*/
 
   first = ProbeNames[0];
@@ -91,7 +91,7 @@ void do_3summary(double *PM, const char **ProbeNames, int *rows, int *cols, doub
     if (strcmp(first,ProbeNames[j]) == 0){
       if (k >= max_nrows){
 	max_nrows = 2*max_nrows;
-	cur_rows = Realloc(cur_rows, max_nrows, int);
+	cur_rows = R_Realloc(cur_rows, max_nrows, int);
       }
       cur_rows[k] = j;
       k++;
@@ -105,7 +105,7 @@ void do_3summary(double *PM, const char **ProbeNames, int *rows, int *cols, doub
 	resultsSE[k*nps + i] = cur_se[k];
       } 
       size = strlen(first);
-      outNames[i] = Calloc(size+1,char);
+      outNames[i] = R_Calloc(size+1,char);
       strcpy(outNames[i],first);
       i++;
       first = ProbeNames[j];
@@ -119,11 +119,11 @@ void do_3summary(double *PM, const char **ProbeNames, int *rows, int *cols, doub
     resultsSE[k*nps + i] = cur_se[k];
   } 
   size = strlen(first);
-  outNames[i] = Calloc(size+1,char);
+  outNames[i] = R_Calloc(size+1,char);
   strcpy(outNames[i],first);
   
   
-  Free(cur_exprs);
-  Free(cur_se);
-  Free(cur_rows);
+  R_Free(cur_exprs);
+  R_Free(cur_se);
+  R_Free(cur_rows);
 }

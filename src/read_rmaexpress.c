@@ -165,16 +165,16 @@ SEXP read_rmaexpress(SEXP R_filename){
 
   fread_int32(&str_length,1,currentFile);
 
-  header = Calloc(str_length,char);
+  header = R_Calloc(str_length,char);
   
   fread_char(header,str_length,currentFile);
 
   
   if (strcmp(header,"RMAExpressionValues") !=0){
-    Free(header);
+    R_Free(header);
     error("This file does not look like it contains RMAExpress computed expression values\n");
   }
-  Free(header);
+  R_Free(header);
   
   fread_int32(&version_number,1,currentFile);
 
@@ -184,14 +184,14 @@ SEXP read_rmaexpress(SEXP R_filename){
 
   fread_int32(&str_length,1,currentFile);
 
-  rmaexpressversion = Calloc(str_length,char);
+  rmaexpressversion = R_Calloc(str_length,char);
   fread_char(rmaexpressversion,str_length,currentFile);
-  Free(rmaexpressversion);
+  R_Free(rmaexpressversion);
 
   fread_int32(&str_length,1,currentFile);
-  cdfname = Calloc(str_length,char);
+  cdfname = R_Calloc(str_length,char);
   fread_char(cdfname,str_length,currentFile);
-  Free(cdfname);
+  R_Free(cdfname);
 
 
 
@@ -202,19 +202,19 @@ SEXP read_rmaexpress(SEXP R_filename){
   PROTECT(colnames = allocVector(STRSXP,n_arrays));
   for (i =0; i < n_arrays; i++){
     fread_int32(&str_length,1,currentFile);
-    buffer= Calloc(str_length,char);
+    buffer= R_Calloc(str_length,char);
     fread_char(buffer,str_length,currentFile);
     SET_STRING_ELT(colnames,i,mkChar(buffer));
-    Free(buffer);
+    R_Free(buffer);
   }
 
   PROTECT(rownames = allocVector(STRSXP,n_probesets));
   for (j =0; j < n_probesets; j++){
     fread_int32(&str_length,1,currentFile);
-    buffer= Calloc(str_length,char);
+    buffer= R_Calloc(str_length,char);
     fread_char(buffer,str_length,currentFile);
     SET_STRING_ELT(rownames,j,mkChar(buffer));
-    Free(buffer);
+    R_Free(buffer);
   }
   
 
@@ -279,17 +279,17 @@ SEXP read_rmaexpress_header(SEXP R_filename){
   
   fread_int32(&str_length,1,currentFile);
 
-  header = Calloc(str_length,char);
+  header = R_Calloc(str_length,char);
   
   fread_char(header,str_length,currentFile);
 
  
 
   if (strcmp(header,"RMAExpressionValues") !=0){
-    Free(header);
+    R_Free(header);
     error("This file does not look like it contains RMAExpress computed expression values\n");
   }
-  Free(header);
+  R_Free(header);
   
   fread_int32(&version_number,1,currentFile);
 
@@ -299,12 +299,12 @@ SEXP read_rmaexpress_header(SEXP R_filename){
 
   fread_int32(&str_length,1,currentFile);
 
-  rmaexpressversion = Calloc(str_length,char);
+  rmaexpressversion = R_Calloc(str_length,char);
   fread_char(rmaexpressversion,str_length,currentFile);
   
   
   fread_int32(&str_length,1,currentFile);
-  cdfname = Calloc(str_length,char);
+  cdfname = R_Calloc(str_length,char);
   fread_char(cdfname,str_length,currentFile);
 
 
@@ -315,32 +315,32 @@ SEXP read_rmaexpress_header(SEXP R_filename){
   PROTECT(colnames = allocVector(STRSXP,n_arrays));
   for (i =0; i < n_arrays; i++){
     fread_int32(&str_length,1,currentFile);
-    buffer= Calloc(str_length,char);
+    buffer= R_Calloc(str_length,char);
     fread_char(buffer,str_length,currentFile);
     SET_STRING_ELT(colnames,i,mkChar(buffer));
-    Free(buffer);
+    R_Free(buffer);
   }
 
   PROTECT(rownames = allocVector(STRSXP,n_probesets));
   for (j =0; j < n_probesets; j++){
     fread_int32(&str_length,1,currentFile);
-    buffer= Calloc(str_length,char);
+    buffer= R_Calloc(str_length,char);
     fread_char(buffer,str_length,currentFile);
     SET_STRING_ELT(rownames,j,mkChar(buffer));
-    Free(buffer);
+    R_Free(buffer);
   }
   
   PROTECT(returnvalue = allocVector(VECSXP,4));
 
   PROTECT(tmpsxp=allocVector(STRSXP,1));
   SET_STRING_ELT(tmpsxp,0,mkChar(rmaexpressversion));
-  Free(rmaexpressversion);
+  R_Free(rmaexpressversion);
   SET_VECTOR_ELT(returnvalue,0,tmpsxp);
   UNPROTECT(1);
    
   PROTECT(tmpsxp=allocVector(STRSXP,1));
   SET_STRING_ELT(tmpsxp,0,mkChar(cdfname));
-  Free(cdfname);
+  R_Free(cdfname);
   SET_VECTOR_ELT(returnvalue,1,tmpsxp);
   UNPROTECT(1);
   
@@ -461,17 +461,17 @@ SEXP gz_read_rmaexpress_header(SEXP R_filename){
   
   gzfread_int32(&str_length,1,currentFile);
 
-  header = Calloc(str_length,char);
+  header = R_Calloc(str_length,char);
   
   gzfread_char(header,str_length,currentFile);
 
  
 
   if (strcmp(header,"RMAExpressionValues") !=0){
-    Free(header);
+    R_Free(header);
     error("This file does not look like it contains RMAExpress computed expression values\n");
   }
-  Free(header);
+  R_Free(header);
   
   gzfread_int32(&version_number,1,currentFile);
 
@@ -481,12 +481,12 @@ SEXP gz_read_rmaexpress_header(SEXP R_filename){
 
   gzfread_int32(&str_length,1,currentFile);
 
-  rmaexpressversion = Calloc(str_length,char);
+  rmaexpressversion = R_Calloc(str_length,char);
   gzfread_char(rmaexpressversion,str_length,currentFile);
   
   
   gzfread_int32(&str_length,1,currentFile);
-  cdfname = Calloc(str_length,char);
+  cdfname = R_Calloc(str_length,char);
   gzfread_char(cdfname,str_length,currentFile);
 
 
@@ -497,32 +497,32 @@ SEXP gz_read_rmaexpress_header(SEXP R_filename){
   PROTECT(colnames = allocVector(STRSXP,n_arrays));
   for (i =0; i < n_arrays; i++){
     gzfread_int32(&str_length,1,currentFile);
-    buffer= Calloc(str_length,char);
+    buffer= R_Calloc(str_length,char);
     gzfread_char(buffer,str_length,currentFile);
     SET_STRING_ELT(colnames,i,mkChar(buffer));
-    Free(buffer);
+    R_Free(buffer);
   }
 
   PROTECT(rownames = allocVector(STRSXP,n_probesets));
   for (j =0; j < n_probesets; j++){
     gzfread_int32(&str_length,1,currentFile);
-    buffer= Calloc(str_length,char);
+    buffer= R_Calloc(str_length,char);
     gzfread_char(buffer,str_length,currentFile);
     SET_STRING_ELT(rownames,j,mkChar(buffer));
-    Free(buffer);
+    R_Free(buffer);
   }
   
   PROTECT(returnvalue = allocVector(VECSXP,4));
 
   PROTECT(tmpsxp=allocVector(STRSXP,1));
   SET_STRING_ELT(tmpsxp,0,mkChar(rmaexpressversion));
-  Free(rmaexpressversion);
+  R_Free(rmaexpressversion);
   SET_VECTOR_ELT(returnvalue,0,tmpsxp);
   UNPROTECT(1);
    
   PROTECT(tmpsxp=allocVector(STRSXP,1));
   SET_STRING_ELT(tmpsxp,0,mkChar(cdfname));
-  Free(cdfname);
+  R_Free(cdfname);
   SET_VECTOR_ELT(returnvalue,1,tmpsxp);
   UNPROTECT(1);
   
@@ -583,16 +583,16 @@ SEXP gz_read_rmaexpress(SEXP R_filename){
 
   gzfread_int32(&str_length,1,currentFile);
 
-  header = Calloc(str_length,char);
+  header = R_Calloc(str_length,char);
   
   gzfread_char(header,str_length,currentFile);
 
   
   if (strcmp(header,"RMAExpressionValues") !=0){
-    Free(header);
+    R_Free(header);
     error("This file does not look like it contains RMAExpress computed expression values\n");
   }
-  Free(header);
+  R_Free(header);
   
   gzfread_int32(&version_number,1,currentFile);
 
@@ -602,14 +602,14 @@ SEXP gz_read_rmaexpress(SEXP R_filename){
 
   gzfread_int32(&str_length,1,currentFile);
 
-  rmaexpressversion = Calloc(str_length,char);
+  rmaexpressversion = R_Calloc(str_length,char);
   gzfread_char(rmaexpressversion,str_length,currentFile);
-  Free(rmaexpressversion);
+  R_Free(rmaexpressversion);
 
   gzfread_int32(&str_length,1,currentFile);
-  cdfname = Calloc(str_length,char);
+  cdfname = R_Calloc(str_length,char);
   gzfread_char(cdfname,str_length,currentFile);
-  Free(cdfname);
+  R_Free(cdfname);
 
 
 
@@ -620,19 +620,19 @@ SEXP gz_read_rmaexpress(SEXP R_filename){
   PROTECT(colnames = allocVector(STRSXP,n_arrays));
   for (i =0; i < n_arrays; i++){
     gzfread_int32(&str_length,1,currentFile);
-    buffer= Calloc(str_length,char);
+    buffer= R_Calloc(str_length,char);
     gzfread_char(buffer,str_length,currentFile);
     SET_STRING_ELT(colnames,i,mkChar(buffer));
-    Free(buffer);
+    R_Free(buffer);
   }
 
   PROTECT(rownames = allocVector(STRSXP,n_probesets));
   for (j =0; j < n_probesets; j++){
     gzfread_int32(&str_length,1,currentFile);
-    buffer= Calloc(str_length,char);
+    buffer= R_Calloc(str_length,char);
     gzfread_char(buffer,str_length,currentFile);
     SET_STRING_ELT(rownames,j,mkChar(buffer));
-    Free(buffer);
+    R_Free(buffer);
   }
   
 
@@ -688,17 +688,17 @@ int isUncompressedRMAExpress(const char *filename){
   
   fread_int32(&str_length,1,currentFile);
 
-  header = Calloc(str_length,char);
+  header = R_Calloc(str_length,char);
   
   fread_char(header,str_length,currentFile);
 
   fclose(currentFile);
 
   if (strcmp(header,"RMAExpressionValues") !=0){
-    Free(header);
+    R_Free(header);
     return 0;
   }
-  Free(header);
+  R_Free(header);
   return 1;
 
 
@@ -724,17 +724,17 @@ int isCompressedRMAExpress(const char *filename){
   
   gzfread_int32(&str_length,1,currentFile);
 
-  header = Calloc(str_length,char);
+  header = R_Calloc(str_length,char);
   
   gzfread_char(header,str_length,currentFile);
 
   gzclose(currentFile);
 
   if (strcmp(header,"RMAExpressionValues") !=0){
-    Free(header);
+    R_Free(header);
     return 0;
   }
-  Free(header);
+  R_Free(header);
   return 1;
 
 

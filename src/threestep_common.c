@@ -44,7 +44,7 @@
 double median_low(double *x, int length){
   int half;
   double med;
-  double *buffer = Calloc(length,double);
+  double *buffer = R_Calloc(length,double);
 
   /* for (i = 0; i < length; i++)
      buffer[i] = x[i];
@@ -63,6 +63,6 @@ double median_low(double *x, int length){
   
   rPsort(buffer, length, half-1); 
   med = buffer[half - 1];
-  Free(buffer);
+  R_Free(buffer);
   return med;
 }

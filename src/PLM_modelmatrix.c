@@ -608,16 +608,16 @@ void R_PLM_Matrix_constructtest(double *X, int *n_arrays, int *n_probes, int *n_
 
 void PLM_current_model_update_space(PLM_modelfit *current, int new_nprobes,int n,int p){
   int i;
-  current->X = Realloc(current->X,n*p, double);
+  current->X = R_Realloc(current->X,n*p, double);
   for (i=0; i<n*p; i++){
     current->X[i] = 0.0;
   }
-  current->cur_params = Realloc(current->cur_params,p,double);
-  current->cur_se_estimates = Realloc(current->cur_se_estimates,p,double);
-  current->cur_weights = Realloc(current->cur_weights,n,double);
-  current->cur_resids = Realloc(current->cur_resids,n,double);
-  current->cur_varcov = Realloc(current->cur_varcov,p*p,double);
-  current->cur_residSE= Realloc(current->cur_residSE,2,double);
+  current->cur_params = R_Realloc(current->cur_params,p,double);
+  current->cur_se_estimates = R_Realloc(current->cur_se_estimates,p,double);
+  current->cur_weights = R_Realloc(current->cur_weights,n,double);
+  current->cur_resids = R_Realloc(current->cur_resids,n,double);
+  current->cur_varcov = R_Realloc(current->cur_varcov,p*p,double);
+  current->cur_residSE= R_Realloc(current->cur_residSE,2,double);
   current->n=n;
   current->p=p;
   current->nprobes = new_nprobes;
@@ -789,7 +789,7 @@ void PLM_build_model_matrix(const PLM_model_parameters *model, const PLM_Datagro
     curcol+=PLM_matrix_intercept(current->X,data->n_arrays, current->nprobes, n_probetypes, curcol);
   }  
   if (model->mmorpm_covariate !=0){
-    MMcovariates = Calloc(n,double);
+    MMcovariates = R_Calloc(n,double);
     if (model->response_variable < 0){
       /* MM response PM covariate */
       for (i=0; i< data->n_arrays; i++){
@@ -804,7 +804,7 @@ void PLM_build_model_matrix(const PLM_model_parameters *model, const PLM_Datagro
       }
     }
     curcol+=PLM_matrix_MM(current->X,data->n_arrays, current->nprobes,n_probetypes, curcol,MMcovariates);
-    Free(MMcovariates);
+    R_Free(MMcovariates);
   }
   if (model->which_parameter_types[1]){
     curcol+=PLM_matrix_chiplevel(current->X,data->n_arrays, current->nprobes,n_probetypes, curcol,model->chiplevelcovariates,model->n_chiplevelcovariates);

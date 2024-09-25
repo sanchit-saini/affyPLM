@@ -62,9 +62,9 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, const char*
   int current_buf_size=200;
   double contrast_tau = 0.03;
   double scale_tau = 10.0;
-  char *curname =Calloc(200,char);
-  int *cur_rows =Calloc(200,int); 
-  double *buffer = Calloc(200,double);
+  char *curname =R_Calloc(200,char);
+  int *cur_rows =R_Calloc(200,int); 
+  double *buffer = R_Calloc(200,double);
   int k = 0;
   /*  int size; */
   const char *first;
@@ -85,8 +85,8 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, const char*
     if ((strcmp(first,ProbeNames[j]) != 0) | (j == (rows -1))){
       if (nprobes > current_buf_size){
 	current_buf_size = nprobes;
-	cur_rows = Realloc(cur_rows,current_buf_size,int);
-	buffer = Realloc(buffer,current_buf_size,double);
+	cur_rows = R_Realloc(cur_rows,current_buf_size,int);
+	buffer = R_Realloc(buffer,current_buf_size,double);
 	  
       }
       if (j == (rows -1)){
@@ -126,9 +126,9 @@ static void IdealMM_correct_single(double *PM, double *MM, int rows, const char*
     nprobes++;
   }
     
-  Free(buffer);
-  Free(curname);
-  Free(cur_rows);
+  R_Free(buffer);
+  R_Free(curname);
+  R_Free(cur_rows);
 
 }
 
@@ -174,9 +174,9 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, con
   /*  double contrast_tau = 0.03; */
   /*double scale_tau = 10.0; */
   int current_buf_size=200;
-  /* char *curname =Calloc(200,char); */
-  int *cur_rows =Calloc(200,int); 
-  double *buffer = Calloc(200,double);
+  /* char *curname =R_Calloc(200,char); */
+  int *cur_rows =R_Calloc(200,int); 
+  double *buffer = R_Calloc(200,double);
   int k = 0;
   /*  int size; */
   const char *first;
@@ -198,8 +198,8 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, con
     if ((strcmp(first,ProbeNames[j]) != 0) | (j == (rows -1))){   
       if (nprobes > current_buf_size){
 	current_buf_size = nprobes;
-	cur_rows = Realloc(cur_rows,current_buf_size,int);
-	buffer = Realloc(buffer,current_buf_size,double);  
+	cur_rows = R_Realloc(cur_rows,current_buf_size,int);
+	buffer = R_Realloc(buffer,current_buf_size,double);  
       }
       if (j == (rows -1)){
         nprobes++;
@@ -237,9 +237,9 @@ static void SpecificBiweightCorrect_single(double *PM, double *MM, int rows, con
     nprobes++;
   }
     
-  Free(buffer);
-/*  Free(curname); */
-  Free(cur_rows);
+  R_Free(buffer);
+/*  R_Free(curname); */
+  R_Free(cur_rows);
 
 }
 

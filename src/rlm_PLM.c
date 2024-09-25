@@ -107,7 +107,7 @@
   ** Routput->nprotected = 0;
  **
  **  
- **  output->outnames = (char **)Calloc(data->nprobesets,char *);
+ **  output->outnames = (char **)R_Calloc(data->nprobesets,char *);
  **
  **  if (store->weights){
  **    PROTECT(Routput->weights = allocMatrix(REALSXP, data->rows, data->cols));
@@ -169,7 +169,7 @@
  **    output->out_varcov= NULL;
  **  } else if (store->varcov == 1){
  **    PROTECT(Routput->varcov = allocVector(VECSXP,data->nprobesets));
- **    output->out_varcov = Calloc(data->nprobesets,double*);
+ **    output->out_varcov = R_Calloc(data->nprobesets,double*);
  **    for (i =0; i < data->nprobesets; i++){
  **      PROTECT(tmp = allocMatrix(REALSXP,model->nchipparams,model->nchipparams));
  **      SET_VECTOR_ELT(Routput->varcov,i,tmp);
@@ -260,7 +260,7 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
   Routput->nprotected = 0;
 
   
-  output->outnames = (char **)Calloc(data->n_probesets,char *);
+  output->outnames = (char **)R_Calloc(data->n_probesets,char *);
   
 
   
@@ -359,7 +359,7 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
 
 
   i=0;
-  n_probes_probeset= Calloc(data->n_probesets, int);
+  n_probes_probeset= R_Calloc(data->n_probesets, int);
   new_nprobes=1;
   first = data->ProbeNames[0];
   for (j = 1; j < data->n_probes; j++){
@@ -434,8 +434,8 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
     }
 
 
-    output->out_probeparams = (double **)Calloc(data->n_probesets,double *);
-    output->out_probe_SE = (double **)Calloc(data->n_probesets,double *);
+    output->out_probeparams = (double **)R_Calloc(data->n_probesets,double *);
+    output->out_probe_SE = (double **)R_Calloc(data->n_probesets,double *);
     
   
     for (i=0; i < data->n_probesets; i++){
@@ -486,7 +486,7 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
   
   Routput->nprotected++;
 
-  output->out_weights = (double **)Calloc(2,double *);
+  output->out_weights = (double **)R_Calloc(2,double *);
   for (i =0; i < 2; i++){
     output->out_weights[i] = NUMERIC_POINTER(VECTOR_ELT(Routput->weights,i));
   }
@@ -525,7 +525,7 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
   
   Routput->nprotected++;
 
-  output->out_resids = (double **)Calloc(2,double *);
+  output->out_resids = (double **)R_Calloc(2,double *);
 
   for (i =0; i < 2; i++){
     output->out_resids[i] = NUMERIC_POINTER(VECTOR_ELT(Routput->residuals,i));
@@ -549,7 +549,7 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
     /* variance-covariance matrix for chip-level covariates */
     if (model->which_parameter_types[0] | model->which_parameter_types[1] | model->which_parameter_types[2]){
       PROTECT(Routput->varcov = allocVector(VECSXP,data->n_probesets));
-      output->out_varcov = Calloc(data->n_probesets,double*);
+      output->out_varcov = R_Calloc(data->n_probesets,double*);
       if (model->n_chiplevelcovariates == 0){
 	if (model->which_parameter_types[2] != 0){
 	  for (i =0; i < data->n_probesets; i++){
@@ -590,7 +590,7 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
     }
   } else if (store->varcov == 2){  
     PROTECT(Routput->varcov = allocVector(VECSXP,data->n_probesets));
-    output->out_varcov = (double **)Calloc(data->n_probesets,double*);
+    output->out_varcov = (double **)R_Calloc(data->n_probesets,double*);
     for (i =0; i < data->n_probesets; i++){
       p = 0;
       if (model->n_chiplevelcovariates > 0){
@@ -613,7 +613,7 @@ static void rlm_PLM_alloc_space(PLMRoutput *Routput, PLM_output *output,PLM_outp
   Routput->nprotected++;
 
 
-  Free(n_probes_probeset);
+  R_Free(n_probes_probeset);
 
 
 }
@@ -747,34 +747,34 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	  n_const_col +=2;
 	} else if (model->strata[3]==1){
 	  for (i =0; i < model->n_arrays;i++){
-	    tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+15,char);
+	    tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+15,char);
 	    tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,i)));
 	    tmp_str = strcat(tmp_str,":probe.type_PM");
 	    SET_STRING_ELT(const_coef_colnames,n_const_col+i*2,mkChar(tmp_str));
-	    Free(tmp_str);
-	    tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+15,char);
+	    R_Free(tmp_str);
+	    tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+15,char);
 	    tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,i)));
 	    tmp_str = strcat(tmp_str,":probe.type_MM");
 	    SET_STRING_ELT(const_coef_colnames,n_const_col+i*2+1,mkChar(tmp_str));
-	    Free(tmp_str);
+	    R_Free(tmp_str);
 	  }
 	  n_const_col +=2*model->n_arrays;
 	} else if (model->strata[3]==2){
 	  for (i =0; i < model->max_probe_type_treatment_factor+1;i++){
-	    tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)))+16,char);
+	    tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)))+16,char);
 	    tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)));
 	    tmp_str = strcat(tmp_str,"_");
 	    tmp_str = strcat(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)));
 	    tmp_str = strcat(tmp_str,":probe.type_PM");
 	    SET_STRING_ELT(const_coef_colnames,n_const_col+2*i,mkChar(tmp_str));
-	    Free(tmp_str);
-	    tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)))+16,char);
+	    R_Free(tmp_str);
+	    tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)))+16,char);
 	    tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)));
 	    tmp_str = strcat(tmp_str,"_");
 	    tmp_str = strcat(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)));
 	    tmp_str = strcat(tmp_str,":probe.type_MM");
 	    SET_STRING_ELT(const_coef_colnames,n_const_col+2*i+1,mkChar(tmp_str));
-	    Free(tmp_str);
+	    R_Free(tmp_str);
 	  }
 	  n_const_col +=2*(model->max_probe_type_treatment_factor+1);
 	}
@@ -789,42 +789,42 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	} else if (model->strata[3]==1){
 	  if (model->constraints[3] > 0){
 	    for (i =0; i < model->n_arrays;i++){
-	      tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+15,char);
+	      tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+15,char);
 	      tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,i)));
 	      tmp_str = strcat(tmp_str,":probe.type_MM");
 	      SET_STRING_ELT(const_coef_colnames,n_const_col+i,mkChar(tmp_str));
-	      Free(tmp_str);
+	      R_Free(tmp_str);
 	    }
 	  } else {
 	    for (i =0; i < model->n_arrays;i++){
-	      tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+15,char);
+	      tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+15,char);
 	      tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,i)));
 	      tmp_str = strcat(tmp_str,":probe.type_PM");
 	      SET_STRING_ELT(const_coef_colnames,n_const_col+i,mkChar(tmp_str));
-	      Free(tmp_str);
+	      R_Free(tmp_str);
 	    }
 	  }
 	  n_const_col +=model->n_arrays;
 	} else if (model->strata[3]==2){ 
 	  if (model->constraints[3] > 0){
 	    for (i =0; i < model->max_probe_type_treatment_factor+1;i++){
-	      tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)))+16,char);
+	      tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)))+16,char);
 	      tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)));
 	      tmp_str = strcat(tmp_str,"_");
 	      tmp_str = strcat(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)));
 	      tmp_str = strcat(tmp_str,":probe.type_MM");
 	      SET_STRING_ELT(const_coef_colnames,n_const_col+i,mkChar(tmp_str));
-	      Free(tmp_str);
+	      R_Free(tmp_str);
 	    }
 	  } else {
 	    for (i =0; i < model->max_probe_type_treatment_factor+1;i++){
-	      tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)))+16,char);
+	      tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)))+16,char);
 	      tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(getAttrib(probe_type_levels,R_NamesSymbol),0)));
 	      tmp_str = strcat(tmp_str,"_");
 	      tmp_str = strcat(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(probe_type_levels,0),i)));
 	      tmp_str = strcat(tmp_str,":probe.type_PM");
 	      SET_STRING_ELT(const_coef_colnames,n_const_col+i,mkChar(tmp_str));
-	      Free(tmp_str);
+	      R_Free(tmp_str);
 	    }
 	  }
 	  n_const_col +=(model->max_probe_type_treatment_factor+1);
@@ -856,13 +856,13 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
     setAttrib(Routput->probe_coef,R_NamesSymbol,probe_coef_names);
     setAttrib(Routput->probe_SE,R_NamesSymbol,probe_coef_names);
     UNPROTECT(1);
-    tmp_str2 = (char *)Calloc(10,char);
+    tmp_str2 = (char *)R_Calloc(10,char);
     for (i =0; i < data->n_probesets;i++){
       PROTECT(dim = getAttrib(VECTOR_ELT(Routput->probe_coef,i),R_DimSymbol));	
       PROTECT(probe_dimnames = allocVector(VECSXP,2));
       PROTECT(probe_rownames = allocVector(STRSXP,INTEGER(dim)[0]));
       for (j =0; j < INTEGER(dim)[0]; j++){
-	tmp_str = (char *)Calloc(15,char);
+	tmp_str = (char *)R_Calloc(15,char);
 	tmp_str = strcpy(tmp_str,"probe_");
 	if (model->constraints[4] == 1){
 	  snprintf(tmp_str2,9,"%d",j+2);
@@ -871,7 +871,7 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	}
 	tmp_str = strcat(tmp_str,tmp_str2);
 	SET_STRING_ELT(probe_rownames,j,mkChar(tmp_str));
-	Free(tmp_str);
+	R_Free(tmp_str);
       }
 
       PROTECT(probe_colnames = allocVector(STRSXP,INTEGER(dim)[1]));
@@ -882,30 +882,30 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	SET_STRING_ELT(probe_colnames,1,mkChar("probe.type_MM:"));
       } else if (model->strata[4] == 2){
 	for (j =0; j < model->max_probe_treatment_factor+1;j++){
-	  tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)))+16,char);
+	  tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)))+16,char);
 	  tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)));
 	  tmp_str = strcat(tmp_str,"_");
 	  tmp_str = strcat(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)));
 	  tmp_str = strcat(tmp_str,":");
 	  SET_STRING_ELT(probe_colnames,j,mkChar(tmp_str));
-	  Free(tmp_str);
+	  R_Free(tmp_str);
 	}
       } else if (model->strata[4] == 4){
 	for (j =0; j < model->max_probe_treatment_factor+1;j++){
-	  tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)))+16,char);
+	  tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)))+16,char);
 	  tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)));
 	  tmp_str = strcat(tmp_str,"_");
 	  tmp_str = strcat(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)));
 	  tmp_str = strcat(tmp_str,":probe.type_PM:");
 	  SET_STRING_ELT(probe_colnames,2*j,mkChar(tmp_str));
-	  Free(tmp_str);
-	  tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)))+16,char);
+	  R_Free(tmp_str);
+	  tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)))+ strlen(CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)))+16,char);
 	  tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(getAttrib(probe_trt_levels,R_NamesSymbol),0)));
 	  tmp_str = strcat(tmp_str,"_");
 	  tmp_str = strcat(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(probe_trt_levels,0),j)));
 	  tmp_str = strcat(tmp_str,":probe.type_MM:");
 	  SET_STRING_ELT(probe_colnames,2*j+1,mkChar(tmp_str));
-	  Free(tmp_str);
+	  R_Free(tmp_str);
 	}
       }
       SET_VECTOR_ELT(probe_dimnames,0,probe_rownames);
@@ -915,7 +915,7 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
       UNPROTECT(4);
     }
 
-    Free(tmp_str2);
+    R_Free(tmp_str2);
   }
   
 
@@ -934,26 +934,26 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
       if (model->constraints[2] == -1){
 	PROTECT(chip_coef_colnames = allocVector(STRSXP,data->n_arrays-1));
 	for (i =0; i <data->n_arrays-1;i++){
-	  tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+1,char);
+	  tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+1,char);
 	  tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,i)));
 	  SET_STRING_ELT(chip_coef_colnames,i,mkChar(tmp_str));
-	  Free(tmp_str);
+	  R_Free(tmp_str);
 	}
       } else if (model->constraints[2] == 1){
 	PROTECT(chip_coef_colnames = allocVector(STRSXP,data->n_arrays-1));
 	for (i =0; i <data->n_arrays-1;i++){
-	  tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,i+1)))+1,char);
+	  tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,i+1)))+1,char);
 	  tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,i+1)));
 	  SET_STRING_ELT(chip_coef_colnames,i,mkChar(tmp_str));
-	  Free(tmp_str);
+	  R_Free(tmp_str);
 	}
       } else {
 	PROTECT(chip_coef_colnames = allocVector(STRSXP,data->n_arrays));
 	for (i =0; i < data->n_arrays;i++){
-	  tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+1,char);
+	  tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,i)))+1,char);
 	  tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,i)));
 	  SET_STRING_ELT(chip_coef_colnames,i,mkChar(tmp_str));	
-	  Free(tmp_str);
+	  R_Free(tmp_str);
 	}
       }
     } else if (model->which_parameter_types[1]){
@@ -961,10 +961,10 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
       PROTECT(chip_coef_colnames = allocVector(STRSXP,model->n_chiplevelcovariates));
       chip_covariate_names = VECTOR_ELT(getAttrib(chipcovariates,R_DimNamesSymbol),1);
       for (i =0; i <model->n_chiplevelcovariates ;i++){
-	tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(chip_covariate_names,i)))+1,char);
+	tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(chip_covariate_names,i)))+1,char);
 	tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(chip_covariate_names,i)));
 	SET_STRING_ELT(chip_coef_colnames,i,mkChar(tmp_str));
-	Free(tmp_str);
+	R_Free(tmp_str);
       }
     } else {
       PROTECT(chip_coef_colnames = allocVector(STRSXP,0));
@@ -1015,19 +1015,19 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	    SET_STRING_ELT(varcov_rownames,0,mkChar("Intercept"));
 	    if (model->constraints[2] == 1){
 	      for (j =0; j <data->n_arrays-1;j++){
-		tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,j+1)))+1,char);
+		tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,j+1)))+1,char);
 		tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,j+1)));
 		SET_STRING_ELT(varcov_rownames,j+1,mkChar(tmp_str));
 		SET_STRING_ELT(varcov_colnames,j+1,mkChar(tmp_str));
-		Free(tmp_str);
+		R_Free(tmp_str);
 	      }
 	    } else {
 	       for (j =0; j <data->n_arrays-1;j++){
-		tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,j)))+1,char);
+		tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,j)))+1,char);
 		tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,j)));
 		SET_STRING_ELT(varcov_rownames,j+1,mkChar(tmp_str));
 		SET_STRING_ELT(varcov_colnames,j+1,mkChar(tmp_str));
-		Free(tmp_str);
+		R_Free(tmp_str);
 	       }
 	    }
 	    SET_VECTOR_ELT(varcov_dimnames,0,varcov_rownames);
@@ -1045,11 +1045,11 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	    SET_STRING_ELT(varcov_rownames,0,mkChar("Intercept"));
 	    chip_covariate_names = STRING_ELT(getAttrib(chipcovariates,R_DimNamesSymbol),1);
 	    for (j =0; j <model->n_chiplevelcovariates ;j++){
-	      tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(chip_covariate_names,j)))+1,char);
+	      tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(chip_covariate_names,j)))+1,char);
 	      tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(chip_covariate_names,j)));
 	      SET_STRING_ELT(varcov_rownames,j+1,mkChar(tmp_str));
 	      SET_STRING_ELT(varcov_colnames,j+1,mkChar(tmp_str));
-	      Free(tmp_str);
+	      R_Free(tmp_str);
 	    }
 	    SET_VECTOR_ELT(varcov_dimnames,0,varcov_rownames);
 	    SET_VECTOR_ELT(varcov_dimnames,1,varcov_colnames);
@@ -1079,11 +1079,11 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	    PROTECT(varcov_colnames = allocVector(STRSXP,data->n_arrays));
 	    PROTECT(varcov_rownames = allocVector(STRSXP,data->n_arrays));
 	    for (j =0; j <data->n_arrays;j++){
-	      tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(sampleNames,j)))+1,char);
+	      tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(sampleNames,j)))+1,char);
 	      tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(sampleNames,j)));
 	      SET_STRING_ELT(varcov_rownames,j,mkChar(tmp_str));
 	      SET_STRING_ELT(varcov_colnames,j,mkChar(tmp_str));
-	      Free(tmp_str);
+	      R_Free(tmp_str);
 	    }
 	    
 	    SET_VECTOR_ELT(varcov_dimnames,0,varcov_rownames);
@@ -1100,11 +1100,11 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	    SET_STRING_ELT(varcov_rownames,0,mkChar("Intercept"));
 	    chip_covariate_names = VECTOR_ELT(getAttrib(chipcovariates,R_DimNamesSymbol),1);
 	    for (j =0; j <model->n_chiplevelcovariates ;j++){
-	      tmp_str=(char *)Calloc(strlen(CHAR(STRING_ELT(chip_covariate_names,j)))+1,char);
+	      tmp_str=(char *)R_Calloc(strlen(CHAR(STRING_ELT(chip_covariate_names,j)))+1,char);
 	      tmp_str=strcpy(tmp_str,CHAR(STRING_ELT(chip_covariate_names,j)));
 	      SET_STRING_ELT(varcov_rownames,j,mkChar(tmp_str));
 	      SET_STRING_ELT(varcov_colnames,j,mkChar(tmp_str));
-	      Free(tmp_str);
+	      R_Free(tmp_str);
 	    }
 	    SET_VECTOR_ELT(varcov_dimnames,0,varcov_rownames);
 	    SET_VECTOR_ELT(varcov_dimnames,1,varcov_colnames);
@@ -1185,12 +1185,12 @@ void rlm_PLMset_nameoutput(PLMRoutput *Routput,PLM_output *output,PLM_outputsett
 	  } else {
 	    for (k=0; k < INTEGER(dim)[1]; k++){
 	      for (j=0; j < INTEGER(dim)[0]; j++){
-		tmp_str = (char *)Calloc(strlen(CHAR(STRING_ELT(VECTOR_ELT(getAttrib(VECTOR_ELT(Routput->probe_coef,i),R_DimNamesSymbol),0),j))) + strlen(CHAR(STRING_ELT(VECTOR_ELT(getAttrib(VECTOR_ELT(Routput->probe_coef,i),R_DimNamesSymbol),1),k))) + 2,char);
+		tmp_str = (char *)R_Calloc(strlen(CHAR(STRING_ELT(VECTOR_ELT(getAttrib(VECTOR_ELT(Routput->probe_coef,i),R_DimNamesSymbol),0),j))) + strlen(CHAR(STRING_ELT(VECTOR_ELT(getAttrib(VECTOR_ELT(Routput->probe_coef,i),R_DimNamesSymbol),1),k))) + 2,char);
 		tmp_str = strcpy(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(getAttrib(VECTOR_ELT(Routput->probe_coef,i),R_DimNamesSymbol),1),k)));
 		tmp_str = strcat(tmp_str,CHAR(STRING_ELT(VECTOR_ELT(getAttrib(VECTOR_ELT(Routput->probe_coef,i),R_DimNamesSymbol),0),j)));
 		SET_STRING_ELT(varcov_colnames,curcol+k*INTEGER(dim)[0]+j,mkChar(tmp_str));
 		SET_STRING_ELT(varcov_rownames,curcol+k*INTEGER(dim)[0]+j,mkChar(tmp_str));
-		Free(tmp_str);
+		R_Free(tmp_str);
 	      }
 				       
 	    }
@@ -1267,11 +1267,11 @@ SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R
   int verbosity_level;
 
 
-  PLM_outputsettings *store = (PLM_outputsettings *)Calloc(1,PLM_outputsettings);
-  PLM_Datagroup *data = (PLM_Datagroup *)Calloc(1,PLM_Datagroup);
-  PLM_output *output = (PLM_output *)Calloc(1,PLM_output);
-  PLM_model_parameters *model = (PLM_model_parameters *)Calloc(1,PLM_model_parameters);
-  PLMRoutput *Routput = (PLMRoutput *)Calloc(1,PLMRoutput);
+  PLM_outputsettings *store = (PLM_outputsettings *)R_Calloc(1,PLM_outputsettings);
+  PLM_Datagroup *data = (PLM_Datagroup *)R_Calloc(1,PLM_Datagroup);
+  PLM_output *output = (PLM_output *)R_Calloc(1,PLM_output);
+  PLM_model_parameters *model = (PLM_model_parameters *)R_Calloc(1,PLM_model_parameters);
+  PLMRoutput *Routput = (PLMRoutput *)R_Calloc(1,PLMRoutput);
   
   SEXP dim1,dim2;
 
@@ -1294,7 +1294,7 @@ SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R
   
   /* Get the names corresponding to each row */
     
-  data->ProbeNames = (const char **)Calloc(data->n_probes,const char *);
+  data->ProbeNames = (const char **)R_Calloc(data->n_probes,const char *);
   for (i =0; i < data->n_probes; i++){
     data->ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
   }
@@ -1446,22 +1446,22 @@ SEXP rlm_PLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP R
   UNPROTECT(Routput->nprotected + 3);
 
 
-  Free(output->out_weights);
-  Free(output->out_resids);
+  R_Free(output->out_weights);
+  R_Free(output->out_resids);
   for ( i =0; i < data->n_probesets; i++){
-    Free(output->outnames[i]);
+    R_Free(output->outnames[i]);
   }
   
-  Free(output->outnames);
-  Free(output->out_probeparams);
-  Free(output->out_probe_SE);
-  Free(output->out_varcov);
-  Free(data->ProbeNames);
-  Free(data);
-  Free(output);
-  Free(Routput);
-  Free(store);
-  Free(model);
+  R_Free(output->outnames);
+  R_Free(output->out_probeparams);
+  R_Free(output->out_probe_SE);
+  R_Free(output->out_varcov);
+  R_Free(data->ProbeNames);
+  R_Free(data);
+  R_Free(output);
+  R_Free(Routput);
+  R_Free(store);
+  R_Free(model);
   
   return output_list;
   

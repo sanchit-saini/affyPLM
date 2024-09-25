@@ -57,7 +57,7 @@ static double mean_trim(double *x, int length, double trim){
   int i;
   int low, high; /* where cutoffs are */
   double sum =0.0;
-  double *buffer = (double *)Calloc(length,double);
+  double *buffer = (double *)R_Calloc(length,double);
 
   if (trim < 0.0 || trim >= 0.5){
     error("Trying to trim the mean to much or negative value");
@@ -67,7 +67,7 @@ static double mean_trim(double *x, int length, double trim){
     for (i=0; i < length; i++){
       sum+=x[i];  
     }    
-    Free(buffer);
+    R_Free(buffer);
     return (sum/(double)length);
   } else {
     
@@ -81,7 +81,7 @@ static double mean_trim(double *x, int length, double trim){
     for (i= low; i < high; i++){
       sum+=buffer[i];
     }
-    Free(buffer);
+    R_Free(buffer);
     return (sum/(double)(high - low +1));
   }
 
@@ -133,7 +133,7 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline, i
 
   if (baseline == -1){
     /* pick the array with median overall (total) intensity as baseline */
-    buffer = Calloc(cols,double);
+    buffer = R_Calloc(cols,double);
     for (j=0; j < cols; j++){
       for(i=0; i < rows; i++){
 	buffer[j]+=data[j*rows + i];
@@ -148,12 +148,12 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline, i
 	break;
       }
     }
-    Free(buffer);
+    R_Free(buffer);
     mean_baseline = mean_trim(&data[baseline*rows],rows,trim);
     
   } else if (baseline == -2){
     /* pick array with with median median intensity as baseline */
-    buffer = Calloc(cols,double);
+    buffer = R_Calloc(cols,double);
     
     for (j =0; j < cols; j++){
       buffer[j] = median(&data[j*rows], rows);
@@ -167,13 +167,13 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline, i
 	break;
       }
     }    
-    Free(buffer);
+    R_Free(buffer);
     mean_baseline = mean_trim(&data[baseline*rows],rows,trim);
 
   } else if (baseline == -3){
     /* build a synthetic array using probewise medians */
-     buffer = Calloc(rows, double);
-     row_buffer = Calloc(cols, double);
+     buffer = R_Calloc(rows, double);
+     row_buffer = R_Calloc(cols, double);
      for(i=0; i < rows; i++){
        for (j=0; j < cols; j++){
   	 row_buffer[j]=data[j*rows + i];
@@ -181,11 +181,11 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline, i
        buffer[i] = median(row_buffer,cols);
      }
      mean_baseline = mean_trim(buffer,rows,trim);
-     Free(buffer);
+     R_Free(buffer);
      
   } else if (baseline == -4){
     /* build a synthetic array using probewise means */
-    buffer = Calloc(rows, double);
+    buffer = R_Calloc(rows, double);
 
     for (i = 0; i < rows; i++){
       for (j=0; j < cols; j++){
@@ -194,7 +194,7 @@ void scaling_norm(double *data, int rows, int cols, double trim, int baseline, i
       buffer[i]/=(double)cols;
     }
     mean_baseline = mean_trim(buffer,rows,trim);
-    Free(buffer);
+    R_Free(buffer);
 
   } else {
 

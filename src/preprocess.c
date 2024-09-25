@@ -242,7 +242,7 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
     PM = NUMERIC_POINTER(AS_NUMERIC(PMmat));
     MM = NUMERIC_POINTER(AS_NUMERIC(MMmat));
 
-    ProbeNames =(const char **)Calloc(rows,const char *);
+    ProbeNames =(const char **)R_Calloc(rows,const char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
     param = GetParameter(background_param,"ideal");
@@ -260,7 +260,7 @@ SEXP pp_background(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP
 
 
 
-    Free(ProbeNames);
+    R_Free(ProbeNames);
     UNPROTECT(1);
   } else if (strncmp(CHAR(STRING_ELT(bg_type,0)),"LESN",4) == 0){
     LESN_param = GetParameter(background_param,"lesnparam");
@@ -434,7 +434,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM and MM together\n");
       }
-      allPMMM = (double *)Calloc(2*rows*cols,double);
+      allPMMM = (double *)R_Calloc(2*rows*cols,double);
       allrows = 2*rows;
       for (i=0; i < rows; i++){
 	for (j=0; j < cols; j++){
@@ -458,14 +458,14 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	  MM[j*rows + i] = allPMMM[j*2*rows + i + rows];
 	}
       }
-      Free(allPMMM);
+      R_Free(allPMMM);
 
     }
 
 
 
   } else if (strcmp(CHAR(STRING_ELT(norm_type,0)),"quantile.probeset") == 0){
-    ProbeNames = (const char **)Calloc(rows, const char *);
+    ProbeNames = (const char **)R_Calloc(rows, const char *);
     for (i =0; i < rows; i++)
       ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
     
@@ -491,7 +491,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM and MM together\n");
       }
-      allPMMM = (double *)Calloc(2*rows*cols,double);
+      allPMMM = (double *)R_Calloc(2*rows*cols,double);
       allrows = 2*rows;
       for (i=0; i < rows; i++){
 	for (j=0; j < cols; j++){
@@ -503,7 +503,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	  allPMMM[j*2*rows + i + rows] = MM[j*rows + i];
 	}
       }
-      ProbeNames = (const char **)Realloc(ProbeNames,2*rows,const char *);
+      ProbeNames = (const char **)R_Realloc(ProbeNames,2*rows,const char *);
       for (i =0; i < rows; i++)
 	ProbeNames[rows + i] = CHAR(STRING_ELT(ProbeNamesVec,i));
       qnorm_probeset_c(allPMMM, allrows, cols, 2*nprobesets, ProbeNames, usemedian, uselog2);
@@ -517,13 +517,13 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	  MM[j*rows + i] = allPMMM[j*2*rows + i + rows];
 	}
       }
-      Free(allPMMM);
+      R_Free(allPMMM);
     }
 
 
 
 
-    Free(ProbeNames);
+    R_Free(ProbeNames);
 
   } else if (strcmp(CHAR(STRING_ELT(norm_type,0)),"scaling") == 0){
     param = GetParameter(norm_parameters,"scaling.trim");
@@ -551,7 +551,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
       if (verbosity_level > 0){
 	Rprintf("Normalizing PM and MM together\n");
       }
-      allPMMM = (double *)Calloc(2*rows*cols,double);
+      allPMMM = (double *)R_Calloc(2*rows*cols,double);
       allrows = 2*rows;
       for (i=0; i < rows; i++){
 	for (j=0; j < cols; j++){
@@ -574,7 +574,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	  MM[j*rows + i] = allPMMM[j*2*rows + i + rows];
 	}
       }
-      Free(allPMMM);
+      R_Free(allPMMM);
     }
   } else if (strcmp(CHAR(STRING_ELT(norm_type,0)),"quantile.robust") == 0){      
 
@@ -637,7 +637,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	R_weights = R_qnorm_robust_weights(PMmat, remove_extreme, n_remove);
 	weights = REAL(R_weights);
       }
-      allPMMM = (double *)Calloc(2*rows*cols,double);
+      allPMMM = (double *)R_Calloc(2*rows*cols,double);
       allrows = 2*rows;
       for (i=0; i < rows; i++){
 	for (j=0; j < cols; j++){
@@ -649,9 +649,9 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	  allPMMM[j*2*rows + i + rows] = MM[j*rows + i];
 	}
       } 
-      weights = Calloc(cols,double);
+      weights = R_Calloc(cols,double);
       qnorm_robust_c(allPMMM,weights, &allrows, &cols, &usemedian, &uselog2, &weightscheme);
-      Free(weights);
+      R_Free(weights);
       for (i=0; i < rows; i++){
 	for (j=0; j < cols; j++){
 	  PM[j*rows + i] = allPMMM[j*2*rows + i];
@@ -662,7 +662,7 @@ SEXP pp_normalize(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,SEXP 
 	  MM[j*rows + i] = allPMMM[j*2*rows + i + rows];
 	}
       }
-      Free(allPMMM);
+      R_Free(allPMMM);
     }
   } 
   UNPROTECT(1);

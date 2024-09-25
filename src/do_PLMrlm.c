@@ -176,7 +176,7 @@ static void  rlm_PLM_probeset(const PLM_model_parameters *model, const PLM_Datag
   int i, j;
   int isDefaultModel = 0;
 
-  double *Y = Calloc(current->n,double);
+  double *Y = R_Calloc(current->n,double);
   /*  double lg2 = log(2.0); */ /* Cache hopefully for speed :) */
   double *input_weights=NULL;
   pt2trans transfn = transFunc(model->trans_fn);
@@ -228,8 +228,8 @@ static void  rlm_PLM_probeset(const PLM_model_parameters *model, const PLM_Datag
 
     if (isDefaultModel){
       
-      current->cur_params = Realloc(current->cur_params,current->nprobes+data->n_arrays,double);
-      current->cur_se_estimates = Realloc(current->cur_se_estimates,current->nprobes+data->n_arrays,double);
+      current->cur_params = R_Realloc(current->cur_params,current->nprobes+data->n_arrays,double);
+      current->cur_se_estimates = R_Realloc(current->cur_se_estimates,current->nprobes+data->n_arrays,double);
 
       /* Optimized case for the RMA style model PM ~ -1 + samples + probes  with sum to zero constraint on probes */
       rlm_fit_anova(Y, current->nprobes, data->n_arrays, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);
@@ -243,10 +243,10 @@ static void  rlm_PLM_probeset(const PLM_model_parameters *model, const PLM_Datag
       rlm_fit(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, PsiFunc(model->psi_code),model->psi_k,model->n_rlm_iterations,model->init_method);  
       rlm_compute_se(current->X,Y, current->n, current->p, current->cur_params, current->cur_resids, current->cur_weights, current->cur_se_estimates,current->cur_varcov, current->cur_residSE, model->se_method, PsiFunc(model->psi_code),model->psi_k);
     }
-    Free(Y);
+    R_Free(Y);
   } else {
     /* weighted rlm's */
-    input_weights= Calloc(current->n,double);
+    input_weights= R_Calloc(current->n,double);
     for (i =0; i < current->n; i++){
       input_weights[i] = 1.0;
     }
@@ -285,7 +285,7 @@ static void  rlm_PLM_probeset(const PLM_model_parameters *model, const PLM_Datag
 
 
 
-    Free(input_weights);
+    R_Free(input_weights);
   }
 }
 
@@ -619,7 +619,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
   int size;
   int first_ind;
   int max_nrows = 1000;
-  int *cur_rows= (int *)Calloc(max_nrows,int);
+  int *cur_rows= (int *)R_Calloc(max_nrows,int);
   const char *first;
   PLM_modelfit *current= new_PLMmodelfit();
   
@@ -637,7 +637,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
       for (k = 0; k < new_nprobes; k++){
       if (k >= max_nrows){
       max_nrows = 2*max_nrows;
-      cur_rows = Realloc(cur_rows, max_nrows, int);
+      cur_rows = R_Realloc(cur_rows, max_nrows, int);
 	  }
           cur_rows[k] = (j+1 - new_nprobes)+k;
 	  }
@@ -646,7 +646,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
 	  for (k = 0; k < new_nprobes; k++){
 	  if (k >= max_nrows){
 	  max_nrows = 2*max_nrows;
-	  cur_rows = Realloc(cur_rows, max_nrows, int);
+	  cur_rows = R_Realloc(cur_rows, max_nrows, int);
 	  }
           cur_rows[k] = (j - new_nprobes)+k;
 	}
@@ -659,7 +659,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
 	copy_PLM_estimates(current, output, data, model, store, start, i);  // j-(new_nprobes),i);
 	
 	size = strlen(first);
-	output->outnames[i] = Calloc(size+1,char);
+	output->outnames[i] = R_Calloc(size+1,char);
 	strcpy(output->outnames[i],first);  
 	i++;
 	first = data->ProbeNames[j];
@@ -673,7 +673,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
     if (strcmp(first,data->ProbeNames[j]) == 0){
       if (k >= max_nrows){
 	max_nrows = 2*max_nrows;
-	cur_rows = Realloc(cur_rows, max_nrows, int);
+	cur_rows = R_Realloc(cur_rows, max_nrows, int);
       }
       cur_rows[k] = j;
       k++;
@@ -687,7 +687,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
       copy_PLM_estimates(current, output, data, model, store, start, i);  /* j-(new_nprobes),i); */
 	
       size = strlen(first);
-      output->outnames[i] = Calloc(size+1,char);
+      output->outnames[i] = R_Calloc(size+1,char);
       strcpy(output->outnames[i],first);  
       i++;
       first = data->ProbeNames[j];
@@ -703,7 +703,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
   copy_PLM_estimates(current, output, data, model, store, start, i);  /* j-(new_nprobes),i); */
   
   size = strlen(first);
-  output->outnames[i] = Calloc(size+1,char);
+  output->outnames[i] = R_Calloc(size+1,char);
   strcpy(output->outnames[i],first);  
   
 
@@ -712,7 +712,7 @@ void do_PLM_rlm(PLM_Datagroup *data,  PLM_model_parameters *model, PLM_output *o
 
 
 
-  Free(cur_rows);
+  R_Free(cur_rows);
   free_PLMmodelfit(current);
 
 }

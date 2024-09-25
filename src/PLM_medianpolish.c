@@ -72,7 +72,7 @@ void median_polish_threestep(double *data, int rows, int cols, int *cur_rows, do
 
   int i,j;
  
-  double *z = Calloc(nprobes*cols,double);
+  double *z = R_Calloc(nprobes*cols,double);
 
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
@@ -82,7 +82,7 @@ void median_polish_threestep(double *data, int rows, int cols, int *cur_rows, do
   
   median_polish_no_copy(z, nprobes, cols, results, resultsSE);
     
-  Free(z); 
+  R_Free(z); 
 }
 
 void median_polishPLM(double *data, int rows, int cols, int *cur_rows, double *probe_param, double *chip_param, double *intercept_param, int nprobes, double *residuals){
@@ -91,9 +91,9 @@ void median_polishPLM(double *data, int rows, int cols, int *cur_rows, double *p
 
   double t = 0.0;
   
-  double *r = Calloc(nprobes,double);
-  double *c = Calloc(cols,double);
-  double *z = Calloc(nprobes*cols,double);
+  double *r = R_Calloc(nprobes,double);
+  double *c = R_Calloc(cols,double);
+  double *z = R_Calloc(nprobes*cols,double);
 
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
@@ -123,9 +123,9 @@ void median_polishPLM(double *data, int rows, int cols, int *cur_rows, double *p
 
 
   
-  Free(r);
-  Free(c);
-  Free(z); 
+  R_Free(r);
+  R_Free(c);
+  R_Free(z); 
 }
 
 
@@ -136,7 +136,7 @@ void median_polish_threestep_PLM(double *data, int rows, int cols, int *cur_rows
 
   int i,j;
 
-  double *z = Calloc(nprobes*cols,double);
+  double *z = R_Calloc(nprobes*cols,double);
 
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
@@ -152,7 +152,7 @@ void median_polish_threestep_PLM(double *data, int rows, int cols, int *cur_rows
     }
   } 
 
-  Free(z); 
+  R_Free(z); 
 }
 
 

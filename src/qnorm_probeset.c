@@ -60,7 +60,7 @@
 void AdjustProbes(double *data, int rows, int cols, int *cur_rows, double *results, double *results_original, int nprobes, int n_probesets, int current_probeset,int uselogs){
   int i,j;
   double adj;
-  double *z = Calloc(nprobes*cols,double);
+  double *z = R_Calloc(nprobes*cols,double);
  
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
@@ -79,7 +79,7 @@ void AdjustProbes(double *data, int rows, int cols, int *cur_rows, double *resul
     }     
   }
   
-  Free(z);
+  R_Free(z);
 }
 
 /*************************************************************
@@ -111,14 +111,14 @@ void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, const ch
   int max_nrows = 1000;
   /* buffers of size 1000 should be enough. */
 
-  int *cur_rows=Calloc(max_nrows,int);
+  int *cur_rows=R_Calloc(max_nrows,int);
   int nprobes=0;
 
-  double *cur_exprs = Calloc(cols,double);
-  double *cur_SE = Calloc(cols,double);
+  double *cur_exprs = R_Calloc(cols,double);
+  double *cur_SE = R_Calloc(cols,double);
 
-  double *results = Calloc(cols*n_probesets,double);
-  double *results_original = Calloc(cols*n_probesets,double);
+  double *results = R_Calloc(cols*n_probesets,double);
+  double *results_original = R_Calloc(cols*n_probesets,double);
 
 
   /* Compute the summary measure that will normalized */
@@ -134,7 +134,7 @@ void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, const ch
        	for (k = 0; k < nprobes; k++){
 	  if (k >= max_nrows){
 	    max_nrows = 2*max_nrows;
-	    cur_rows = Realloc(cur_rows, max_nrows, int);
+	    cur_rows = R_Realloc(cur_rows, max_nrows, int);
 	  }
 	  cur_rows[k] = (j+1 - nprobes)+k; 
 	}
@@ -142,7 +142,7 @@ void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, const ch
 	for (k = 0; k < nprobes; k++){
 	  if (k >= max_nrows){
 	    max_nrows = 2*max_nrows;
-	    cur_rows = Realloc(cur_rows, max_nrows, int);
+	    cur_rows = R_Realloc(cur_rows, max_nrows, int);
 	  }
 	  cur_rows[k] = (j - nprobes)+k; 
 	}
@@ -195,7 +195,7 @@ void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, const ch
        	for (k = 0; k < nprobes; k++){
 	  if (k >= max_nrows){
 	    max_nrows = 2*max_nrows;
-	    cur_rows = Realloc(cur_rows, max_nrows, int);
+	    cur_rows = R_Realloc(cur_rows, max_nrows, int);
 	  }
 	  cur_rows[k] = (j+1 - nprobes)+k; 
 	}
@@ -203,7 +203,7 @@ void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, const ch
 	for (k = 0; k < nprobes; k++){
 	  if (k >= max_nrows){
 	    max_nrows = 2*max_nrows;
-	    cur_rows = Realloc(cur_rows, max_nrows, int);
+	    cur_rows = R_Realloc(cur_rows, max_nrows, int);
 	  }
 	  cur_rows[k] = (j - nprobes)+k; 
 	}
@@ -221,11 +221,11 @@ void qnorm_probeset_c(double *data, int rows, int cols,int n_probesets, const ch
 
 
 
-  Free(results_original);
-  Free(results);
-  Free(cur_exprs);
-  Free(cur_SE);
-  Free(cur_rows);
+  R_Free(results_original);
+  R_Free(results);
+  R_Free(cur_exprs);
+  R_Free(cur_SE);
+  R_Free(cur_rows);
 
 }
 

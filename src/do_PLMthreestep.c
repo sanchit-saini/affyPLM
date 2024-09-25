@@ -121,18 +121,18 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
   
   /* buffers of size 200 should be enough. */
 
-  modelfit *current = Calloc(1,modelfit);
+  modelfit *current = R_Calloc(1,modelfit);
 
-  current->cur_rows=Calloc(max_nrows,int);
+  current->cur_rows=R_Calloc(max_nrows,int);
   current->cur_weights = 0; /* weights are not returned by threestep routines */
-  current->cur_params = Calloc(data->cols,double);
-  current->cur_se_estimates = Calloc(data->cols,double);
-  current->cur_resids = Calloc(data->cols,double);
+  current->cur_params = R_Calloc(data->cols,double);
+  current->cur_se_estimates = R_Calloc(data->cols,double);
+  current->cur_resids = R_Calloc(data->cols,double);
   current->p = 0;
   current->nprobes = 0;
   current->n = 0;
-  current->cur_residSE = 0; /* Calloc(2,double); */
-  current->cur_varcov = 0; /* Calloc(4,double); */
+  current->cur_residSE = 0; /* R_Calloc(2,double); */
+  current->cur_varcov = 0; /* R_Calloc(4,double); */
   current->X = 0;
   
 
@@ -148,7 +148,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
         for (k = 0; k < current->nprobes; k++){
 	  if (k >= max_nrows){
 	    max_nrows = 2*max_nrows;
-	    current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
+	    current->cur_rows = R_Realloc(current->cur_rows, max_nrows, int);
 	  }
           current->cur_rows[k] = (j+1 - current->nprobes)+k;
         }
@@ -156,20 +156,20 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
         for (k = 0; k < current->nprobes; k++){
 	  if (k >= max_nrows){
 	    max_nrows = 2*max_nrows;
-	    current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
+	    current->cur_rows = R_Realloc(current->cur_rows, max_nrows, int);
 	  }
           current->cur_rows[k] = (j - current->nprobes)+k;
 	}
       }
 
-      // Check last number of probes and only Realloc when needed  
+      // Check last number of probes and only R_Realloc when needed  
       if (old_nprobes != current->nprobes){
 	current->n = current->nprobes*(data->cols);
-	current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+	current->cur_resids = R_Realloc(current->cur_resids,data->cols*current->nprobes,double);
 	old_nprobes = current->nprobes;
       }
       
-      current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+      current->cur_resids = R_Realloc(current->cur_resids,data->cols*current->nprobes,double);
 
 
       
@@ -180,7 +180,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
       
     
       size = strlen(first);
-      output->outnames[i] = Calloc(size+1,char);
+      output->outnames[i] = R_Calloc(size+1,char);
       strcpy(output->outnames[i],first);  
       i++;
       first = data->ProbeNames[j];
@@ -198,7 +198,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
     if (strcmp(first,data->ProbeNames[j]) == 0){
       if (k >= max_nrows){
 	max_nrows = 2*max_nrows;
-	current->cur_rows = Realloc(current->cur_rows, max_nrows, int);
+	current->cur_rows = R_Realloc(current->cur_rows, max_nrows, int);
       }
       current->cur_rows[k] = j;
       k++;
@@ -208,11 +208,11 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
     } else{
       if (old_nprobes != current->nprobes){
 	current->n = current->nprobes*(data->cols);
-	current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+	current->cur_resids = R_Realloc(current->cur_resids,data->cols*current->nprobes,double);
 	old_nprobes = current->nprobes;
       }
       
-      /* current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double); */
+      /* current->cur_resids = R_Realloc(current->cur_resids,data->cols*current->nprobes,double); */
 
 
       
@@ -223,7 +223,7 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
       
     
       size = strlen(first);
-      output->outnames[i] = Calloc(size+1,char);
+      output->outnames[i] = R_Calloc(size+1,char);
       strcpy(output->outnames[i],first);  
       i++;
       first = data->ProbeNames[j];
@@ -235,27 +235,27 @@ void do_PLMthreestep(Datagroup *data,  PLMmodelparam *model, PLMoutput *output, 
   j--;
   if (old_nprobes != current->nprobes){
     current->n = current->nprobes*(data->cols);
-    current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double);
+    current->cur_resids = R_Realloc(current->cur_resids,data->cols*current->nprobes,double);
     old_nprobes = current->nprobes;
   }
   
-/* current->cur_resids = Realloc(current->cur_resids,data->cols*current->nprobes,double); */
+/* current->cur_resids = R_Realloc(current->cur_resids,data->cols*current->nprobes,double); */
   
   threestep_PLM_block(data, model, current);
   copy_threestepPLM_results(current, output, data, model, store, j,i);
   size = strlen(first);
-  output->outnames[i] = Calloc(size+1,char);
+  output->outnames[i] = R_Calloc(size+1,char);
   strcpy(output->outnames[i],first);  
   
 
 
 
-/*  Free(current->X);
-**  Free(current->cur_varcov); */
-  Free(current->cur_resids);
-  Free(current->cur_se_estimates);
-  Free(current->cur_params);
-/* Free(current->cur_weights); */
-  Free(current->cur_rows);
-  Free(current);
+/*  R_Free(current->X);
+**  R_Free(current->cur_varcov); */
+  R_Free(current->cur_resids);
+  R_Free(current->cur_se_estimates);
+  R_Free(current->cur_params);
+/* R_Free(current->cur_weights); */
+  R_Free(current->cur_rows);
+  R_Free(current);
 }

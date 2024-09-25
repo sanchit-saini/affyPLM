@@ -58,7 +58,7 @@ static void rmaPLM_alloc_space(PLMRoutput *Routput, PLMoutput *output,outputsett
   Routput->nprotected = 0;
 
   
-  output->outnames = (char **)Calloc(data->nprobesets,char *);
+  output->outnames = (char **)R_Calloc(data->nprobesets,char *);
 
   if (store->weights){
     PROTECT(Routput->weights = allocMatrix(REALSXP, data->rows, data->cols));
@@ -133,11 +133,11 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
 
   int verbosity_level;
   
-  outputsettings *store = (outputsettings *)Calloc(1,outputsettings);
-  Datagroup *data = (Datagroup *)Calloc(1,Datagroup);
-  PLMoutput *output = (PLMoutput *)Calloc(1,PLMoutput);
-  PLMmodelparam *model = (PLMmodelparam *)Calloc(1,PLMmodelparam);
-  PLMRoutput *Routput = (PLMRoutput *)Calloc(1,PLMRoutput);
+  outputsettings *store = (outputsettings *)R_Calloc(1,outputsettings);
+  Datagroup *data = (Datagroup *)R_Calloc(1,Datagroup);
+  PLMoutput *output = (PLMoutput *)R_Calloc(1,PLMoutput);
+  PLMmodelparam *model = (PLMmodelparam *)R_Calloc(1,PLMmodelparam);
+  PLMRoutput *Routput = (PLMRoutput *)R_Calloc(1,PLMRoutput);
   
   SEXP dim1;
   SEXP dimnames,names;
@@ -164,7 +164,7 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   
   /* Get the names corresponding to each row */
     
-  data->ProbeNames = (const char **)Calloc(data->rows,const char *);
+  data->ProbeNames = (const char **)R_Calloc(data->rows,const char *);
   for (i =0; i < data->rows; i++){
     data->ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
   }
@@ -260,14 +260,14 @@ SEXP rmaPLMset(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes, SEXP ou
   UNPROTECT(Routput->nprotected + 4);
 
   for ( i =0; i < data->nprobesets; i++)
-    Free(output->outnames[i]); 
-  Free(output->outnames);
-  Free(data->ProbeNames);
-  Free(data);
-  Free(output);
-  Free(Routput);
-  Free(store);
-  Free(model);
+    R_Free(output->outnames[i]); 
+  R_Free(output->outnames);
+  R_Free(data->ProbeNames);
+  R_Free(data);
+  R_Free(output);
+  R_Free(Routput);
+  R_Free(store);
+  R_Free(model);
   
   return output_list;
   

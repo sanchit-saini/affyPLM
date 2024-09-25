@@ -46,7 +46,7 @@ void LogMedianPM_threestep(double *data, int rows, int cols, int *cur_rows, doub
 
 void LogMedianPM_threestep_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
   int i,j;
-  double *z = Calloc(nprobes*cols,double);
+  double *z = R_Calloc(nprobes*cols,double);
 
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
@@ -64,5 +64,5 @@ void LogMedianPM_threestep_PLM(double *data, int rows, int cols, int *cur_rows, 
     
 
 
-  Free(z);
+  R_Free(z);
 }

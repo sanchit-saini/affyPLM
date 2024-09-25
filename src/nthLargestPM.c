@@ -54,7 +54,7 @@
 double LogNthLargest(double *x, int length,int n){
   int i;
   double nthLargest;
-  double *buffer = Calloc(length,double);
+  double *buffer = R_Calloc(length,double);
 
   for (i = 0; i < length; i++)
     buffer[i] = x[i];
@@ -68,7 +68,7 @@ double LogNthLargest(double *x, int length,int n){
   }
   nthLargest = log(nthLargest)/log(2.0);
 
-  Free(buffer);
+  R_Free(buffer);
   return (nthLargest);    
 }
 
@@ -91,7 +91,7 @@ double LogNthLargest(double *x, int length,int n){
 
 void LogNthLargestPM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, summary_plist *summary_param){
   int i,j;
-  double *z = Calloc(nprobes*cols,double);
+  double *z = R_Calloc(nprobes*cols,double);
 
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
@@ -103,7 +103,7 @@ void LogNthLargestPM(double *data, int rows, int cols, int *cur_rows, double *re
     results[j] = LogNthLargest(&z[j*nprobes],nprobes,2);
     resultsSE[j] = R_NaReal;
   }
-  Free(z);
+  R_Free(z);
 }
 
 
@@ -111,7 +111,7 @@ void LogNthLargestPM(double *data, int rows, int cols, int *cur_rows, double *re
 
 void LogNthLargestPM_PLM(double *data, int rows, int cols, int *cur_rows, double *results, int nprobes, double *resultsSE, double *residuals, summary_plist *summary_param){
   int i,j;
-  double *z = Calloc(nprobes*cols,double);
+  double *z = R_Calloc(nprobes*cols,double);
 
   for (j = 0; j < cols; j++){
     for (i =0; i < nprobes; i++){
@@ -130,5 +130,5 @@ void LogNthLargestPM_PLM(double *data, int rows, int cols, int *cur_rows, double
     }
   } 
   
-  Free(z);
+  R_Free(z);
 }

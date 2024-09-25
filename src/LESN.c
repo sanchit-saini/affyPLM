@@ -77,7 +77,7 @@
 
 static void shift_down(double *data, double P0, int rows, int cols){
 
-  double *buffer = (double *)Calloc(rows,double);
+  double *buffer = (double *)R_Calloc(rows,double);
   double Pmin;
   int i,j;
 
@@ -96,7 +96,7 @@ static void shift_down(double *data, double P0, int rows, int cols){
     }
   }
 
-  Free(buffer);
+  R_Free(buffer);
 
 }
 
@@ -213,7 +213,7 @@ static double affyPLMlog2(double x){
 
 void stretch_down(double *data, double baseline, int rows, int cols, double theta, int use_logs, double (*BackWeighting)(double,double, double, double)){
 
-  double *buffer = (double *)Calloc(rows,double);
+  double *buffer = (double *)R_Calloc(rows,double);
   double Pmin,Pmax;
   int i,j;
 
@@ -248,7 +248,7 @@ void stretch_down(double *data, double baseline, int rows, int cols, double thet
   }
 
 
-  Free(buffer);
+  R_Free(buffer);
  
 }
 
@@ -334,7 +334,7 @@ void R_stretch_down(double *data, double *baseline, int *rows, int *cols,int *ty
 
 void shift_down_log(double *data, double baseline, int rows, int cols){
 
-  double *buffer = (double *)Calloc(rows,double);
+  double *buffer = (double *)R_Calloc(rows,double);
   double Pmin;
   int i,j;
 
@@ -360,7 +360,7 @@ void shift_down_log(double *data, double baseline, int rows, int cols){
       }
     }
   }
-  Free(buffer);
+  R_Free(buffer);
 }
 
 

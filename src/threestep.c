@@ -86,7 +86,7 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   int Method;
   int verbosity_level;
 
-  summary_plist *summary_param = (summary_plist *)Calloc(1,summary_plist);
+  summary_plist *summary_param = (summary_plist *)R_Calloc(1,summary_plist);
 
   SEXP dim1;
   SEXP outvec, outSEvec, output_list;        /*outnamesvec */
@@ -112,10 +112,10 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
 
   nprobesets=INTEGER(N_probes)[0];
   
-  ProbeNames = (const char **)Calloc(rows,const char *);
+  ProbeNames = (const char **)R_Calloc(rows,const char *);
   for (i =0; i < rows; i++)
     ProbeNames[i] = CHAR(STRING_ELT(ProbeNamesVec,i));
-  outnames = (char **)Calloc(nprobesets,char *);
+  outnames = (char **)R_Calloc(nprobesets,char *);
 
   /* PROTECT(outvec = NEW_NUMERIC(nprobesets*cols)); */
   PROTECT(outvec = allocMatrix(REALSXP, nprobesets, cols));
@@ -160,11 +160,11 @@ SEXP threestep_summary(SEXP PMmat, SEXP MMmat, SEXP ProbeNamesVec,SEXP N_probes,
   UNPROTECT(1);
   
   for (i =0; i < nprobesets; i++)
-    Free(outnames[i]);
+    R_Free(outnames[i]);
 
-  Free(outnames);
-  Free(ProbeNames);
-  Free(summary_param);
+  R_Free(outnames);
+  R_Free(ProbeNames);
+  R_Free(summary_param);
   return output_list;
 } 
 
